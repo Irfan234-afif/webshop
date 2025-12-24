@@ -64,6 +64,42 @@ def remove_ecommerce_settings_doctype():
 
 def add_custom_fields():
 	custom_fields = {
+		"Quotation": [
+			{
+				"fieldname": "school_section",
+				"fieldtype": "Section Break",
+				"label": "School Information",
+				"insert_after": "party_name",
+				"depends_on": "eval:doc.order_type=='Shopping Cart'",
+				"collapsible": 1,
+			},
+			{
+				"fieldname": "student",
+				"fieldtype": "Link",
+				"label": "Student",
+				"options": "Student",
+				"insert_after": "school_section",
+				"read_only": 1,
+				"depends_on": "eval:doc.order_type=='Shopping Cart'",
+			}
+		],
+		"Sales Order": [
+			{
+				"fieldname": "school_section",
+				"fieldtype": "Section Break",
+				"label": "School Information",
+				"insert_after": "customer",
+				"collapsible": 1,
+			},
+			{
+				"fieldname": "student",
+				"fieldtype": "Link",
+				"label": "Student",
+				"options": "Student",
+				"insert_after": "school_section",
+				"read_only": 1,
+			}
+		],
 		"Item": [
 			{
 				"default": 0,

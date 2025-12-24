@@ -1,0 +1,138 @@
+{
+ "actions": [],
+ "creation": "2024-12-24 13:45:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "banner_key",
+  "is_active",
+  "type",
+  "image",
+  "section_break_content",
+  "title",
+  "subtitle",
+  "right_image",
+  "section_break_cta",
+  "cta_text",
+  "cta_url",
+  "column_break_cta_2",
+  "secondary_cta_text",
+  "secondary_cta_url"
+ ],
+ "fields": [
+  {
+   "fieldname": "banner_key",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Banner Key",
+   "options": "Home Hero\nProduct Detail Promo",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Active"
+  },
+  {
+   "default": "Full Content",
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "Full Content\nImage Only"
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "label": "Background Image"
+  },
+  {
+   "depends_on": "eval:doc.type == 'Full Content'",
+   "fieldname": "section_break_content",
+   "fieldtype": "Section Break",
+   "label": "Content"
+  },
+  {
+   "depends_on": "eval:doc.type == 'Full Content'",
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title"
+  },
+  {
+   "depends_on": "eval:doc.type == 'Full Content'",
+   "fieldname": "subtitle",
+   "fieldtype": "Small Text",
+   "label": "Subtitle"
+  },
+  {
+   "depends_on": "eval:doc.type == 'Full Content'",
+   "fieldname": "right_image",
+   "fieldtype": "Attach Image",
+   "label": "Right Image"
+  },
+  {
+   "depends_on": "eval:doc.type == 'Full Content'",
+   "fieldname": "section_break_cta",
+   "fieldtype": "Section Break",
+   "label": "Call to Action"
+  },
+  {
+   "depends_on": "eval:doc.type == 'Full Content'",
+   "fieldname": "cta_text",
+   "fieldtype": "Data",
+   "label": "Primary CTA Text"
+  },
+  {
+   "depends_on": "eval:doc.type == 'Full Content'",
+   "fieldname": "cta_url",
+   "fieldtype": "Data",
+   "label": "Primary CTA URL"
+  },
+  {
+   "depends_on": "eval:doc.type == 'Full Content'",
+   "fieldname": "column_break_cta_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.type == 'Full Content'",
+   "fieldname": "secondary_cta_text",
+   "fieldtype": "Data",
+   "label": "Secondary CTA Text"
+  },
+  {
+   "depends_on": "eval:doc.type == 'Full Content'",
+   "fieldname": "secondary_cta_url",
+   "fieldtype": "Data",
+   "label": "Secondary CTA URL"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-12-24 13:45:00.000000",
+ "modified_by": "Administrator",
+ "module": "Webshop",
+ "name": "Webshop Banner",
+ "naming_rule": "By fieldname",
+ "autoname": "field:banner_key",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

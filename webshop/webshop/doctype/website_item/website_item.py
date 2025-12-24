@@ -108,14 +108,10 @@ class WebsiteItem(WebsiteGenerator):
 	def make_route(self):
 		"""Called from set_route in WebsiteGenerator."""
 		if not self.route:
-			return (
-				cstr(frappe.db.get_value("Item Group", self.item_group, "route"))
-				+ "/"
-				+ self.scrub(
-					(self.item_name if self.item_name else self.item_code)
-					+ "-"
-					+ random_string(5)
-				)
+			return self.scrub(
+				(self.item_name if self.item_name else self.item_code)
+				+ "-"
+				+ random_string(5)
 			)
 
 	def update_template_item(self):

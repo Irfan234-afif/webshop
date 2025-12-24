@@ -1,0 +1,293 @@
+{% extends "templates/web.html" %}
+
+{% block title %}{{ _("Virtual Account Payment") }}{% endblock %}
+
+{% block page_content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Payment Header -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fa fa-university mr-2"></i>
+                        {{ _("Virtual Account Payment") }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-3">
+                        <i class="fa fa-info-circle mr-2"></i>
+                        <strong>{{ _("Payment Instructions") }}</strong>
+                        <p class="mb-0 mt-2">
+                            {{ _("Please transfer the exact amount to the virtual account number below within 1 hour to complete your payment.") }}
+                        </p>
+                    </div>
+
+                    <!-- Payment Details -->
+                    <div class="payment-details">
+                        <h5 class="mb-3">{{ _("Payment Details") }}</h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="text-muted small">{{ _("Order Reference") }}</label>
+                                    <div class="font-weight-bold">{{ payment_details.reference_docname }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="text-muted small">{{ _("Document Type") }}</label>
+                                    <div class="font-weight-bold">{{ payment_details.reference_doctype }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="text-muted small">{{ _("Customer Name") }}</label>
+                                    <div class="font-weight-bold">{{ payment_details.payer_name }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="text-muted small">{{ _("Email") }}</label>
+                                    <div class="font-weight-bold">{{ payment_details.payer_email }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="text-muted small">{{ _("Description") }}</label>
+                                    <div>{{ payment_details.description or payment_details.title }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">{{ _("Total Amount") }}</h5>
+                                            <h3 class="mb-0 text-primary">{{ payment_details.formatted_amount }}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Virtual Account Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fa fa-money mr-2"></i>
+                        {{ _("Virtual Account Number") }}
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <h2 class="text-primary font-weight-bold" id="virtual-account-number">
+                            {{ virtual_account_number or "Loading..." }}
+                        </h2>
+                        <p class="text-muted">{{ _("Please use this exact number for your transfer") }}</p>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-uppercase text-muted small">{{ _("Bank") }}</h6>
+                                    <h4 class="text-dark">{{ bank_name or "BCA" }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-uppercase text-muted small">{{ _("Payment Status") }}</h6>
+                                    <h4 class="text-dark" id="payment-status">{{ payment_status or "Waiting for payment" }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="fa fa-clock-o mr-2"></i>
+                        {{ _("Payment must be completed within 1 hour, otherwise the order will be canceled automatically.") }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Actions -->
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <button class="btn btn-primary btn-lg mr-2" id="copy-account-btn">
+                            <i class="fa fa-copy mr-2"></i>
+                            {{ _("Copy Account Number") }}
+                        </button>
+                        <button class="btn btn-success btn-lg" id="refresh-status-btn">
+                            <i class="fa fa-refresh mr-2"></i>
+                            {{ _("Check Payment Status") }}
+                        </button>
+                    </div>
+
+                    <div class="mt-3">
+                        <a href="/orders/{{ payment_details.reference_docname }}" class="btn btn-link">
+                            <i class="fa fa-arrow-left mr-2"></i>
+                            {{ _("Back to Order Details") }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999;">
+    <div
+        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: white;">
+        <div class="spinner-border" role="status">
+            <span class="sr-only">{{ _("Loading...") }}</span>
+        </div>
+        <div class="mt-3">{{ _("Processing...") }}</div>
+    </div>
+</div>
+
+<style>
+    .payment-details .form-group label {
+        margin-bottom: 0.25rem;
+        font-size: 0.875rem;
+    }
+
+    .payment-details .form-group>div {
+        font-size: 1rem;
+    }
+
+    .card {
+        border: none;
+    }
+
+    .btn-lg {
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+    }
+    
+    #virtual-account-number {
+        font-family: 'Courier New', monospace;
+        letter-spacing: 2px;
+    }
+</style>
+
+<script>
+    frappe.ready(() => {
+        const token = "{{ token }}";
+        const integration_request_name = "{{ integration_request_name }}";
+        let paymentStatus = "{{ payment_status }}";
+
+        // Copy virtual account number to clipboard
+        document.getElementById('copy-account-btn').addEventListener('click', function () {
+            const virtualAccountElement = document.getElementById('virtual-account-number');
+            const virtualAccountNumber = virtualAccountElement.textContent;
+            
+            navigator.clipboard.writeText(virtualAccountNumber).then(() => {
+                frappe.show_alert({
+                    message: __('Virtual account number copied to clipboard'),
+                    indicator: 'green'
+                });
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = virtualAccountNumber;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                frappe.show_alert({
+                    message: __('Virtual account number copied to clipboard'),
+                    indicator: 'green'
+                });
+            });
+        });
+
+        // Refresh payment status
+        document.getElementById('refresh-status-btn').addEventListener('click', function () {
+            checkPaymentStatus();
+        });
+
+        // Function to check payment status
+        function checkPaymentStatus() {
+            // Show loading
+            document.getElementById('loading-overlay').style.display = 'block';
+
+            // Call the API to check payment status
+            frappe.call({
+                method: 'webshop.webshop.doctype.midtrans_settings.midtrans_settings.check_payment_status',
+                args: {
+                    integration_request_name: integration_request_name
+                },
+                callback: function (r) {
+                    document.getElementById('loading-overlay').style.display = 'none';
+                    
+                    if (r.message) {
+                        const status = r.message.status;
+                        const statusElement = document.getElementById('payment-status');
+                        
+                        if (status === 'Completed') {
+                            statusElement.textContent = 'Paid';
+                            statusElement.className = 'text-success';
+                            
+                            // Show success message and redirect after delay
+                            frappe.show_alert({
+                                message: __('Payment confirmed! Redirecting to order details...'),
+                                indicator: 'green'
+                            });
+                            
+                            setTimeout(() => {
+                                window.location.href = `/orders/${r.message.reference_docname}`;
+                            }, 3000);
+                        } else if (status === 'Failed') {
+                            statusElement.textContent = 'Failed';
+                            statusElement.className = 'text-danger';
+                            
+                            frappe.show_alert({
+                                message: __('Payment failed. Please contact support or try again.'),
+                                indicator: 'red'
+                            });
+                        } else {
+                            statusElement.textContent = 'Waiting for payment';
+                            statusElement.className = 'text-dark';
+                            
+                            frappe.show_alert({
+                                message: __('Payment status: Waiting for payment'),
+                                indicator: 'orange'
+                            });
+                        }
+                    }
+                },
+                error: function () {
+                    document.getElementById('loading-overlay').style.display = 'none';
+                    frappe.show_alert({
+                        message: __('Error checking payment status'),
+                        indicator: 'red'
+                    });
+                }
+            });
+        }
+
+        // Check payment status every 30 seconds
+        setInterval(checkPaymentStatus, 30000);
+    });
+</script>
+{% endblock %}

@@ -5,3 +5,17 @@
 webshop.patches.add_homepage_field #09-05-2024
 webshop.patches.enable_allow_to_guest_view_for_item_group
 webshop.patches.clear_cache_for_item_group_route
+webshop.patches.add_student_custom_fields #2024-12-20
+webshop.patches.migrate_to_student_carts #2024-12-20
+webshop.patches.migrate_student_to_standalone_doctype #2024-12-20
+webshop.patches.add_student_custom_fields_standalone #2024-12-20
+webshop.patches.add_checkout_custom_fields #2024-12-21
+webshop.patches.migrate_payment_methods_to_new_doctype #2024-12-21
+webshop.patches.update_checkout_custom_fields_for_dynamic_payment #2024-12-21
+webshop.patches.update_checkout_custom_fields_for_delivery_date #2024-12-21
+webshop.patches.add_delivery_date_to_quotation #2024-12-21
+webshop.patches.add_school_unit_sales_order #2024-12-21
+webshop.patches.add_payment_request_custom_fields #2024-12-22
+webshop.patches.migrate_payment_approval_to_payment_request #2024-12-22
+webshop.patches.add_payment_due_date_to_payment_request #2024-12-24
+webshop.patches.add_attach_image_delivery_note #2025-12-24

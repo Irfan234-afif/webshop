@@ -1,0 +1,102 @@
+{
+    "actions": [],
+    "creation": "2024-12-14 12:00:00.000000",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "enabled",
+        "column_break_2",
+        "test_mode",
+        "section_break_post_payment",
+        "auto_create_sales_invoice",
+        "section_break_3",
+        "server_key",
+        "client_key",
+        "section_break_6",
+        "payment_gateway_name"
+    ],
+    "fields": [
+        {
+            "default": "0",
+            "fieldname": "enabled",
+            "fieldtype": "Check",
+            "label": "Enabled"
+        },
+        {
+            "fieldname": "column_break_2",
+            "fieldtype": "Column Break"
+        },
+        {
+            "default": "1",
+            "description": "Enable test mode for local testing without real API keys",
+            "fieldname": "test_mode",
+            "fieldtype": "Check",
+            "label": "Test Mode"
+        },
+        {
+            "fieldname": "section_break_post_payment",
+            "fieldtype": "Section Break",
+            "label": "Post-Payment Actions"
+        },
+        {
+            "default": "0",
+            "description": "Automatically create and submit Sales Invoice when payment is successful. Invoice will NOT update stock - use Delivery Note for inventory updates.",
+            "fieldname": "auto_create_sales_invoice",
+            "fieldtype": "Check",
+            "label": "Auto Create Sales Invoice After Payment"
+        },
+        {
+            "fieldname": "section_break_3",
+            "fieldtype": "Section Break",
+            "label": "API Credentials"
+        },
+        {
+            "description": "Midtrans Server Key (leave empty for test mode)",
+            "fieldname": "server_key",
+            "fieldtype": "Password",
+            "label": "Server Key",
+            "mandatory_depends_on": "eval:!doc.test_mode"
+        },
+        {
+            "description": "Midtrans Client Key (leave empty for test mode)",
+            "fieldname": "client_key",
+            "fieldtype": "Data",
+            "label": "Client Key",
+            "mandatory_depends_on": "eval:!doc.test_mode"
+        },
+        {
+            "fieldname": "section_break_6",
+            "fieldtype": "Section Break",
+            "label": "Payment Gateway Configuration"
+        },
+        {
+            "default": "Midtrans",
+            "fieldname": "payment_gateway_name",
+            "fieldtype": "Data",
+            "label": "Payment Gateway Name",
+            "read_only": 1
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "issingle": 1,
+    "links": [],
+    "modified": "2024-12-14 12:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Webshop",
+    "name": "Midtrans Settings",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "read": 1,
+            "role": "System Manager",
+            "write": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [],
+    "track_changes": 1
+}

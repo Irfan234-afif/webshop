@@ -17,12 +17,21 @@ web_include_js = "web.bundle.js"
 after_install = "webshop.setup.install.after_install"
 on_logout = "webshop.webshop.shopping_cart.utils.clear_cart_count"
 on_session_creation = [
-    "webshop.webshop.utils.portal.update_debtors_account",
-    "webshop.webshop.shopping_cart.utils.set_cart_count",
+	"webshop.webshop.utils.portal.update_debtors_account",
+	"webshop.webshop.shopping_cart.utils.set_cart_count",
+	"webshop.webshop.shopping_cart.student_utils.restore_active_student_from_cookie",
+	"webshop.webshop.shopping_cart.utils.update_website_context"
 ]
+
 update_website_context = [
-    "webshop.webshop.shopping_cart.utils.update_website_context",
+	"webshop.webshop.shopping_cart.utils.update_website_context"
 ]
+
+scheduler_events = {
+	"hourly": [
+		"webshop.webshop.api.scheduled_tasks.cancel_overdue_orders"
+	]
+}
 
 website_generators = ["Website Item", "Item Group"]
 
@@ -35,6 +44,7 @@ override_doctype_class = {
 doctype_js = {
     "Item": "public/js/override/item.js",
     "Homepage": "public/js/override/homepage.js",
+    "Payment Request": "webshop/doctype/override_doctype/payment_request.js",
 }
 
 doc_events = {
@@ -58,6 +68,7 @@ doc_events = {
     "Quotation": {
         "validate": [
             "webshop.webshop.crud_events.quotation.validate_shopping_cart_items.execute",
+            "webshop.webshop.crud_events.quotation.validate_student_cart.execute",
         ],
     },
     "Price List": {

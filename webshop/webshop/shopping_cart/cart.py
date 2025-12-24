@@ -87,8 +87,8 @@ def get_billing_addresses(party=None):
 
 
 @frappe.whitelist()
-def place_order():
-	quotation = _get_cart_quotation()
+def place_order(quotation_name=None):
+	quotation = _get_cart_quotation(quotation_name=quotation_name)
 	cart_settings = frappe.get_cached_doc("Webshop Settings")
 	quotation.company = cart_settings.company
 
@@ -107,18 +107,37 @@ def place_order():
 			quotation.name, ignore_permissions=True
 		)
 	)
+
+	# Copy student information from quotation to sales order
+	if quotation.get("student"):
+		sales_order.student = quotation.student
+
 	sales_order.payment_schedule = []
 
-	if not cint(cart_settings.allow_items_not_in_stock):
-		for item in sales_order.get("items"):
+	# Ensure warehouse is set for all items
+	for item in sales_order.get("items"):
+		if not item.warehouse:
 			item.warehouse = frappe.db.get_value(
 				"Website Item", {"item_code": item.item_code}, "website_warehouse"
 			)
+			# If no website warehouse, check if it's a variant and get parent's website warehouse
+			if not item.warehouse:
+				variant_of = frappe.get_cached_value("Item", item.item_code, "variant_of")
+				if variant_of:
+					item.warehouse = frappe.db.get_value(
+						"Website Item", {"item_code": variant_of}, "website_warehouse"
+					)
+
+		if not item.warehouse:
+			item.warehouse = frappe.get_cached_value("Item", item.item_code, "default_warehouse")
+
+	if not cint(cart_settings.allow_items_not_in_stock):
+		for item in sales_order.get("items"):
 			is_stock_item = frappe.db.get_value("Item", item.item_code, "is_stock_item")
 
 			if is_stock_item:
 				item_stock = get_web_item_qty_in_stock(
-					item.item_code, "website_warehouse"
+					item.item_code, "website_warehouse", warehouse=item.warehouse
 				)
 				if not cint(item_stock.in_stock):
 					throw(_("{0} Not in Stock").format(item.item_code))
@@ -153,8 +172,8 @@ def request_for_quotation():
 
 
 @frappe.whitelist()
-def update_cart(item_code, qty, additional_notes=None, with_items=False):
-	quotation = _get_cart_quotation()
+def update_cart(item_code, qty, additional_notes=None, with_items=False, quotation_name=None):
+	quotation = _get_cart_quotation(quotation_name=quotation_name)
 
 	empty_card = False
 	qty = flt(qty)
@@ -166,9 +185,16 @@ def update_cart(item_code, qty, additional_notes=None, with_items=False):
 			empty_card = True
 
 	else:
-		warehouse = frappe.get_cached_value(
-			"Website Item", {"item_code": item_code}, "website_warehouse"
-		)
+		# Try to find website warehouse for item or its template
+		warehouse = frappe.db.get_value("Website Item", {"item_code": item_code}, "website_warehouse")
+		if not warehouse:
+			variant_of = frappe.get_cached_value("Item", item_code, "variant_of")
+			if variant_of:
+				warehouse = frappe.db.get_value("Website Item", {"item_code": variant_of}, "website_warehouse")
+
+		# Fallback to item default
+		if not warehouse:
+			warehouse = frappe.get_cached_value("Item", item_code, "default_warehouse")
 
 		quotation_items = quotation.get("items", {"item_code": item_code})
 		if not quotation_items:
@@ -361,25 +387,42 @@ def decorate_quotation_doc(doc):
 			"Website Item", {"item_code": item_code}, "website_warehouse"
 		)
 
-		d.warehouse = website_warehouse
+		d.warehouse = website_warehouse or frappe.get_cached_value("Item", item_code, "default_warehouse")
 
 	return doc
 
 
-def _get_cart_quotation(party=None):
+def _get_cart_quotation(party=None, quotation_name=None):
 	"""Return the open Quotation of type "Shopping Cart" or make a new one"""
 	if not party:
 		party = get_party()
 
-	quotation = frappe.get_all(
-		"Quotation",
-		fields=["name"],
-		filters={
+	if not quotation_name:
+		# Get active student from session for per-student cart support
+		from webshop.webshop.shopping_cart.student_utils import get_active_student
+		active_student = get_active_student()
+
+		# Build filters for cart lookup
+		filters = {
 			"party_name": party.name,
 			"contact_email": frappe.session.user,
 			"order_type": "Shopping Cart",
 			"docstatus": 0,
-		},
+		}
+
+		# Add student filter if student is active
+		if active_student:
+			filters["student"] = active_student.name
+		else:
+			# No student selected - look for carts without student linkage
+			filters["student"] = ["in", [None, ""]]
+	else:
+		filters = {"name": quotation_name}
+
+	quotation = frappe.get_all(
+		"Quotation",
+		fields=["name"],
+		filters=filters,
 		order_by="modified desc",
 		limit_page_length=1,
 	)
@@ -407,6 +450,10 @@ def _get_cart_quotation(party=None):
 			"Contact", {"email_id": frappe.session.user}
 		)
 		qdoc.contact_email = frappe.session.user
+
+		# Link student if active
+		if active_student:
+			qdoc.student = active_student.name
 
 		qdoc.flags.ignore_permissions = True
 		qdoc.run_method("set_missing_values")

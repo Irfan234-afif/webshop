@@ -1,0 +1,1 @@
+from .webshop_payment_method import WebshopPaymentMethod
