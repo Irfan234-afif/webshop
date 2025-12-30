@@ -1,0 +1,379 @@
+{
+  "info": {
+    "name": "Webshop API Collection",
+    "description": "Complete API collection for Frappe Webshop with student management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "api_method",
+      "value": "{{base_url}}/api/method",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone_number\": \"+1234567890\",\n  \"password\": \"SecurePassword123\",\n  \"students\": [\n    {\n      \"student_name\": \"Alice Doe\",\n      \"school_unit\": \"High School\",\n      \"grade_level\": \"Grade 10\"\n    },\n    {\n      \"student_name\": \"Bob Doe\",\n      \"school_unit\": \"Elementary\",\n      \"grade_level\": \"Grade 5\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.api.auth.register",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.api.auth.register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecurePassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.api.auth.login",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.api.auth.login"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.api.auth.get_current_user",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.api.auth.get_current_user"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.api.auth.logout",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.api.auth.logout"]
+            }
+          }
+        },
+        {
+          "name": "Check Email Availability",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.api.auth.check_email_availability?email=newuser@example.com",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.api.auth.check_email_availability"],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "newuser@example.com"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Student Management",
+      "item": [
+        {
+          "name": "Get Students",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.api.student.get_students",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.api.student.get_students"]
+            }
+          }
+        },
+        {
+          "name": "Add Student",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student_name\": \"Charlie Doe\",\n  \"school_unit\": \"Middle School\",\n  \"grade_level\": \"Grade 7\",\n  \"date_of_birth\": \"2011-03-10\"\n}"
+            },
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.api.student.add_student",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.api.student.add_student"]
+            }
+          }
+        },
+        {
+          "name": "Update Student",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student_id\": \"CUST-00001-ABC123\",\n  \"student_name\": \"Alice Marie Doe\",\n  \"grade_level\": \"Grade 11\"\n}"
+            },
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.api.student.update_student",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.api.student.update_student"]
+            }
+          }
+        },
+        {
+          "name": "Delete Student",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student_id\": \"CUST-00001-ABC123\"\n}"
+            },
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.api.student.delete_student",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.api.student.delete_student"]
+            }
+          }
+        },
+        {
+          "name": "Set Active Student",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student_id\": \"CUST-00001-ABC123\"\n}"
+            },
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.shopping_cart.student_utils.set_active_student",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.shopping_cart.student_utils.set_active_student"]
+            }
+          }
+        },
+        {
+          "name": "Clear Active Student",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.shopping_cart.student_utils.clear_active_student",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.shopping_cart.student_utils.clear_active_student"]
+            }
+          }
+        },
+        {
+          "name": "Get Cart by Student",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.api.student.get_cart_by_student?student_id=CUST-00001-ABC123",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.api.student.get_cart_by_student"],
+              "query": [
+                {
+                  "key": "student_id",
+                  "value": "CUST-00001-ABC123"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Student Carts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.api.student.get_all_student_carts",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.api.student.get_all_student_carts"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shopping Cart",
+      "item": [
+        {
+          "name": "Get Cart Quotation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.shopping_cart.cart.get_cart_quotation",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.shopping_cart.cart.get_cart_quotation"]
+            }
+          }
+        },
+        {
+          "name": "Update Cart (Add Item)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"item_code\": \"ITEM-001\",\n  \"qty\": 2,\n  \"additional_notes\": \"Size: Large\",\n  \"with_items\": true\n}"
+            },
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.shopping_cart.cart.update_cart",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.shopping_cart.cart.update_cart"]
+            }
+          }
+        },
+        {
+          "name": "Update Cart (Remove Item)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"item_code\": \"ITEM-001\",\n  \"qty\": 0\n}"
+            },
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.shopping_cart.cart.update_cart",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.shopping_cart.cart.update_cart"]
+            }
+          }
+        },
+        {
+          "name": "Update Cart Address",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shipping_address_name\": \"Address-001\",\n  \"billing_address_name\": \"Address-002\"\n}"
+            },
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.shopping_cart.cart.update_cart_address",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.shopping_cart.cart.update_cart_address"]
+            }
+          }
+        },
+        {
+          "name": "Place Order (Checkout)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.shopping_cart.cart.place_order",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.shopping_cart.cart.place_order"]
+            }
+          }
+        },
+        {
+          "name": "Apply Coupon Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"applied_code\": \"SUMMER2024\"\n}"
+            },
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.shopping_cart.cart.apply_coupon_code",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.shopping_cart.cart.apply_coupon_code"]
+            }
+          }
+        },
+        {
+          "name": "Request for Quotation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{api_method}}/webshop.webshop.shopping_cart.cart.request_for_quotation",
+              "host": ["{{api_method}}"],
+              "path": ["webshop.webshop.shopping_cart.cart.request_for_quotation"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
