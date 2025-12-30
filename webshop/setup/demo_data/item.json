@@ -1,0 +1,303 @@
+[
+    {
+        "doctype": "Item",
+        "item_code": "WS-TSHIRT-TEMPLATE",
+        "item_name": "Webshop T-Shirt Template",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "has_variants": 1,
+        "variant_based_on": "Item Attribute",
+        "attributes": [
+            { "attribute": "Size" },
+            { "attribute": "Color" }
+        ],
+        "valuation_rate": 150.0,
+        "description": "A cool T-Shirt for Webshop Demo",
+        "image": "https://images.pexels.com/photos/1484808/pexels-photo-1484808.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_code": "WS-TSHIRT-S-RED",
+        "item_name": "Webshop T-Shirt Small Red",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "variant_of": "WS-TSHIRT-TEMPLATE",
+        "attributes": [
+            { "attribute": "Size", "attribute_value": "Small" },
+            { "attribute": "Color", "attribute_value": "Red" }
+        ],
+        "valuation_rate": 150.0,
+        "standard_rate": 300.0,
+        "description": "Small Red T-Shirt",
+        "image": "https://images.pexels.com/photos/1484808/pexels-photo-1484808.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_code": "WS-TSHIRT-M-RED",
+        "item_name": "Webshop T-Shirt Medium Red",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "variant_of": "WS-TSHIRT-TEMPLATE",
+        "attributes": [
+            { "attribute": "Size", "attribute_value": "Medium" },
+            { "attribute": "Color", "attribute_value": "Red" }
+        ],
+        "valuation_rate": 150.0,
+        "standard_rate": 300.0,
+        "description": "Medium Red T-Shirt",
+        "image": "https://images.pexels.com/photos/1484808/pexels-photo-1484808.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_code": "WS-TSHIRT-L-BLUE",
+        "item_name": "Webshop T-Shirt Large Blue",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "variant_of": "WS-TSHIRT-TEMPLATE",
+        "attributes": [
+            { "attribute": "Size", "attribute_value": "Large" },
+            { "attribute": "Color", "attribute_value": "Blue" }
+        ],
+        "valuation_rate": 160.0,
+        "standard_rate": 320.0,
+        "description": "Large Blue T-Shirt",
+        "image": "https://images.pexels.com/photos/1484808/pexels-photo-1484808.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_code": "WS-HOODIE-TEMPLATE",
+        "item_name": "Webshop Hoodie Template",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "has_variants": 1,
+        "variant_based_on": "Item Attribute",
+        "attributes": [
+            { "attribute": "Size" },
+            { "attribute": "Color" }
+        ],
+        "valuation_rate": 250.0,
+        "description": "Cozy Hoodie for cold days",
+        "image": "https://images.pexels.com/photos/1183266/pexels-photo-1183266.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_code": "WS-HOODIE-S-BLACK",
+        "item_name": "Webshop Hoodie Small Black",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "variant_of": "WS-HOODIE-TEMPLATE",
+        "attributes": [
+            { "attribute": "Size", "attribute_value": "Small" },
+            { "attribute": "Color", "attribute_value": "Black" }
+        ],
+        "valuation_rate": 250.0,
+        "standard_rate": 500.0,
+        "description": "Small Black Hoodie",
+        "image": "https://images.pexels.com/photos/1183266/pexels-photo-1183266.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_code": "WS-HOODIE-M-BLACK",
+        "item_name": "Webshop Hoodie Medium Black",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "variant_of": "WS-HOODIE-TEMPLATE",
+        "attributes": [
+            { "attribute": "Size", "attribute_value": "Medium" },
+            { "attribute": "Color", "attribute_value": "Black" }
+        ],
+        "valuation_rate": 250.0,
+        "standard_rate": 500.0,
+        "description": "Medium Black Hoodie",
+        "image": "https://images.pexels.com/photos/1183266/pexels-photo-1183266.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_code": "WS-HOODIE-L-GREY",
+        "item_name": "Webshop Hoodie Large Grey",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "variant_of": "WS-HOODIE-TEMPLATE",
+        "attributes": [
+            { "attribute": "Size", "attribute_value": "Large" },
+            { "attribute": "Color", "attribute_value": "Grey" }
+        ],
+        "valuation_rate": 260.0,
+        "standard_rate": 520.0,
+        "description": "Large Grey Hoodie",
+        "image": "https://images.pexels.com/photos/1183266/pexels-photo-1183266.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_code": "WS-HOODIE-XL-GREY",
+        "item_name": "Webshop Hoodie XL Grey",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "variant_of": "WS-HOODIE-TEMPLATE",
+        "attributes": [
+            { "attribute": "Size", "attribute_value": "Extra Large" },
+            { "attribute": "Color", "attribute_value": "Grey" }
+        ],
+        "valuation_rate": 270.0,
+        "standard_rate": 540.0,
+        "description": "XL Grey Hoodie",
+        "image": "https://images.pexels.com/photos/1183266/pexels-photo-1183266.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_code": "WS-SNEAKERS-TEMPLATE",
+        "item_name": "Webshop Sneakers Template",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "has_variants": 1,
+        "variant_based_on": "Item Attribute",
+        "attributes": [
+            { "attribute": "Size" },
+            { "attribute": "Color" }
+        ],
+        "valuation_rate": 400.0,
+        "description": "Stylish Sneakers",
+        "image": "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_code": "WS-SNEAKERS-8-WHITE",
+        "item_name": "Webshop Sneakers Size 8 White",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "variant_of": "WS-SNEAKERS-TEMPLATE",
+        "attributes": [
+            { "attribute": "Size", "attribute_value": "8" },
+            { "attribute": "Color", "attribute_value": "White" }
+        ],
+        "valuation_rate": 400.0,
+        "standard_rate": 800.0,
+        "description": "Size 8 White Sneakers",
+        "image": "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_code": "WS-SNEAKERS-9-WHITE",
+        "item_name": "Webshop Sneakers Size 9 White",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "variant_of": "WS-SNEAKERS-TEMPLATE",
+        "attributes": [
+            { "attribute": "Size", "attribute_value": "9" },
+            { "attribute": "Color", "attribute_value": "White" }
+        ],
+        "valuation_rate": 400.0,
+        "standard_rate": 800.0,
+        "description": "Size 9 White Sneakers",
+        "image": "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_code": "WS-SNEAKERS-10-BLACK",
+        "item_name": "Webshop Sneakers Size 10 Black",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "variant_of": "WS-SNEAKERS-TEMPLATE",
+        "attributes": [
+            { "attribute": "Size", "attribute_value": "10" },
+            { "attribute": "Color", "attribute_value": "Black" }
+        ],
+        "valuation_rate": 400.0,
+        "standard_rate": 800.0,
+        "description": "Size 10 Black Sneakers",
+        "image": "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_code": "WS-CAP-TEMPLATE",
+        "item_name": "Webshop Cap Template",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "has_variants": 1,
+        "variant_based_on": "Item Attribute",
+        "attributes": [
+            { "attribute": "Color" }
+        ],
+        "valuation_rate": 50.0,
+        "description": "Casual Cap",
+        "image": "https://images.pexels.com/photos/1124465/pexels-photo-1124465.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_code": "WS-CAP-BLUE",
+        "item_name": "Webshop Cap Blue",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "variant_of": "WS-CAP-TEMPLATE",
+        "attributes": [
+            { "attribute": "Color", "attribute_value": "Blue" }
+        ],
+        "valuation_rate": 50.0,
+        "standard_rate": 100.0,
+        "description": "Blue Cap",
+        "image": "https://images.pexels.com/photos/1124465/pexels-photo-1124465.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_code": "WS-CAP-RED",
+        "item_name": "Webshop Cap Red",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "variant_of": "WS-CAP-TEMPLATE",
+        "attributes": [
+            { "attribute": "Color", "attribute_value": "Red" }
+        ],
+        "valuation_rate": 50.0,
+        "standard_rate": 100.0,
+        "description": "Red Cap",
+        "image": "https://images.pexels.com/photos/1124465/pexels-photo-1124465.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_code": "WS-BAG",
+        "item_name": "Webshop Backpack",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "has_variants": 0,
+        "valuation_rate": 120.0,
+        "standard_rate": 240.0,
+        "description": "Durable Backpack",
+        "image": "https://images.pexels.com/photos/3731256/pexels-photo-3731256.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_code": "WS-WATCH",
+        "item_name": "Webshop Watch",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "has_variants": 0,
+        "valuation_rate": 600.0,
+        "standard_rate": 1200.0,
+        "description": "Classic Watch",
+        "image": "https://images.pexels.com/photos/277390/pexels-photo-277390.jpeg"
+    },
+     {
+        "doctype": "Item",
+        "item_code": "WS-SUNGLASSES",
+        "item_name": "Webshop Sunglasses",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "has_variants": 0,
+        "valuation_rate": 80.0,
+        "standard_rate": 160.0,
+        "description": "Cool Sunglasses",
+        "image": "https://images.pexels.com/photos/46710/pexels-photo-46710.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_code": "WS-BELT",
+        "item_name": "Webshop Belt",
+        "item_group": "Demo Item Group",
+        "is_stock_item": 1,
+        "has_variants": 0,
+        "valuation_rate": 40.0,
+        "standard_rate": 80.0,
+        "description": "Leather Belt",
+        "image": "https://images.pexels.com/photos/934063/pexels-photo-934063.jpeg"
+    }
+]

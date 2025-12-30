@@ -1,0 +1,213 @@
+================================================================================
+  WEBSHOP API DOCUMENTATION - COMPLETE COLLECTION
+  Created: 2024-12-20
+  Location: apps/webshop/api_docs/
+================================================================================
+
+📁 DOCUMENTATION STRUCTURE
+==========================
+
+api_docs/
+├── README.md                              ⭐ START HERE - Main index
+├── QUICK_REFERENCE.md                     📋 Cheat sheet
+├── STRUCTURE.md                           🗺️  Navigation guide
+├── Webshop_API.postman_collection.json    📮 Import to Postman
+│
+├── authentication/
+│   └── AUTH_API.md                        🔐 Login, register, logout
+│
+├── student_management/
+│   └── STUDENT_API.md                     👨‍👩‍👧‍👦 Student APIs
+│
+├── shopping_cart/
+│   └── CART_API.md                        🛒 Cart & checkout
+│
+└── common/
+    └── GETTING_STARTED.md                 🚀 Setup & conventions
+
+================================================================================
+  📚 WHAT'S INCLUDED
+================================================================================
+
+✅ AUTHENTICATION APIS (5 endpoints)
+   - Register with students
+   - Login / Logout
+   - Session verification
+   - Email availability check
+
+✅ STUDENT MANAGEMENT APIS (8 endpoints)
+   - Get/Add/Update/Delete students
+   - Set active student
+   - Get student carts
+   - Multi-cart overview
+
+✅ SHOPPING CART APIS (7 endpoints)
+   - Get cart
+   - Add/Remove items
+   - Update address
+   - Checkout (place order)
+   - Apply coupons
+
+✅ COMPLETE EXAMPLES
+   - Vue 3 + TypeScript + Pinia stores
+   - React + Axios examples
+   - Vanilla JavaScript examples
+   - Component examples (Login, Cart, Checkout)
+
+✅ TESTING TOOLS
+   - Postman collection (import ready)
+   - cURL examples
+   - Python test scripts
+
+✅ TYPESCRIPT TYPES
+   - All request/response types
+   - Store types
+   - Component prop types
+
+================================================================================
+  🚀 QUICK START FOR FRONTEND DEVELOPERS
+================================================================================
+
+1. READ DOCUMENTATION
+   cd apps/webshop/api_docs
+   cat README.md
+
+2. IMPORT POSTMAN COLLECTION
+   File: Webshop_API.postman_collection.json
+   → Open Postman → Import → Select file
+   → Set variable: base_url = http://localhost:8080
+   → Test all endpoints
+
+3. REFERENCE GUIDES
+   - Quick lookup: QUICK_REFERENCE.md
+   - Setup guide: common/GETTING_STARTED.md
+   - Auth: authentication/AUTH_API.md
+   - Students: student_management/STUDENT_API.md
+   - Cart: shopping_cart/CART_API.md
+
+4. COPY CODE EXAMPLES
+   All documentation includes ready-to-use:
+   - Pinia stores
+   - Vue components
+   - TypeScript types
+   - Error handlers
+
+================================================================================
+  🔥 ESSENTIAL ENDPOINTS
+================================================================================
+
+LOGIN
+POST /api/method/webshop.webshop.api.auth.login
+{ "email": "user@example.com", "password": "password" }
+
+GET STUDENTS
+GET /api/method/webshop.webshop.api.student.get_students
+
+SET ACTIVE STUDENT
+POST /api/method/webshop.webshop.shopping_cart.student_utils.set_active_student
+{ "student_id": "CUST-00001-ABC123" }
+
+ADD TO CART
+POST /api/method/webshop.webshop.shopping_cart.cart.update_cart
+{ "item_code": "ITEM-001", "qty": 2 }
+
+CHECKOUT
+POST /api/method/webshop.webshop.shopping_cart.cart.place_order
+
+================================================================================
+  💡 KEY FEATURES
+================================================================================
+
+✅ Session-based authentication (cookies)
+✅ Per-student cart isolation
+✅ Cookie persistence for active student
+✅ Complete error handling examples
+✅ TypeScript support
+✅ CORS configuration guide
+✅ Best practices and troubleshooting
+✅ Production-ready code examples
+
+================================================================================
+  📖 DOCUMENTATION HIGHLIGHTS
+================================================================================
+
+Each API doc includes:
+├── Endpoint descriptions
+├── Request/Response examples
+├── Parameter tables
+├── Error responses
+├── Frontend integration (Vue/React)
+├── TypeScript types
+├── cURL test examples
+├── Best practices
+└── Troubleshooting
+
+================================================================================
+  🎯 USE CASES
+================================================================================
+
+Need to implement login?
+→ authentication/AUTH_API.md
+
+Need to manage students?
+→ student_management/STUDENT_API.md
+
+Need to build cart?
+→ shopping_cart/CART_API.md
+
+Getting CORS errors?
+→ common/GETTING_STARTED.md → CORS Configuration
+
+Quick endpoint reference?
+→ QUICK_REFERENCE.md
+
+Test with Postman?
+→ Webshop_API.postman_collection.json
+
+================================================================================
+  🔧 IMPORTANT NOTES
+================================================================================
+
+1. ALL requests must include: credentials: 'include'
+2. Set active student BEFORE cart operations
+3. Refresh cart AFTER switching students
+4. Session cookies handled automatically by Frappe
+5. Use Vite proxy for CORS in development
+
+================================================================================
+  📝 NEXT STEPS
+================================================================================
+
+1. ✅ Read: api_docs/README.md
+2. ✅ Import: Postman collection
+3. ✅ Test: All endpoints with Postman
+4. ✅ Reference: common/GETTING_STARTED.md for setup
+5. ✅ Build: Copy store examples from docs
+6. ✅ Integrate: Follow component examples
+
+================================================================================
+  📞 SUPPORT
+================================================================================
+
+Documentation Location:
+/workspace/development/frappe-bench/apps/webshop/api_docs/
+
+Start Here:
+apps/webshop/api_docs/README.md
+
+Postman Collection:
+apps/webshop/api_docs/Webshop_API.postman_collection.json
+
+Quick Reference:
+apps/webshop/api_docs/QUICK_REFERENCE.md
+
+================================================================================
+  ✅ COMPLETE!
+================================================================================
+
+All API documentation is ready for frontend development.
+Start with README.md and follow the learning path.
+
+Happy Coding! 🚀
+
+================================================================================

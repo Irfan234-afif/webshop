@@ -1,0 +1,219 @@
+{% extends "templates/web.html" %}
+
+{% block title %}{{ _("Payment Checkout") }}{% endblock %}
+
+{% block page_content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Payment Header -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fa fa-credit-card mr-2"></i>
+                        {{ _("Midtrans Payment Gateway") }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-3">
+                        <i class="fa fa-info-circle mr-2"></i>
+                        <strong>{{ _("Test Mode Enabled") }}</strong>
+                        <p class="mb-0 mt-2">{{ _("This is a simulated payment gateway for testing purposes. No real
+                            transaction will be processed.") }}</p>
+                    </div>
+
+                    <!-- Payment Details -->
+                    <div class="payment-details">
+                        <h5 class="mb-3">{{ _("Payment Details") }}</h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="text-muted small">{{ _("Order Reference") }}</label>
+                                    <div class="font-weight-bold">{{ payment_details.reference_docname }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="text-muted small">{{ _("Document Type") }}</label>
+                                    <div class="font-weight-bold">{{ payment_details.reference_doctype }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="text-muted small">{{ _("Customer Name") }}</label>
+                                    <div class="font-weight-bold">{{ payment_details.payer_name }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="text-muted small">{{ _("Email") }}</label>
+                                    <div class="font-weight-bold">{{ payment_details.payer_email }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="text-muted small">{{ _("Description") }}</label>
+                                    <div>{{ payment_details.description or payment_details.title }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">{{ _("Total Amount") }}</h5>
+                                            <h3 class="mb-0 text-primary">{{ payment_details.formatted_amount }}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Actions -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-3">{{ _("Simulate Payment") }}</h5>
+                    <p class="text-muted">{{ _("Choose an option to simulate the payment result:") }}</p>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <button class="btn btn-success btn-lg btn-block" id="success-btn">
+                                <i class="fa fa-check-circle mr-2"></i>
+                                {{ _("Simulate Successful Payment") }}
+                            </button>
+                            <small class="text-muted d-block mt-2">{{ _("This will create a payment entry and mark the
+                                order as paid") }}</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <button class="btn btn-danger btn-lg btn-block" id="fail-btn">
+                                <i class="fa fa-times-circle mr-2"></i>
+                                {{ _("Simulate Failed Payment") }}
+                            </button>
+                            <small class="text-muted d-block mt-2">{{ _("This will redirect to payment failed page")
+                                }}</small>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <a href="javascript:history.back()" class="btn btn-link">
+                            <i class="fa fa-arrow-left mr-2"></i>
+                            {{ _("Cancel and Go Back") }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999;">
+    <div
+        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: white;">
+        <div class="spinner-border" role="status">
+            <span class="sr-only">{{ _("Loading...") }}</span>
+        </div>
+        <div class="mt-3">{{ _("Processing payment...") }}</div>
+    </div>
+</div>
+
+<style>
+    .payment-details .form-group label {
+        margin-bottom: 0.25rem;
+        font-size: 0.875rem;
+    }
+
+    .payment-details .form-group>div {
+        font-size: 1rem;
+    }
+
+    .card {
+        border: none;
+    }
+
+    .btn-lg {
+        padding: 1rem;
+        font-size: 1rem;
+    }
+</style>
+
+<script>
+    frappe.ready(() => {
+        const token = "{{ token }}";
+
+        // Success button click handler
+        document.getElementById('success-btn').addEventListener('click', function () {
+            processPayment('success');
+        });
+
+        // Fail button click handler
+        document.getElementById('fail-btn').addEventListener('click', function () {
+            processPayment('failed');
+        });
+
+        function processPayment(status) {
+            // Show loading overlay
+            document.getElementById('loading-overlay').style.display = 'block';
+
+            // Disable buttons
+            document.getElementById('success-btn').disabled = true;
+            document.getElementById('fail-btn').disabled = true;
+
+            // Call the payment processing API
+            frappe.call({
+                method: 'webshop.webshop.doctype.midtrans_settings.midtrans_settings.process_payment',
+                args: {
+                    token: token,
+                    payment_status: status
+                },
+                callback: function (r) {
+                    if (r.message && r.message.redirect_to) {
+                        // Redirect to success or failure page
+                        window.location.href = r.message.redirect_to;
+                    } else {
+                        // Hide loading and show error
+                        document.getElementById('loading-overlay').style.display = 'none';
+                        frappe.msgprint({
+                            title: __('Error'),
+                            message: __('Unable to process payment. Please try again.'),
+                            indicator: 'red'
+                        });
+
+                        // Re-enable buttons
+                        document.getElementById('success-btn').disabled = false;
+                        document.getElementById('fail-btn').disabled = false;
+                    }
+                },
+                error: function () {
+                    // Hide loading and show error
+                    document.getElementById('loading-overlay').style.display = 'none';
+                    frappe.msgprint({
+                        title: __('Error'),
+                        message: __('Unable to process payment. Please try again.'),
+                        indicator: 'red'
+                    });
+
+                    // Re-enable buttons
+                    document.getElementById('success-btn').disabled = false;
+                    document.getElementById('fail-btn').disabled = false;
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

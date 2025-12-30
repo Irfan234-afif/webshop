@@ -1,0 +1,64 @@
+{
+ "actions": [],
+ "creation": "2024-12-24 23:45:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "test_mode",
+  "sb_credentials",
+  "secret_api_key",
+  "webhook_token"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "default": "1",
+   "fieldname": "test_mode",
+   "fieldtype": "Check",
+   "label": "Test Mode"
+  },
+  {
+   "fieldname": "sb_credentials",
+   "fieldtype": "Section Break",
+   "label": "Credentials"
+  },
+  {
+   "fieldname": "secret_api_key",
+   "fieldtype": "Password",
+   "label": "Secret API Key"
+  },
+  {
+   "fieldname": "webhook_token",
+   "fieldtype": "Data",
+   "label": "Webhook Verification Token"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-12-24 23:45:00.000000",
+ "modified_by": "Administrator",
+ "module": "Webshop",
+ "name": "Xendit Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
