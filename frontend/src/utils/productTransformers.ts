@@ -19,7 +19,8 @@ export function transformApiProduct(apiProduct: ApiProduct): Product {
       ? calculateDiscount(apiProduct.price_list_rate, apiProduct.formatted_mrp)
       : undefined,
     hasDiscount: !!apiProduct.formatted_mrp,
-    itemCode: apiProduct.item_code
+    itemCode: apiProduct.item_code,
+    isSubscription: !!apiProduct.is_subscription_item
   }
 }
 

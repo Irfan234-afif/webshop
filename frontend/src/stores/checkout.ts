@@ -19,7 +19,9 @@ export const useCheckoutStore = defineStore('checkout', () => {
   const currentStep = ref<number>(1)
   const pickupType = ref<string>('')
   const paymentMethodType = ref<string>('')
+  const paymentChannel = ref<string>('')
   const deliveryDate = ref<string>('')
+  const deliveryTime = ref<string>('')
   const paymentMethods = ref<PaymentMethod[]>([])
   const isLoading = ref<boolean>(false)
   const error = ref<Error | null>(null)
@@ -35,13 +37,24 @@ export const useCheckoutStore = defineStore('checkout', () => {
   const canProceedToStep2 = computed(() => {
     if (!pickupType.value) return false
     if (pickupType.value === 'Ambil di koperasi') {
-      return !!deliveryDate.value
+      return !!deliveryDate.value && !!deliveryTime.value
     }
     return true
   })
 
   const canProceedToStep3 = computed(() => {
-    return !!paymentMethodType.value
+    // If method has channels, one must be selected? 
+    // Logic: If there are channels available for the selected method, enforce channel selection.
+    // For now, simple check: just need paymentMethodType. 
+    // Ideally we check if channel is required based on method details.
+    
+    if (!paymentMethodType.value) return false
+    
+    // Optional: Add channel validation if needed
+    // const method = paymentMethods.value.find(m => m.name === paymentMethodType.value)
+    // if (method?.payment_channels?.length && !paymentChannel.value) return false
+    
+    return true
   })
 
   const canPlaceOrder = computed(() => {
@@ -73,6 +86,9 @@ export const useCheckoutStore = defineStore('checkout', () => {
       if (data.delivery_date) {
         deliveryDate.value = data.delivery_date
       }
+      if (data.delivery_time) {
+        deliveryTime.value = data.delivery_time
+      }
     } catch (err) {
       error.value = err as Error
       console.error('❌ initializeCheckout: Failed:', err)
@@ -100,6 +116,9 @@ export const useCheckoutStore = defineStore('checkout', () => {
       if (data.delivery_date) {
         deliveryDate.value = data.delivery_date
       }
+      if (data.delivery_time) {
+        deliveryTime.value = data.delivery_time
+      }
     } catch (err) {
       error.value = err as Error
       console.error('Failed to fetch checkout data:', err)
@@ -108,7 +127,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     }
   }
 
-  async function setPickupType(type: string, deliveryDateTime?: string) {
+  async function setPickupType(type: string, deliveryDateStr?: string, deliveryTimeStr?: string) {
     isLoading.value = true
     error.value = null
 
@@ -123,16 +142,19 @@ export const useCheckoutStore = defineStore('checkout', () => {
       await updatePickupType({
         quotation_name: quotationName.value,
         pickup_type: type,
-        delivery_date: deliveryDateTime
+        delivery_date: deliveryDateStr,
+        delivery_time: deliveryTimeStr
       })
 
       pickupType.value = type
-      deliveryDate.value = deliveryDateTime || ''
+      deliveryDate.value = deliveryDateStr || ''
+      deliveryTime.value = deliveryTimeStr || ''
 
       // Update checkout data
       if (checkoutData.value) {
         checkoutData.value.pickup_type = type
-        checkoutData.value.delivery_date = deliveryDateTime
+        checkoutData.value.delivery_date = deliveryDateStr
+        checkoutData.value.delivery_time = deliveryTimeStr
       }
 
       console.log('✅ setPickupType: Updated successfully')
@@ -206,7 +228,9 @@ export const useCheckoutStore = defineStore('checkout', () => {
 
       console.log('🔍 placeOrder: Creating order from quotation:', quotationName.value)
 
-      const response = await placeOrderWithPayment(quotationName.value)
+      console.log('🔍 placeOrder: Creating order from quotation:', quotationName.value)
+
+      const response = await placeOrderWithPayment(quotationName.value, paymentChannel.value)
 
       console.log('✅ placeOrder: Order created successfully:', response.sales_order)
 
@@ -242,8 +266,11 @@ export const useCheckoutStore = defineStore('checkout', () => {
     checkoutData.value = null
     currentStep.value = 1
     pickupType.value = ''
+    pickupType.value = ''
     paymentMethodType.value = ''
+    paymentChannel.value = ''
     deliveryDate.value = ''
+    deliveryTime.value = ''
     paymentMethods.value = []
     error.value = null
   }
@@ -254,7 +281,9 @@ export const useCheckoutStore = defineStore('checkout', () => {
     currentStep,
     pickupType,
     paymentMethodType,
+    paymentChannel,
     deliveryDate,
+    deliveryTime,
     paymentMethods,
     isLoading,
     error,

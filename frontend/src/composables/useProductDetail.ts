@@ -97,8 +97,8 @@ export function useProductDetail() {
 
         // If variant matches, check if it has stock
         if (matches_selection) {
-          const stock_qty = variant.stockQuantity || 0;
-          return stock_qty > 0;
+          // Check inStock boolean instead of quantity
+          return variant.inStock;
         }
         return false;
       });

@@ -27,16 +27,17 @@ const emit = defineEmits<{
   'selectSize': [size: string]
   'selectVariant': [variant: VariantAttribute]
   'customize': []
-  'addToCart': []
+  'addToCart': [serviceStartDate?: string]
   'toggleWishlist': []
   'showLoginModal': []
+  'selectDate': [date: string]
 }>()
 </script>
 
 <template>
   <div class="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
     <!-- Left: Image Gallery -->
-    <div v-if="product.type === 'product' && product.images && product.images.length > 0">
+    <div v-if="product.images && product.images.length > 0">
       <ProductImageGallery
         :images="product.images"
         :selected-index="selectedImageIndex"
@@ -45,18 +46,18 @@ const emit = defineEmits<{
     </div>
 
     <!-- Service Icon Display (for services without image gallery) -->
-    <div
+    <!-- <div
       v-else-if="product.type === 'service'"
       class="flex items-center justify-center rounded-xl p-12"
       :style="{ background: product.bgGradient }"
     >
-      <!-- Service icon placeholder -->
+      Service icon placeholder
       <div class="flex h-32 w-32 items-center justify-center rounded-full bg-white/20">
         <span class="text-6xl" :style="{ color: product.iconColor }">
           {{ product.icon }}
         </span>
       </div>
-    </div>
+    </div> -->
 
     <!-- Right: Product Info -->
     <ProductInfo
@@ -73,9 +74,10 @@ const emit = defineEmits<{
       @select-size="emit('selectSize', $event)"
       @select-variant="emit('selectVariant', $event)"
       @customize="emit('customize')"
-      @add-to-cart="emit('addToCart')"
+      @add-to-cart="emit('addToCart', $event)"
       @toggle-wishlist="emit('toggleWishlist')"
       @show-login-modal="emit('showLoginModal')"
+      @select-date="emit('selectDate', $event)"
     />
   </div>
 </template>

@@ -19,8 +19,7 @@ on_logout = "webshop.webshop.shopping_cart.utils.clear_cart_count"
 on_session_creation = [
 	"webshop.webshop.utils.portal.update_debtors_account",
 	"webshop.webshop.shopping_cart.utils.set_cart_count",
-	"webshop.webshop.shopping_cart.student_utils.restore_active_student_from_cookie",
-	"webshop.webshop.shopping_cart.utils.update_website_context"
+	"webshop.webshop.shopping_cart.student_utils.restore_active_student_from_cookie"
 ]
 
 update_website_context = [
@@ -39,6 +38,7 @@ override_doctype_class = {
     "Payment Request": "webshop.webshop.doctype.override_doctype.payment_request.PaymentRequest",
     "Item Group": "webshop.webshop.doctype.override_doctype.item_group.WebshopItemGroup",
     "Item": "webshop.webshop.doctype.override_doctype.item.WebshopItem",
+    "Subscription": "webshop.overrides.subscription_override.CustomSubscription",
 }
 
 doctype_js = {
@@ -70,6 +70,17 @@ doc_events = {
             "webshop.webshop.crud_events.quotation.validate_shopping_cart_items.execute",
             "webshop.webshop.crud_events.quotation.validate_student_cart.execute",
         ],
+    },
+    "Sales Order": {
+        "validate": [
+            "webshop.webshop.api.subscription.validate_subscription_dates"
+        ],
+        "on_submit": [
+            "webshop.webshop.api.subscription.process_subscription_order"
+        ]
+    },
+    "Payment Entry": {
+        "on_submit": "webshop.webshop.api.subscription.process_payment_entry"
     },
     "Price List": {
         "validate": [

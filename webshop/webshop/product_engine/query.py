@@ -35,6 +35,7 @@ class ProductQuery:
             "website_warehouse",
             "ranking",
             "on_backorder",
+            "is_subscription_item",
         ]
 
     def query(self, attributes=None, fields=None, search_term=None, start=0, item_group=None, page_length=None):

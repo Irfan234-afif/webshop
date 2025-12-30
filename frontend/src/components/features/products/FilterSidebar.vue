@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useProductsStore } from '@/stores/products'
 import FilterGroup from './FilterGroup.vue'
+import PrimaryButton from '@/components/common/PrimaryButton.vue';
 
 interface Props {
   variant?: 'default' | 'modal'
@@ -85,12 +86,14 @@ const handleClearFilters = () => {
 
     <!-- Apply Button (Modal variant only) -->
     <div v-if="variant === 'modal'" class="mt-8">
-      <button
+      <PrimaryButton
         @click="emit('apply')"
-        class="w-full rounded-xl bg-gray-900 py-4 font-bold text-white transition-colors hover:bg-gray-800 active:bg-gray-700"
+        variant="primary"
+        size="medium"
+        class="w-full"
       >
         Tampilkan {{ productsStore.filteredProducts.length }} Produk
-      </button>
+      </PrimaryButton>
     </div>
   </aside>
 </template>

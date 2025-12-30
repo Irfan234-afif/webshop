@@ -2,20 +2,12 @@
   <Teleport to="body">
     <!-- Backdrop -->
     <Transition name="fade">
-      <div
-        v-if="isOpen"
-        class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
-        @click="emit('close')"
-      >
+      <div v-if="isOpen" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+        @click="emit('close')">
         <!-- Modal Content -->
         <Transition name="scale">
-          <div
-            v-if="isOpen"
-            class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
-            @click.stop
-            role="dialog"
-            aria-modal="true"
-          >
+          <div v-if="isOpen" class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+            @click.stop role="dialog" aria-modal="true">
             <!-- Header -->
             <div class="bg-white rounded-t-xl p-8 border-b border-gray-100">
               <div class="flex items-start gap-6">
@@ -35,18 +27,11 @@
                 </div>
 
                 <!-- Close Button -->
-                <button
-                  @click="emit('close')"
+                <button @click="emit('close')"
                   class="flex-shrink-0 w-[18px] h-[18px] text-text-secondary hover:text-gray-600 transition-colors"
-                  aria-label="Close"
-                >
+                  aria-label="Close">
                   <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" class="rotate-45">
-                    <path
-                      d="M9 0L9 18M0 9L18 9"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                    />
+                    <path d="M9 0L9 18M0 9L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                   </svg>
                 </button>
               </div>
@@ -69,10 +54,8 @@
                   </div>
 
                   <!-- Payment Deadline Warning -->
-                  <div
-                    v-if="order.status === 'Draft' || order.status === 'Pending Payment'"
-                    class="bg-white rounded-lg p-4 flex items-start gap-3"
-                  >
+                  <div v-if="order.status === 'Draft' || order.status === 'Pending Payment'"
+                    class="bg-white rounded-lg p-4 flex items-start gap-3">
                     <InfoCircleIcon :size="16" color="#FFBC4F" class="flex-shrink-0 mt-0.5" />
                     <p class="text-sm font-semibold text-text-secondary flex-1">
                       Selesaikan pembayaran sebelum {{ formatPaymentDeadline(order.transaction_date) }}
@@ -113,15 +96,27 @@
                     </div>
                   </div>
 
+                  <!-- Delivery Proof for History -->
+                  <div v-if="order.delivery_image"
+                    class="bg-white border-l-[1.5px] border-r-[1.5px] border-b-[1.5px] border-gray-100 p-6">
+                    <h4 class="text-sm font-bold text-gray-900 mb-4 capitalize">Bukti Pengiriman</h4>
+                    <div class="h-48 w-full bg-gray-50 rounded-lg overflow-hidden border border-gray-100 cursor-pointer"
+                      @click="openImage(order.delivery_image)">
+                      <img :src="order.delivery_image" alt="Bukti Pengiriman" class="w-full h-full object-cover" />
+                    </div>
+                  </div>
+
                   <!-- Informasi Produk & Layanan -->
                   <div class="bg-white border-l-[1.5px] border-r-[1.5px] border-b-[1.5px] border-gray-100 p-6">
                     <h4 class="text-sm font-bold text-gray-900 mb-8 capitalize">Informasi Produk & Layanan</h4>
                     <div class="space-y-4">
                       <div v-for="item in order.items" :key="item.item_code" class="flex gap-2 justify-between">
                         <div class="flex gap-3">
-                          <div class="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 border border-gray-100 shrink-0 overflow-hidden">
-                              <img v-if="item.image" :src="item.image" :alt="item.item_name" class="w-full h-full object-cover" />
-                              <span v-else class="text-[10px]">No Img</span>
+                          <div
+                            class="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 border border-gray-100 shrink-0 overflow-hidden">
+                            <img v-if="item.image" :src="item.image" :alt="item.item_name"
+                              class="w-full h-full object-cover" />
+                            <span v-else class="text-[10px]">No Img</span>
                           </div>
                           <div class="flex-1 min-w-0">
                             <p class="text-sm font-semibold text-gray-900 line-clamp-1">{{ item.item_name }}</p>
@@ -129,7 +124,9 @@
                           </div>
                         </div>
                         <div>
-                          <p class="text-sm font-semibold text-text-secondary line-clamp-1">{{ formatIDR(item.amount) }}</p>
+                          <p class="text-sm font-semibold text-text-secondary line-clamp-1">{{ formatIDR(item.amount ||
+                            0) }}
+                          </p>
                         </div>
                       </div>
                       <!-- <div
@@ -144,10 +141,7 @@
                         <span>Voucher</span>
                         <span class="text-right">{{ order.voucher_amount ? formatIDR(order.voucher_amount) : '0' }}</span>
                       </div> -->
-                      <div
-                        v-if="order.discount_amount"
-                        class="flex items-center justify-between text-sm font-semibold"
-                      >
+                      <div v-if="order.discount_amount" class="flex items-center justify-between text-sm font-semibold">
                         <span class="text-text-secondary">Diskon Anggota Koperasi</span>
                         <span class="text-red-500 text-right">- {{ formatIDR(order.discount_amount) }}</span>
                       </div>
@@ -155,12 +149,14 @@
                   </div>
 
                   <!-- Metode Pembayaran -->
-                  <div class="bg-white border-l-[1.5px] border-r-[1.5px] border-b-[1.5px] border-gray-100 rounded-b-xl p-6">
+                  <div
+                    class="bg-white border-l-[1.5px] border-r-[1.5px] border-b-[1.5px] border-gray-100 rounded-b-xl p-6">
                     <h4 class="text-sm font-bold text-gray-900 mb-6 capitalize">Metode Pembayaran</h4>
                     <div class="space-y-4">
-                      <div class="flex items-center justify-between text-sm font-semibold text-text-secondary">
+                      <div v-if="order.virtual_account"
+                        class="flex items-center justify-between text-sm font-semibold text-text-secondary">
                         <span>Nomor Virtual Account</span>
-                        <span class="text-right">{{ order.virtual_account || 'N/A' }}</span>
+                        <span class="text-right">{{ order.virtual_account }}</span>
                       </div>
                       <div class="flex items-center justify-between text-sm font-semibold text-text-secondary">
                         <span>Payment Gateway</span>
@@ -177,19 +173,14 @@
             </div>
 
             <!-- Footer Actions -->
-            <div class="bg-white border-t-[1.5px] border-gray-100 rounded-b-xl p-8 flex items-center justify-between gap-4">
-              <router-link
-                v-if="order.per_billed < 100"
-                :to="{ name: 'checkout-payment', params: { id: order.name } }"
-                class="flex-1 py-4 px-8 bg-primary text-white font-bold text-sm rounded-lg hover:bg-primary-dark transition-colors capitalize text-center"
-              >
+            <div
+              class="bg-white border-t-[1.5px] border-gray-100 rounded-b-xl p-8 flex items-center justify-between gap-4">
+              <router-link v-if="order.per_billed < 100" :to="{ name: 'checkout-payment', params: { id: order.name } }"
+                class="flex-1 py-4 px-8 bg-primary text-white font-bold text-sm rounded-lg hover:bg-primary-dark transition-colors capitalize text-center">
                 Bayar Pesanan - {{ formatIDR(order.grand_total) }}
               </router-link>
-              <button
-                v-else
-                @click="emit('close')"
-                class="flex-1 py-4 px-8 bg-primary text-white font-bold text-sm rounded-lg hover:bg-primary-dark transition-colors capitalize"
-              >
+              <button v-else @click="emit('close')"
+                class="flex-1 py-4 px-8 bg-primary text-white font-bold text-sm rounded-lg hover:bg-primary-dark transition-colors capitalize">
                 Tutup
               </button>
             </div>
@@ -205,34 +196,7 @@ import { computed, watch } from 'vue'
 import { formatIDR } from '@/utils/formatters'
 import ReceiptIcon from '@/components/icons/ReceiptIcon.vue'
 import InfoCircleIcon from '@/components/icons/InfoCircleIcon.vue'
-
-interface OrderItem {
-  item_code: string
-  item_name: string
-  qty: number
-  image?: string
-  amount: number
-  name?: string // Backwards compatibility if needed, but we'll map
-}
-
-interface Order {
-  name: string
-  grand_total: number
-  transaction_date: string
-  status: string
-  student: string
-  school_unit?: string
-  pickup_type?: string
-  delivery_date?: string
-  voucher_amount?: number
-  discount_amount?: number
-  virtual_account?: string
-  per_billed: number
-  payment_gateway?: string
-  items?: OrderItem[]
-  payment_method_type?: string
-  payment_request_status?: string
-}
+import type { Order } from '@/types/order'
 
 interface Props {
   isOpen: boolean
@@ -347,6 +311,11 @@ watch(
     }
   }
 )
+
+// Open image in new tab
+const openImage = (url: string) => {
+  window.open(url, '_blank')
+}
 </script>
 
 <style scoped>

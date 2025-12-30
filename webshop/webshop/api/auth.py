@@ -30,10 +30,10 @@ def login(email, password):
 			frappe.throw(_("Email and password are required"))
 
 		# Validate email format
-		try:
-			validate_email_address(email, throw=True)
-		except Exception:
-			frappe.throw(_("Invalid email format"))
+		# try:
+		# 	validate_email_address(email, throw=True)
+		# except Exception:
+		# 	frappe.throw(_("Invalid email format"))
 
 		# Check if user exists
 		if not frappe.db.exists("User", email):

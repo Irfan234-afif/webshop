@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { ProductDetail } from '@/types/productDetail'
-import type { ProductOrService } from '@/types/product'
+import type { Product } from '@/types/product'
 import { productsMockData } from '@/data/products'
 
 export const useProductDetailStore = defineStore('productDetail', () => {
   // State
   const currentProduct = ref<ProductDetail | null>(null)
-  const relatedProducts = ref<ProductOrService[]>([])
+  const relatedProducts = ref<Product[]>([])
   const isLoading = ref(false)
   const error = ref<Error | null>(null)
 
@@ -53,6 +53,7 @@ export const useProductDetailStore = defineStore('productDetail', () => {
 
       if (data.message) {
         currentProduct.value = data.message as ProductDetail
+        console.log("is_subscription_item", currentProduct.value.is_subscription_item)
       } else {
         throw new Error('Invalid response from server')
       }

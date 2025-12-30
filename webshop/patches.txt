@@ -1,21 +1,29 @@
-[pre_model_sync]
-
-[post_model_sync]
-
-webshop.patches.add_homepage_field #09-05-2024
+webshop.patches.add_homepage_field
+webshop.patches.populate_e_commerce_settings
+webshop.patches.migrate_payment_methods_to_new_doctype
+webshop.patches.migrate_payment_approval_to_payment_request
+webshop.patches.create_website_items
+webshop.patches.update_checkout_custom_fields_for_delivery_date
+webshop.patches.update_checkout_custom_fields_for_dynamic_payment
+webshop.patches.make_homepage_products_website_items
+webshop.patches.fetch_thumbnail_in_website_items
+webshop.patches.convert_to_website_item_in_item_card_group_template
+webshop.patches.shopping_cart_to_ecommerce
+webshop.patches.add_student_custom_fields
+# webshop.patches.delete_orphaned_docshares
+webshop.patches.add_subscription_fields
+webshop.patches.add_subscription_ref_field
+webshop.patches.add_subscription_plan_fields
+webshop.patches.migrate_to_student_carts
+webshop.patches.migrate_student_to_standalone_doctype
+webshop.patches.add_student_custom_fields_standalone
+webshop.patches.add_school_unit_sales_order
+webshop.patches.copy_custom_field_filters_to_website_item
+webshop.patches.add_delivery_date_to_quotation
+webshop.patches.add_payment_request_custom_fields
 webshop.patches.enable_allow_to_guest_view_for_item_group
 webshop.patches.clear_cache_for_item_group_route
-webshop.patches.add_student_custom_fields #2024-12-20
-webshop.patches.migrate_to_student_carts #2024-12-20
-webshop.patches.migrate_student_to_standalone_doctype #2024-12-20
-webshop.patches.add_student_custom_fields_standalone #2024-12-20
-webshop.patches.add_checkout_custom_fields #2024-12-21
-webshop.patches.migrate_payment_methods_to_new_doctype #2024-12-21
-webshop.patches.update_checkout_custom_fields_for_dynamic_payment #2024-12-21
-webshop.patches.update_checkout_custom_fields_for_delivery_date #2024-12-21
-webshop.patches.add_delivery_date_to_quotation #2024-12-21
-webshop.patches.add_school_unit_sales_order #2024-12-21
-webshop.patches.add_payment_request_custom_fields #2024-12-22
-webshop.patches.migrate_payment_approval_to_payment_request #2024-12-22
-webshop.patches.add_payment_due_date_to_payment_request #2024-12-24
-webshop.patches.add_attach_image_delivery_note #2025-12-24
+webshop.patches.add_payment_due_date_to_payment_request
+webshop.patches.add_xendit_fields_to_payment_request
+webshop.patches.update_delivery_date_sales
+webshop.patches.add_use_fixed_period_to_subscription_plan

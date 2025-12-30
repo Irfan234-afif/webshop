@@ -10,7 +10,7 @@ export interface ProductDetail {
   id: string
   item_code: string
   route: string
-  type: 'product' | 'service'
+  is_subscription_item: boolean
 
   // Basic info (shared between products and services)
   title: string

@@ -180,7 +180,7 @@ const legalLinks: FooterLink[] = [
         </div>
 
         <!-- Social Media Icons -->
-        <div class="flex items-center gap-4 order-1 md:order-3">
+        <div class="flex flex-wrap items-center gap-4 order-1 md:order-3">
           <a
             v-for="social in socialLinks"
             :key="social.name"

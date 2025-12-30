@@ -8,6 +8,7 @@ import FilterSidebar from '@/components/features/products/FilterSidebar.vue'
 import ProductGrid from '@/components/features/products/ProductGrid.vue'
 import { useProductsStore } from '@/stores/products'
 import { useFilterQuerySync } from '@/composables/useFilterQuerySync'
+import PrimaryButton from '@/components/common/PrimaryButton.vue'
 
 const productsStore = useProductsStore()
 
@@ -57,8 +58,25 @@ onMounted(async () => {
           <div class="flex-1">
             <ProductGrid
               :products="productsStore.allProducts"
-              :is-loading="productsStore.isLoading"
+              :is-loading="productsStore.isLoading && productsStore.allProducts.length === 0"
             />
+            
+            <!-- Load More Button -->
+            <div 
+              v-if="productsStore.hasMore" 
+              class="mt-8 flex justify-center"
+            >
+              <PrimaryButton
+                @click="productsStore.fetchProducts({ loadMore: true })"
+                variant="outline"
+                size="large"
+                :disabled="productsStore.isLoading"
+                class="min-w-[200px]"
+              >
+                <span v-if="productsStore.isLoading" class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></span>
+                {{ productsStore.isLoading ? 'Memuat...' : 'Muat Lebih Banyak' }}
+              </PrimaryButton>
+            </div>
           </div>
         </div>
       </Container>
@@ -66,9 +84,10 @@ onMounted(async () => {
 
     <!-- Mobile Filter Button - Fixed at bottom -->
     <div class="fixed bottom-6 left-1/2 z-40 -translate-x-1/2 lg:hidden">
-      <button
+      <PrimaryButton
         @click="isFilterModalOpen = true"
-        class="flex items-center gap-3 rounded-full bg-gray-900 px-6 py-3 text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
+        variant="primary"
+        size="medium"
       >
         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
@@ -85,7 +104,7 @@ onMounted(async () => {
         >
           {{ activeFilterCount }}
         </span>
-      </button>
+      </PrimaryButton>
     </div>
 
     <!-- Mobile Filter Modal -->

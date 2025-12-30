@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 
 interface Props {
-  variant?: 'primary' | 'secondary' | 'outline'
+  variant?: 'primary' | 'secondary' | 'outline' | 'success'
   size?: 'small' | 'medium' | 'large'
   icon?: string
   disabled?: boolean
@@ -20,7 +20,8 @@ const buttonClasses = computed(() => {
   const variants = {
     primary: 'bg-secondary-alt text-white hover:opacity-90',
     secondary: 'bg-primary text-white hover:opacity-90',
-    outline: 'border-2 border-white text-white hover:bg-white hover:text-primary'
+    outline: 'border-2 border-white text-white hover:bg-white hover:text-primary',
+    success: 'bg-success text-white hover:opacity-90',
   }
 
   const sizes = {

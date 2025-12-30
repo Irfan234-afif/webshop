@@ -11,6 +11,8 @@ import LoginPage from '../views/Authentication/LoginPage.vue'
 import RegistrationPage from '../views/Authentication/RegistrationPage.vue'
 import CheckoutPage from '../views/Checkout/CheckoutPage.vue'
 import WishlistPage from '../views/Wishlist/WishlistPage.vue'
+import { useAuthStore } from '@/stores/auth'
+import BillsPage from '@/views/Bills/BillsPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -45,11 +47,21 @@ const router = createRouter({
       }
     },
     {
+      path: '/subscription-checkout/:itemCode',
+      name: 'subscription-checkout',
+      component: () => import('../views/Products/SubscriptionCheckoutPage.vue'),
+      meta: {
+        title: 'Subscription Checkout',
+        requiresAuth: true
+      }
+    },
+    {
       path: '/checkout',
       name: 'checkout',
       component: CheckoutPage,
       meta: {
-        title: 'Checkout'
+        title: 'Checkout',
+        requiresAuth: true
       }
     },
     {
@@ -57,7 +69,8 @@ const router = createRouter({
       name: 'cart',
       component: CartPage,
       meta: {
-        title: 'Keranjang Belanja'
+        title: 'Keranjang Belanja',
+        requiresAuth: true
       }
     },
     {
@@ -65,7 +78,8 @@ const router = createRouter({
       name: 'wishlist',
       component: WishlistPage,
       meta: {
-        title: 'Wishlist Saya'
+        title: 'Wishlist Saya',
+        requiresAuth: true
       }
     },
     {
@@ -73,7 +87,17 @@ const router = createRouter({
       name: 'orders',
       component: OrdersPage,
       meta: {
-        title: 'Riwayat Pesanan'
+        title: 'Riwayat Pesanan',
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/bills',
+      name: 'bills',
+      component: BillsPage,
+      meta: {
+        title: 'Tagihan Berjalan',
+        requiresAuth: true
       }
     },
     {
@@ -81,7 +105,8 @@ const router = createRouter({
       name: 'order-detail',
       component: OrderDetailPage,
       meta: {
-        title: 'Detail Pesanan'
+        title: 'Detail Pesanan',
+        requiresAuth: true
       }
     },
     {
@@ -89,7 +114,8 @@ const router = createRouter({
       name: 'checkout-payment',
       component: CheckoutPaymentPage,
       meta: {
-        title: 'Konfirmasi Pembayaran'
+        title: 'Konfirmasi Pembayaran',
+        requiresAuth: true
       }
     },
     {
@@ -116,6 +142,24 @@ const router = createRouter({
     } else {
       return { top: 0, behavior: 'smooth' };
     }
+  }
+})
+
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  
+  // Update document title
+  if (to.meta.title) {
+    document.title = `${to.meta.title} - Lafiye`
+  }
+  
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    next({
+      name: 'login',
+      query: { redirect: to.fullPath }
+    })
+  } else {
+    next()
   }
 })
 

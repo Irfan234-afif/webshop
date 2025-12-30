@@ -71,12 +71,14 @@ onMounted(() => {
     <Container class="flex flex-col gap-17">
       <!-- Section Header -->
       <div class="flex items-center justify-between gap-17 mb-16">
-        <h2
-          class="flex-1 font-bold text-3xl leading-snug text-gray-900 capitalize"
-          
-        >
-          {{ title }}
-        </h2>
+        <router-link :to="`/products?categories=${title}`">
+          <h2
+            class="flex-1 font-bold text-3xl leading-snug text-gray-900 capitalize"
+            
+          >
+            {{ title }}
+          </h2>
+        </router-link>
 
         <!-- Navigation Arrows -->
         <div class="flex items-center gap-4">
@@ -123,7 +125,7 @@ onMounted(() => {
         <div
           v-for="product in products"
           :key="product.id"
-          class="flex-shrink-0 w-[387px] flex"
+          class="flex-shrink-0 w-full md:w-[387px] flex"
           style="scroll-snap-align: start"
         >
           <ProductCard
@@ -146,7 +148,7 @@ onMounted(() => {
         <!-- Promotional Card -->
         <div
           v-if="promotionalCard"
-          class="flex-shrink-0 w-[387px] flex flex-col justify-between p-12 rounded-xl"
+          class="flex-shrink-0 w-full md:w-[387px] flex flex-col justify-between p-12 rounded-xl"
           :style="{ ...gradientStyle, 'scroll-snap-align': 'start' }"
         >
           <!-- Icon -->

@@ -2,11 +2,8 @@
   <div class="pickup-type-selector">
     <div class="space-y-4">
       <!-- Option 1: Ambil Di Koperasi -->
-      <div
-        class="pickup-option"
-        :class="{ 'selected': selectedType === 'Ambil di koperasi' }"
-        @click="selectPickupType('Ambil di koperasi')"
-      >
+      <div class="pickup-option" :class="{ 'selected': selectedType === 'Ambil di koperasi' }"
+        @click="selectPickupType('Ambil di koperasi')">
         <div class="flex items-start justify-between">
           <div class="flex-1">
             <h3 class="font-semibold text-lg mb-2">Ambil Di Koperasi</h3>
@@ -24,29 +21,31 @@
         <!-- Delivery Date & Time Selection (shown when Ambil di koperasi is selected) -->
         <div v-if="selectedType === 'Ambil di koperasi'" class="mt-4 pt-4 border-t border-gray-200">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Date Time Picker -->
-            <div class="md:col-span-2">
+            <!-- Date Picker -->
+            <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Tanggal & Waktu Pengambilan <span class="text-red-500">*</span>
+                Tanggal Pengambilan <span class="text-red-500">*</span>
               </label>
-              <input
-                v-model="selectedDateTime"
-                type="datetime-local"
-                :min="minDateTime"
+              <input v-model="selectedDate" type="date" :min="minDate"
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                @click.stop
-              />
+                @click.stop />
+            </div>
+            <!-- Time Picker -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Waktu Pengambilan <span class="text-red-500">*</span>
+              </label>
+              <input v-model="selectedTime" type="time"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                @click.stop />
             </div>
           </div>
         </div>
       </div>
 
       <!-- Option 2: Ambil Secara Online -->
-      <div
-        class="pickup-option"
-        :class="{ 'selected': selectedType === 'Ambil secara online' }"
-        @click="selectPickupType('Ambil secara online')"
-      >
+      <div class="pickup-option" :class="{ 'selected': selectedType === 'Ambil secara online' }"
+        @click="selectPickupType('Ambil secara online')">
         <div class="flex items-start justify-between">
           <div class="flex-1">
             <h3 class="font-semibold text-lg mb-2">Ambil Secara Online</h3>
@@ -64,18 +63,23 @@
         <!-- Delivery Date & Time Selection (shown when Ambil secara online is selected) -->
         <div v-if="selectedType === 'Ambil secara online'" class="mt-4 pt-4 border-t border-gray-200">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Date Time Picker -->
-            <div class="md:col-span-2">
+            <!-- Date Picker -->
+            <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Tanggal & Waktu Pengiriman <span class="text-red-500">*</span>
+                Tanggal Pengiriman <span class="text-red-500">*</span>
               </label>
-              <input
-                v-model="selectedDateTime"
-                type="datetime-local"
-                :min="minDateTime"
+              <input v-model="selectedDate" type="date" :min="minDate"
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                @click.stop
-              />
+                @click.stop />
+            </div>
+            <!-- Time Picker -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Waktu Pengiriman <span class="text-red-500">*</span>
+              </label>
+              <input v-model="selectedTime" type="time"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                @click.stop />
             </div>
           </div>
         </div>
@@ -90,27 +94,31 @@ import { useCheckoutStore } from '@/stores/checkout'
 import { storeToRefs } from 'pinia'
 
 const checkoutStore = useCheckoutStore()
-const { pickupType, deliveryDate } = storeToRefs(checkoutStore)
+const { pickupType, deliveryDate, deliveryTime } = storeToRefs(checkoutStore)
 
 const selectedType = ref<string>(pickupType.value || '')
-const selectedDateTime = ref<string>(deliveryDate.value || '')
+const selectedDate = ref<string>(deliveryDate.value || '')
+const selectedTime = ref<string>(deliveryTime.value || '')
 
-// Minimum date is tomorrow (+1 day) at 10:00 AM
-const minDateTime = computed(() => {
+// Minimum date is tomorrow (+1 day)
+const minDate = computed(() => {
   const tomorrow = new Date()
   tomorrow.setDate(tomorrow.getDate() + 1)
-  tomorrow.setHours(10, 0, 0, 0) // 10:00 AM
-  return tomorrow.toISOString().slice(0, 16) // Format for datetime-local input
+  return tomorrow.toISOString().slice(0, 10) // Format: YYYY-MM-DD
 })
 
 // Initialize with default date (tomorrow) and time (10:00)
 onMounted(() => {
-  if (!selectedDateTime.value) {
-    // Set default to tomorrow at 10:00 AM
+  if (!selectedDate.value) {
+    // Set default to tomorrow
     const tomorrow = new Date()
     tomorrow.setDate(tomorrow.getDate() + 1)
-    tomorrow.setHours(10, 0, 0, 0) // 10:00 AM
-    selectedDateTime.value = tomorrow.toISOString().slice(0, 16) // Format for datetime-local input
+    selectedDate.value = tomorrow.toISOString().slice(0, 10)
+  }
+
+  if (!selectedTime.value) {
+    // Set default time to 10:00
+    selectedTime.value = "10:00"
   }
 })
 
@@ -120,47 +128,56 @@ watch(pickupType, (newVal) => {
 })
 
 watch(deliveryDate, (newVal) => {
-  selectedDateTime.value = newVal || ''
+  selectedDate.value = newVal || ''
+})
+
+watch(deliveryTime, (newVal) => {
+  selectedTime.value = newVal || ''
 })
 
 // Watch for type changes and set defaults
 watch(selectedType, (newType) => {
-  if (newType && !selectedDateTime.value) {
-    // Set default to tomorrow at 10:00 AM
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    tomorrow.setHours(10, 0, 0, 0) // 10:00 AM
-    selectedDateTime.value = tomorrow.toISOString().slice(0, 16) // Format for datetime-local input
-  }
-  // Update store immediately when type changes
   if (newType) {
-    checkoutStore.pickupType = newType
+    // Set defaults if missing
+    if (!selectedDate.value) {
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      selectedDate.value = tomorrow.toISOString().slice(0, 10)
+    }
+    if (!selectedTime.value) {
+      selectedTime.value = "10:00"
+    }
+
+    // Update store immediately when type changes
+    checkoutStore.setPickupType(newType, selectedDate.value, selectedTime.value)
+  }
+})
+
+function selectPickupType(type: string) {
+  selectedType.value = type
+}
+
+// Watch for local changes and sync to store
+watch([selectedDate, selectedTime], ([newDate, newTime]) => {
+  if (selectedType.value && newDate && newTime) {
+    // Debounce or just update? Store action might be async but we can update state
+    // Ideally use debounce if calling API, but here we update store which calls API
+    // Let's rely on the store action from the watcher above, wait, calling setPickupType on every keystroke/change?
+    // Better to update store state only if needed or let the user confirm? 
+    // The original code updated store immediately.
+
+    // Check if values actually changed to avoid loop
+    if (newDate !== deliveryDate.value || newTime !== deliveryTime.value) {
+      checkoutStore.setPickupType(selectedType.value, newDate, newTime)
+    }
   }
 })
 
 
-function selectPickupType(type: string) {
-  selectedType.value = type
-  // Set default date and time if not already set
-  if (!selectedDateTime.value) {
-    // Set default to tomorrow at 10:00 AM
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    tomorrow.setHours(10, 0, 0, 0) // 10:00 AM
-    selectedDateTime.value = tomorrow.toISOString().slice(0, 16) // Format for datetime-local input
-  }
-}
-
-// Watch for local changes and sync to store
-watch(selectedDateTime, (newVal) => {
-  if (newVal) {
-    checkoutStore.deliveryDate = newVal
-  }
-}, { immediate: true })
-
 defineExpose({
   selectedType,
-  selectedDateTime
+  selectedDate,
+  selectedTime
 })
 </script>
 

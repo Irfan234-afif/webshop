@@ -15,7 +15,7 @@ withDefaults(
 <template>
   <RouterLink
     to="/"
-    class="flex items-center transition-opacity hover:opacity-80"
+    class="flex items-center transition-opacity hover:opacity-80 max-w-[120px] sm:max-w-full"
   >
     <Logo/>
   </RouterLink>

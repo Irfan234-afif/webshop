@@ -86,6 +86,8 @@ def get_product_detail(route):
         "category": doc.item_group,
         "short_description": doc.short_description or doc.description or "",
         "description": doc.web_long_description or doc.description or "",
+        "is_subscription_item": doc.is_subscription_item,
+        "subscription_plan": doc.subscription_plan,
         "rating": 0,  # Will be calculated from reviews
         "reviewCount": 0,  # Will be calculated from reviews
     }
@@ -116,6 +118,17 @@ def get_product_detail(route):
             if price_info.discount_percent:
                 product_detail["discountPercent"] = flt(price_info.discount_percent)
                 product_detail["hasDiscount"] = True
+
+    # Subscription Logic: Display Price Override for Post-Paid
+    if doc.is_subscription_item and doc.subscription_plan:
+        plan = frappe.get_cached_doc("Subscription Plan", doc.subscription_plan)
+        if plan.billing_timing == "Post-Paid":
+            # Show Plan Cost as the display price (e.g. 100,000)
+            # Even though Item Price is 0 for signup
+            # Formatting uses standard helper or raw currency
+            product_detail["price"] = flt(plan.cost)
+            product_detail["originalPrice"] = flt(plan.cost)
+            product_detail["priceLabel"] = f"{frappe.db.get_value('Currency', plan.currency, 'symbol') or plan.currency} {flt(plan.cost):,.0f} / {plan.billing_interval}"
 
     # Get variants if item has variants
     variants = []
@@ -359,7 +372,10 @@ def get_cart_items():
                 "amount": flt(item.amount),
                 "description": item.get("description") or "",
                 "route": item.get("route") or "",
-                "warehouse": item.get("warehouse") or ""
+                "warehouse": item.get("warehouse") or "",
+                "service_start_date": item.get("service_start_date"),
+                "service_end_date": item.get("service_end_date"),
+                "isSubscription": item.get("is_subscription_item")
             }
 
             # Get variant attributes if item is a variant
@@ -443,7 +459,7 @@ def get_item_variant_attributes(item_code):
 
 
 @frappe.whitelist()
-def add_to_cart(item_code, qty=1, additional_notes=None, student=None):
+def add_to_cart(item_code, qty=1, service_start_date=None, additional_notes=None, student=None):
     """
     Add item to shopping cart.
 
@@ -474,7 +490,7 @@ def add_to_cart(item_code, qty=1, additional_notes=None, student=None):
 
         try:
             # Update cart using existing cart functionality
-            update_cart(item_code, qty, additional_notes, with_items=False)
+            update_cart(item_code, qty, service_start_date, additional_notes, with_items=False)
 
             # Return updated cart
             return get_cart_items()

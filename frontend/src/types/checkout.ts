@@ -12,6 +12,7 @@ export interface CheckoutData {
   pickup_type?: string
   payment_method_type?: string
   delivery_date?: string
+  delivery_time?: string
   has_address: boolean
   shipping_address?: string
   billing_address?: string
@@ -42,6 +43,13 @@ export interface BankAccountDetails {
   branch_code?: string
 }
 
+export interface PaymentChannel {
+  channel_code: string
+  channel_name: string
+  description?: string
+  icon?: string
+}
+
 export interface PaymentMethod {
   name: string
   label: string
@@ -51,12 +59,20 @@ export interface PaymentMethod {
   need_admin_approval?: boolean
   payment_type?: 'Transfer Manual' | 'Payment Gateway'
   bank_account_details?: BankAccountDetails
+  payment_channels?: PaymentChannel[]
+}
+
+export interface VirtualAccountDetails {
+  number: string
+  bank: string
+  expiry: string
 }
 
 export interface OrderConfirmationResponse {
   sales_order: string
   payment_url: string
-  redirect_type: 'gateway' | 'manual' | 'cash'
+  redirect_type: 'gateway' | 'manual' | 'cash' | 'virtual_account'
+  virtual_account?: VirtualAccountDetails
 }
 
 export interface CheckoutPaymentDetails {
@@ -82,16 +98,20 @@ export interface CheckoutPaymentDetails {
     payment_proof: string | null
     remarks: string | null
   } | null
+  virtual_account?: VirtualAccountDetails
+  payment_status?: string
 }
 
 export interface PickupInfo {
   pickup_type: string
   delivery_date?: string
+  delivery_time?: string
 }
 
 export interface UpdatePickupTypeParams {
   pickup_type: string
   delivery_date?: string
+  delivery_time?: string
 }
 
 export interface UpdatePaymentMethodParams {

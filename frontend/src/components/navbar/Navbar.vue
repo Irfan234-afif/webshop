@@ -12,6 +12,7 @@ import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import type { NavLink } from '@/types/navigation'
 import { useAuthStore } from '@/stores/auth'
+import { useWishlistStore } from '@/stores/wishlist'
 
 withDefaults(
   defineProps<{
@@ -30,6 +31,7 @@ withDefaults(
 const router = useRouter()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
+const wishlistStore = useWishlistStore()
 
 const emit = defineEmits<{
   openSearch: []
@@ -48,6 +50,7 @@ const isGuest = computed(() => authStore.isGuest)
 onMounted(async () => {
   if (authStore.isAuthenticated) {
     await cartStore.initialize()
+    await wishlistStore.fetchWishlist()
   }
 })
 

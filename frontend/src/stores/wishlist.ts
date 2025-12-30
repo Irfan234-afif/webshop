@@ -48,7 +48,7 @@ export const useWishlistStore = defineStore('wishlist', () => {
     }
   }
 
-  const toggleWishlist = async (productId: string, productType: 'product' | 'service' = 'product') => {
+  const toggleWishlist = async (productId: string) => {
     isLoading.value = true
     error.value = null
 
@@ -71,7 +71,6 @@ export const useWishlistStore = defineStore('wishlist', () => {
         items.value = response.map((item: any) => ({
             id: item.name || item.website_item || item.item_code,
             productId: item.item_code,
-            productType: 'product',
             addedAt: new Date(),
             title: item.title || item.web_item_name || item.item_name,
             image: item.image || item.website_image,
@@ -102,7 +101,7 @@ export const useWishlistStore = defineStore('wishlist', () => {
   }
     
   // Initialize
-  fetchWishlist()
+  // fetchWishlist()
 
   return {
     // State

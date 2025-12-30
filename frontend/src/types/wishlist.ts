@@ -7,7 +7,6 @@
 export interface WishlistItem {
   id: string // Unique wishlist item ID
   productId: string // Reference to product or service
-  productType: 'product' | 'service'
   addedAt: Date // When the item was added to wishlist
   // Display fields
   title?: string

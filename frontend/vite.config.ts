@@ -15,21 +15,13 @@ export default defineConfig({
 		frappeui({
 			frappeProxy: {
 				port: 8000,
-				source: "^/(app|desk|login|api|assets|files|pages|builder_assets|midtrans_checkout)",
+				source: "^/(app|desk|api|files|private|pages|builder_assets|midtrans_checkout)",
 			},
 			lucideIcons: true,
 		}),
 		vue(),
 		vueDevTools(),
 	],
-	buildConfig: false,
-	build: {
-		chunkSizeWarningLimit: 1500,
-		outDir: `../webshop/public/frontend`,
-		emptyOutDir: true,
-		target: "es2015",
-		sourcemap: true,
-	},
 	resolve: {
 		alias: {
 			'@': fileURLToPath(new URL('./src', import.meta.url))
@@ -44,6 +36,6 @@ export default defineConfig({
 		}
 	},
 	optimizeDeps: {
-		include: ["frappe-ui > feather-icons", "showdown", "engine.io-client", "interactjs"],
+		include: ["frappe-ui > feather-icons", "engine.io-client", "interactjs", "debug"],
 	}
 })

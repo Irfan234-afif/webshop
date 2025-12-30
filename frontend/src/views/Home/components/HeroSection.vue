@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import PrimaryButton from '@/components/common/PrimaryButton.vue'
 import Container from '@/components/layout/Container.vue'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 
 interface Props {
   content?: {
@@ -21,15 +21,19 @@ const props = defineProps<Props>()
 
 const isImageOnly = computed(() => props.content?.type === 'Image Only')
 const backgroundStyle = computed(() => {
-  if (isImageOnly.value && props.content?.image) {
+  if (props.content?.image) {
     return {
-      background: `url(${props.content.image}) center/cover no-repeat`
+      background: `url('${props.content.image}') center/cover no-repeat`
     }
   }
   // Default gradient if not image only or no image provided
   return {
     background: 'linear-gradient(223.53deg, #AC208E 14.18%, #CE65B7 83.2%)'
   }
+})
+
+onMounted(() => {
+  console.log("isImageOnly", isImageOnly.value, backgroundStyle.value)
 })
 </script>
 
@@ -53,13 +57,13 @@ const backgroundStyle = computed(() => {
         <div class="flex flex-col gap-12 items-start max-w-3xl">
           <!-- Heading -->
           <h1
-            class="font-bold text-5xl leading-tight text-white capitalize"
+            class="font-bold text-2xl md:text-5xl leading-tight text-white capitalize"
           >
             {{ content.title || 'Semua Kebutuhan Sekolah, Lengkap dalam Satu Tempat' }}
           </h1>
 
           <!-- Description -->
-          <p class="font-semibold text-base leading-7 text-white/80 max-w-[630px]">
+          <p class="!font-semibold text-base md:text-xl leading-7 text-white/80 max-w-[630px]">
             {{ content.subtitle || 'Belanja seragam, buku pelajaran, dan perlengkapan sekolah kini lebih mudah. Tersedia pilihan sesuai jenjang dan kebutuhan murid untuk memudahkan wali murid dan koperasi dalam setiap pembelian.' }}
           </p>
 
@@ -76,26 +80,26 @@ const backgroundStyle = computed(() => {
                     Wait, existing code didn't have hrefs. I will render text.
                 -->
                <a :href="content.cta_url || '#'">
-                 <PrimaryButton variant="primary" size="large" icon="arrow">
+                 <PrimaryButton variant="success" size="medium" icon="arrow">
                    {{ content.cta_text }}
                  </PrimaryButton>
                </a>
             </template>
             <!-- Fallback if no data -->
-            <PrimaryButton v-else variant="primary" size="large" icon="arrow">
+            <PrimaryButton v-else variant="primary" size="medium" icon="arrow">
               Belanja Sekarang
             </PrimaryButton>
 
             <template v-if="content.secondary_cta_text">
                <a :href="content.secondary_cta_url || '#'">
-                 <PrimaryButton variant="outline" size="large" icon="arrow">
+                 <PrimaryButton variant="outline" size="medium" icon="arrow">
                    {{ content.secondary_cta_text }}
                  </PrimaryButton>
                </a>
             </template>
-             <PrimaryButton v-else variant="outline" size="large" icon="arrow">
+             <!-- <PrimaryButton v-else variant="outline" size="large" icon="arrow">
                Hubungi Koperasi
-             </PrimaryButton>
+             </PrimaryButton> -->
           </div>
         </div>
 

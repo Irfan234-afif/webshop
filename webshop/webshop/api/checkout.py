@@ -89,7 +89,8 @@ def get_checkout_data(student_name=None):
 			"student": quotation.student if hasattr(quotation, 'student') else None,
 			"pickup_type": quotation.pickup_type if hasattr(quotation, 'pickup_type') else None,
 			"payment_method_type": quotation.payment_method_type if hasattr(quotation, 'payment_method_type') else None,
-			"delivery_date": quotation.delivery_date if hasattr(quotation, 'delivery_date') else None,  # Using default delivery_date field
+			"delivery_date": quotation.delivery_date if hasattr(quotation, 'delivery_date') else None,
+			"delivery_time": quotation.delivery_time if hasattr(quotation, 'delivery_time') else None,
 			"has_address": has_address,
 			"shipping_address": quotation.shipping_address_name,
 			"billing_address": quotation.customer_address
@@ -103,7 +104,7 @@ def get_checkout_data(student_name=None):
 
 
 @frappe.whitelist()
-def update_pickup_type(quotation_name, pickup_type, delivery_date=None):
+def update_pickup_type(quotation_name, pickup_type, delivery_date=None, delivery_time=None):
 	"""
 	Update pickup type on cart quotation
 
@@ -127,7 +128,7 @@ def update_pickup_type(quotation_name, pickup_type, delivery_date=None):
 
 		# Validate required fields for koperasi pickup
 		if pickup_type == "Ambil di koperasi":
-			if not delivery_date:
+			if not delivery_date or not delivery_time:
 				frappe.throw(_("Delivery date and time are required for koperasi pickup"))
 
 		# Get quotation by name explicitly (not via session)
@@ -155,10 +156,12 @@ def update_pickup_type(quotation_name, pickup_type, delivery_date=None):
 		quotation.db_set("pickup_type", pickup_type, update_modified=True)
 
 		if pickup_type == "Ambil di koperasi":
-			quotation.db_set("delivery_date", delivery_date, update_modified=False)  # Using default delivery_date field
+			quotation.db_set("delivery_date", delivery_date, update_modified=False)
+			quotation.db_set("delivery_time", delivery_time, update_modified=False)
 		else:
 			# Clear delivery date for online delivery
-			quotation.db_set("delivery_date", None, update_modified=False)  # Using default delivery_date field
+			quotation.db_set("delivery_date", None, update_modified=False)
+			quotation.db_set("delivery_time", None, update_modified=False)
 
 		frappe.db.commit()
 
@@ -288,6 +291,17 @@ def get_payment_methods():
 				# Continue without bank details if there's an error
 				method_data["bank_account_details"] = None
 
+			# Add Channels if Payment Gateway
+		if method.payment_type == "Payment Gateway":
+			channels = frappe.get_all(
+				"Webshop Payment Channel",
+				filters={"parent": method.name},
+				fields=["channel_code", "channel_name", "description", "icon"],
+				order_by="idx asc"
+			)
+			if channels:
+				method_data["payment_channels"] = channels
+
 		result.append(method_data)
 
 	return result
@@ -366,7 +380,7 @@ def get_checkout_payment_details(sales_order_name):
 					"remarks": pr.remarks
 				}
 
-		return {
+		res = {
 			"sales_order": {
 				"name": sales_order.name,
 				"customer": sales_order.customer_name,
@@ -384,8 +398,47 @@ def get_checkout_payment_details(sales_order_name):
 				"payment_duration": payment_method.payment_duration
 			},
 			"bank_account_details": bank_details,
-			"payment_approval": approval
+			"payment_approval": approval,
+			"virtual_account": {
+				"number": getattr(sales_order, 'virtual_account_number', None), # Fallback if stored on SO
+				"bank": getattr(sales_order, 'virtual_account_bank', None),
+				"expiry": getattr(sales_order, 'payment_due_date', None)
+			}
 		}
+
+		# Get general payment status from Payment Request
+		# specific logic for identifying if "Paid"
+		pr_general = frappe.get_all(
+			"Payment Request",
+			filters={
+				"reference_doctype": "Sales Order",
+				"reference_name": sales_order_name,
+				"docstatus": ["!=", 2] # Not cancelled
+			},
+			fields=["status"],
+			order_by="creation desc",
+			limit=1
+		)
+		if pr_general:
+			res["payment_status"] = pr_general[0].status
+		else:
+			res["payment_status"] = "Pending"
+
+		# Check for Payment Request VA details (Primary Source)
+		pr_va = frappe.db.get_value("Payment Request", {
+			"reference_doctype": "Sales Order",
+			"reference_name": sales_order_name,
+			"status": ["in", ["Requested", "Pending", "Initiated"]]
+		}, ["virtual_account_number", "virtual_account_bank", "payment_due_date"], as_dict=1)
+
+		if pr_va:
+			res["virtual_account"] = {
+				"number": pr_va.virtual_account_number,
+				"bank": pr_va.virtual_account_bank,
+				"expiry": pr_va.payment_due_date
+			}
+
+		return res
 
 	except Exception as e:
 		frappe.log_error(frappe.get_traceback(), "Checkout: Get Payment Details Error")
@@ -393,7 +446,7 @@ def get_checkout_payment_details(sales_order_name):
 
 
 @frappe.whitelist()
-def place_order_with_payment(quotation_name):
+def place_order_with_payment(quotation_name, payment_channel=None):
 	"""
 	Create Sales Order from cart and redirect to payment
 
@@ -443,13 +496,14 @@ def place_order_with_payment(quotation_name):
 			frappe.throw(_("Please select a payment method"))
 
 		if quotation.pickup_type == "Ambil di koperasi":
-			if not quotation.delivery_date:  # Using default delivery_date field
+			if not quotation.delivery_date or not quotation.delivery_time:
 				frappe.throw(_("Please select delivery date and time"))
 
 		# Store checkout data temporarily
 		pickup_type = quotation.pickup_type
 		payment_method_type = quotation.payment_method_type
-		delivery_date = quotation.delivery_date  # Using default delivery_date field
+		delivery_date = quotation.delivery_date
+		delivery_time = quotation.delivery_time
 
 		# CRITICAL: Re-calculate totals before submitting
 		# db_set() skips calculation, so we need to trigger it manually
@@ -461,7 +515,6 @@ def place_order_with_payment(quotation_name):
 		# Clear payment_schedule to avoid validation error
 		quotation.payment_schedule = []
 		quotation.save(ignore_permissions=True)
-		frappe.db.commit()
 
 		frappe.log_error(
 			f"Quotation totals recalculated: {quotation.name}, Grand Total: {quotation.grand_total}, Net Total: {quotation.net_total}",
@@ -484,9 +537,18 @@ def place_order_with_payment(quotation_name):
 			set_active_student(quotation.student)
 			frappe.log_error(f"Set active student for place_order: {quotation.student}", "Checkout Debug")
 
-		# Create Sales Order using existing place_order function
-		# This will call _get_cart_quotation() internally and should get our recalculated quotation
-		sales_order_name = place_order(quotation_name=quotation_name)
+		# CRITICAL: Prevent auto-commit from submit() calls in place_order
+		# This ensures the entire transaction (quotation submit + SO creation + payment setup) is atomic
+		original_in_patch = frappe.flags.get("in_patch")
+		frappe.flags.in_patch = True  # Prevents auto-commit on document submit
+		
+		try:
+			# Create Sales Order using existing place_order function
+			# This will call _get_cart_quotation() internally and should get our recalculated quotation
+			sales_order_name = place_order(quotation_name=quotation_name)
+		finally:
+			# Restore original flag value
+			frappe.flags.in_patch = original_in_patch
 
 		# Get the created Sales Order
 		sales_order = frappe.get_doc("Sales Order", sales_order_name)
@@ -498,25 +560,27 @@ def place_order_with_payment(quotation_name):
 		# Set the delivery date using the default field in Sales Order
 		if delivery_date:
 			sales_order.delivery_date = delivery_date
+		if delivery_time:
+			sales_order.delivery_time = delivery_time
 
 		sales_order.save(ignore_permissions=True)
+		payment_data = get_payment_gateway_url(sales_order_name, payment_method_type, payment_channel)
 		frappe.db.commit()
-
-		# Get payment URL based on payment method
-		payment_data = get_payment_gateway_url(sales_order_name, payment_method_type)
 
 		return {
 			"sales_order": sales_order_name,
 			"payment_url": payment_data.get("payment_url"),
-			"redirect_type": payment_data.get("redirect_type")
+			"redirect_type": payment_data.get("redirect_type"),
+			"virtual_account": payment_data.get("virtual_account")
 		}
 
 	except Exception as e:
+		frappe.db.rollback()
 		frappe.log_error(frappe.get_traceback(), "Checkout: Place Order Error")
 		frappe.throw(_("Failed to create order: {0}").format(str(e)))
 
 
-def get_payment_gateway_url(sales_order_name, payment_method_type):
+def get_payment_gateway_url(sales_order_name, payment_method_type, payment_channel=None):
 	"""
 	Get payment URL based on payment method
 
@@ -560,9 +624,64 @@ def get_payment_gateway_url(sales_order_name, payment_method_type):
 				# Calculate payment due date based on duration
 				payment_duration_seconds = payment_method.payment_duration or 86400  # Default 24h if 0 or None
 				payment_request.payment_due_date = now_datetime() + timedelta(seconds=payment_duration_seconds)
+				
+				# Xendit Integration: Set Payment Channel
+				if payment_channel:
+					payment_request.payment_channel_code = payment_channel
 
 				payment_request.insert(ignore_permissions=True)
-				frappe.db.commit()
+				
+				# IMPORTANT: Only submit Payment Request for Payment Gateways
+				# Manual payments that need admin approval should stay in Draft (docstatus=0)
+				# so admin can review payment proof before submitting (approving)
+				# Payment gateways need submitted status for webhooks to work
+				payment_request.submit()
+
+				# Xendit VA Creation Trigger
+				if payment_channel:
+					# Check if this gateway is Xendit
+					# We assume "payment_gateway_account" is linked to "Xendit" gateway or check settings
+					# Better: Check if Xendit Settings is enabled and this PR targets it.
+					# For now, if payment_channel is passed, we try to create VA.
+					try:
+						xendit_settings = frappe.get_doc("Xendit Settings")
+						if xendit_settings.enabled:
+							# Prepare data for Xendit create_request (following Stripe pattern)
+							payment_data = {
+								"order_id": payment_request.name,
+								"reference_doctype": "Sales Order",
+								"reference_docname": sales_order_name,
+								"amount": payment_request.grand_total,
+								"currency": payment_request.currency or "IDR",
+								"bank_code": payment_channel,
+								"payment_channel_code": payment_channel,
+								"payer_name": sales_order.customer_name,
+								"payer_email": payment_request.email_to,
+								"redirect_to": f"/order/{sales_order_name}/checkout"
+							}
+							
+							# Create virtual account using new API
+							result = xendit_settings.create_request(payment_data)
+							
+							# Update payment request with VA details
+							if xendit_settings.virtual_account_number:
+								payment_request.db_set("virtual_account_number", xendit_settings.virtual_account_number)
+							if xendit_settings.virtual_account_bank:
+								payment_request.db_set("virtual_account_bank", xendit_settings.virtual_account_bank)
+							
+							return {
+								"payment_url": result.get("redirect_to", f"/order/{sales_order_name}/checkout"),
+								"redirect_type": "virtual_account",
+								"virtual_account": {
+									"account_number": xendit_settings.virtual_account_number,
+									"bank_code": xendit_settings.virtual_account_bank
+								}
+							}
+					except Exception as e:
+						frappe.log_error(f"Xendit VA Creation Error: {str(e)}", "Checkout")
+						# Fallback to standard flow or re-raise? 
+						# If creation fails, we might want to tell basic checkout page
+						pass
 
 			# Get payment URL from payment request
 			payment_url = payment_request.get_payment_url()
@@ -634,7 +753,6 @@ def create_payment_request_for_manual_approval(sales_order, payment_method):
 
 	# Insert as Draft (docstatus=0) - this is the "Pending" state
 	payment_request.insert(ignore_permissions=True)
-	frappe.db.commit()
 
 	return payment_request
 

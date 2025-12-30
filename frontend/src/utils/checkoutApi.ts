@@ -19,7 +19,8 @@ export async function updatePickupType(params: UpdatePickupTypeParams & { quotat
   const response = await call('webshop.webshop.api.checkout.update_pickup_type', {
     quotation_name: params.quotation_name,
     pickup_type: params.pickup_type,
-    delivery_date: params.delivery_date
+    delivery_date: params.delivery_date,
+    delivery_time: params.delivery_time
   })
   return response as { success: boolean; message: string; quotation_name: string }
 }
@@ -37,9 +38,10 @@ export async function getPaymentMethods(): Promise<PaymentMethod[]> {
   return response as PaymentMethod[]
 }
 
-export async function placeOrderWithPayment(quotationName: string): Promise<OrderConfirmationResponse> {
+export async function placeOrderWithPayment(quotationName: string, paymentChannel?: string): Promise<OrderConfirmationResponse> {
   const response = await call('webshop.webshop.api.checkout.place_order_with_payment', {
-    quotation_name: quotationName
+    quotation_name: quotationName,
+    payment_channel: paymentChannel
   })
   return response as OrderConfirmationResponse
 }

@@ -11,6 +11,7 @@ interface Props {
   discount?: number
   hasDiscount?: boolean
   isInWishlist?: boolean
+  isSubscription?: boolean
 }
 
 const props = defineProps<Props>()
@@ -33,12 +34,17 @@ const formattedPrice = (price: number) => {
 <template>
   <div class="bg-white flex flex-col w-full h-full">
     <!-- Image Container -->
-    <div class="bg-gray-100 relative rounded-xl h-[294px] overflow-hidden">
+    <div class="bg-gray-100 relative rounded-xl aspect-square w-full overflow-hidden">
       <img
         :src="image"
         :alt="title"
         class="w-full h-full object-cover"
       />
+
+      <!-- Subscription Badge -->
+      <div v-if="isSubscription" class="absolute top-3 left-3 bg-purple-100 text-purple-600 px-2 py-1 rounded-md text-xs font-bold z-10 shadow-sm border border-purple-200">
+        Berlangganan
+      </div>
 
       <!-- Wishlist Button -->
       <button
@@ -130,9 +136,9 @@ const formattedPrice = (price: number) => {
       </p>
 
       <!-- View Detail Button -->
-       <router-link :to="`/products/${route}`">
+       <router-link :to="`/products/${route}`" class="mt-auto w-full">
         <button
-          class="w-full mt-auto border border-gray-300 rounded-xl h-12 flex items-center justify-center hover:border-gray-400 transition-colors"
+          class="w-full border border-gray-300 rounded-xl h-12 flex items-center justify-center hover:border-gray-400 transition-colors"
         >
           <span
             class="text-sm font-bold text-gray-900 capitalize"

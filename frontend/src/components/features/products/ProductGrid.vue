@@ -41,12 +41,12 @@ onMounted(() => {
     <!-- Loading State -->
     <div
       v-if="isLoading"
-      class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3"
+      class="grid grid-cols-2 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3"
       aria-label="Loading products"
     >
       <div v-for="i in 6" :key="i" class="animate-pulse">
         <div class="flex h-full flex-col overflow-hidden rounded-xl bg-gray-200">
-          <div class="h-[294px] bg-gray-300"></div>
+          <div class="h-[200px] md:h-[294px] bg-gray-300"></div>
           <div class="flex-1 space-y-4 p-6">
             <div class="h-4 rounded bg-gray-300"></div>
             <div class="h-6 rounded bg-gray-300"></div>
@@ -80,7 +80,7 @@ onMounted(() => {
     </div>
 
     <!-- Product Grid -->
-    <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
+    <div v-else class="grid grid-cols-2 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
       <template v-for="item in products" :key="item.name">
         <!-- Regular Product Card -->
         <ProductCard

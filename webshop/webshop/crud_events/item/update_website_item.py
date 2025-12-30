@@ -18,7 +18,10 @@ def execute(doc, method=None):
         doc_before_save = doc.get_doc_before_save()
 
         for field in editable_fields:
-            if doc_before_save.get(field) != doc.get(field):
+            old_value = doc_before_save.get(field) if doc_before_save else None
+            new_value = doc.get(field)
+            
+            if old_value != new_value:
                 if field == "disabled":
                     changed["published"] = not doc.get(field)
                 else:

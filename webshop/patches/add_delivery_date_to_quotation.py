@@ -19,9 +19,25 @@ def execute():
 		"Quotation": [
 			{
 				"fieldname": "delivery_date",
-				"fieldtype": "Datetime",
+				"fieldtype": "Date",
 				"label": "Delivery Date",
 				"insert_after": "transaction_date",
+				"depends_on": "eval:doc.order_type=='Shopping Cart'",
+			},
+			{
+				"fieldname": "delivery_time",
+				"fieldtype": "Time",
+				"label": "Delivery Time",
+				"insert_after": "delivery_date",
+				"depends_on": "eval:doc.order_type=='Shopping Cart'",
+			}
+		],
+		"Sales Order": [
+			{
+				"fieldname": "delivery_time",
+				"fieldtype": "Time",
+				"label": "Delivery Time",
+				"insert_after": "delivery_date",
 				"depends_on": "eval:doc.order_type=='Shopping Cart'",
 			}
 		]

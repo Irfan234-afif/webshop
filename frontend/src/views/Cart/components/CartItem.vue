@@ -35,6 +35,15 @@ const handleIncrement = () => {
 const handleRemove = () => {
   emit('remove', props.item.item_code, props.quotation_name)
 }
+
+const formatDate = (dateString?: string) => {
+  if (!dateString) return ''
+  return new Date(dateString).toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  })
+}
 </script>
 
 <template>
@@ -79,6 +88,9 @@ const handleRemove = () => {
           </p> -->
           <p v-for="variant in item.variant_attributes" class="text-xs font-bold text-gray-500">
             {{ variant.attribute }}: {{ variant.value }}
+          </p>
+          <p v-if="item.isSubscription && item.service_start_date" class="text-xs text-purple-600 font-medium mt-1">
+             Periode: {{ formatDate(item.service_start_date) }} - {{ formatDate(item.service_end_date) }}
           </p>
         </div>
         <p class="text-base font-bold text-primary">

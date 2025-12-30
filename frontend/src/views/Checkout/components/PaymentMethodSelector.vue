@@ -45,6 +45,43 @@
                   Syarat & Ketentuan.
                 </span>
               </p>
+
+              <!-- Channels Grid -->
+              <div v-if="method.payment_channels && method.payment_channels.length > 0 && selectedMethod === method.name" class="mt-4 grid grid-cols-2 gap-3">
+                <div
+                  v-for="channel in method.payment_channels"
+                  :key="channel.channel_code"
+                  class="channel-option p-3 border rounded-lg flex items-center gap-3 cursor-pointer transition-all"
+                  :class="{
+                    'border-primary bg-purple-50 ring-1 ring-primary': selectedChannel === channel.channel_code,
+                    'border-gray-200 hover:border-blue-300': selectedChannel !== channel.channel_code
+                  }"
+                  @click.stop="selectChannel(channel.channel_code)"
+                >
+                   <!-- Channel Icon -->
+                   <img 
+                      v-if="channel.icon" 
+                      :src="channel.icon" 
+                      :alt="channel.channel_name"
+                      class="w-8 h-8 object-contain"
+                   />
+                   <div v-else class="w-8 h-8 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-500">
+                      {{ channel.channel_code }}
+                   </div>
+
+                   <div class="flex-1 min-w-0">
+                      <p class="font-medium text-sm truncate">{{ channel.channel_name }}</p>
+                      <p v-if="channel.description" class="text-xs text-gray-500 truncate">{{ channel.description }}</p>
+                   </div>
+                   
+                   <!-- Checkmark -->
+                  <div v-if="selectedChannel === channel.channel_code" class="text-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -72,13 +109,15 @@ import { useCheckoutStore } from '@/stores/checkout'
 import { storeToRefs } from 'pinia'
 
 const checkoutStore = useCheckoutStore()
-const { paymentMethods, paymentMethodType } = storeToRefs(checkoutStore)
+const { paymentMethods, paymentMethodType, paymentChannel } = storeToRefs(checkoutStore)
 
 const selectedMethod = ref<string>(paymentMethodType.value || '')
+const selectedChannel = ref<string>(paymentChannel.value || '')
 
 // Watch for changes from store to local
-watch(paymentMethodType, (newVal) => {
-  selectedMethod.value = newVal || ''
+watch([paymentMethodType, paymentChannel], ([newType, newChannel]) => {
+  selectedMethod.value = newType || ''
+  selectedChannel.value = newChannel || ''
 })
 
 // Watch for local changes and sync to store
@@ -94,11 +133,27 @@ onMounted(async () => {
   }
 })
 
-function selectPaymentMethod(method: string) {
-  selectedMethod.value = method
-  // CRITICAL: Update store immediately so validation can pass
-  checkoutStore.paymentMethodType = method
-  console.log('✅ Payment method selected:', method)
+function selectPaymentMethod(methodName: string) {
+  selectedMethod.value = methodName
+  checkoutStore.paymentMethodType = methodName
+  
+  // If method has channels, don't clear channel yet unless switching methods
+  // But strictly, if we switch method, we should clear channel
+  // EXCEPT if we are re-clicking the same method
+  
+  const method = paymentMethods.value.find(m => m.name === methodName)
+  if (method && (!method.payment_channels || method.payment_channels.length === 0)) {
+     selectedChannel.value = ''
+     checkoutStore.paymentChannel = ''
+  }
+  
+  console.log('✅ Payment method selected:', methodName)
+}
+
+function selectChannel(channelCode: string) {
+  selectedChannel.value = channelCode
+  checkoutStore.paymentChannel = channelCode
+  console.log('✅ Payment channel selected:', channelCode)
 }
 
 // Icon components as simple SVG elements
@@ -166,7 +221,8 @@ function getIcon(iconName: string) {
 }
 
 defineExpose({
-  selectedMethod
+  selectedMethod,
+  selectedChannel
 })
 </script>
 

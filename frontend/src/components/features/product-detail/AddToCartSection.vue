@@ -15,13 +15,15 @@ interface Props {
   selectedVariant: ProductVariant | null
   maxQuantity?: number
   isOutOfStock?: boolean
+  isSubscriptionItem?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isAddingToCart: false,
   isTogglingWishlist: false,
   canAddToCart: true,
-  isOutOfStock: false
+  isOutOfStock: false,
+  isSubscriptionItem: false
 })
 
 const router = useRouter()
@@ -51,6 +53,7 @@ const handleAddToCart = () => {
 // Button text based on authentication status
 const buttonText = computed(() => {
   if (props.isOutOfStock) return 'Stok Habis'
+  if (props.isSubscriptionItem) return 'Langganan Sekarang'
   return isGuest.value ? 'Login untuk Belanja' : 'Masukkan Ke Keranjang'
 })
 </script>
@@ -58,24 +61,15 @@ const buttonText = computed(() => {
 <template>
   <div class="flex flex-col gap-4 md:flex-row md:items-center">
     <!-- Quantity Selector -->
-    <QuantitySelector
-      :model-value="quantity"
-      :max="maxQuantity"
+    <QuantitySelector :model-value="quantity" :max="maxQuantity"
       :disabled="isAddingToCart || isGuest || selectedVariant === null || isOutOfStock"
-      @update:model-value="emit('update:quantity', $event)"
-    />
+      @update:model-value="emit('update:quantity', $event)" />
 
     <!-- Wishlist Button -->
-    <WishlistButton
-      :is-in-wishlist="isInWishlist"
-      :is-loading="isTogglingWishlist"
-      @toggle="emit('toggleWishlist')"
-    />
+    <WishlistButton :is-in-wishlist="isInWishlist" :is-loading="isTogglingWishlist" @toggle="emit('toggleWishlist')" />
 
     <!-- Add to Cart Button -->
-    <button
-      type="button"
-      :disabled="!canAddToCart || isAddingToCart || (isGuest && !canAddToCart) || isOutOfStock"
+    <button type="button" :disabled="!canAddToCart || isAddingToCart || (isGuest && !canAddToCart) || isOutOfStock"
       :class="[
         'py-5 flex h-12 flex-1 items-center justify-center gap-2 rounded-xl px-6 text-sm font-bold text-white transition-all',
         isOutOfStock
@@ -85,29 +79,13 @@ const buttonText = computed(() => {
             : isGuest
               ? 'bg-[#8B1A73] hover:bg-[#7a1662] active:scale-95' // Different color for guest login button
               : 'cursor-not-allowed bg-gray-300'
-      ]"
-      @click="handleAddToCart"
-    >
+      ]" @click="handleAddToCart">
       <!-- Loading Spinner -->
-      <svg
-        v-if="isAddingToCart"
-        class="h-5 w-5 animate-spin"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          class="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          stroke-width="4"
-        ></circle>
-        <path
-          class="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-        ></path>
+      <svg v-if="isAddingToCart" class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+        </path>
       </svg>
 
       <!-- Button Text -->

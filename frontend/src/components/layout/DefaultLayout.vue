@@ -38,12 +38,7 @@ const handleOpenSearch = () => {
 <template>
   <div class="min-h-screen flex flex-col bg-white dark:bg-gray-900">
     <!-- Navbar -->
-    <Navbar
-      :store-name="storeName"
-      :links="navLinks"
-      :sticky="true"
-      @open-search="handleOpenSearch"
-    />
+    <Navbar :store-name="storeName" :links="navLinks" :sticky="true" @open-search="handleOpenSearch" />
 
     <!-- Main Content -->
     <SplashScreen v-if="authStore.isLoading" />
@@ -52,6 +47,6 @@ const handleOpenSearch = () => {
     </main>
 
     <!-- Footer -->
-    <Footer />
+    <Footer v-if="!authStore.isLoading" />
   </div>
 </template>

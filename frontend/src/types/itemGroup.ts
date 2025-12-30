@@ -23,6 +23,7 @@ export interface ApiProduct {
   in_stock: boolean
   in_cart: boolean
   wished: boolean
+  is_subscription_item: number
 }
 
 /**
@@ -42,6 +43,7 @@ export interface Product {
   discount?: number
   hasDiscount: boolean
   itemCode: string // Added for wishlist operations
+  isSubscription?: boolean
 }
 
 /**

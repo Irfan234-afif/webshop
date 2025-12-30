@@ -172,8 +172,9 @@ def request_for_quotation():
 
 
 @frappe.whitelist()
-def update_cart(item_code, qty, additional_notes=None, with_items=False, quotation_name=None):
+def update_cart(item_code, qty, service_start_date=None, additional_notes=None, with_items=False, quotation_name=None):
 	quotation = _get_cart_quotation(quotation_name=quotation_name)
+	# frappe.throw(f"_get_cart_quotation: {_get_cart_quotation(quotation_name=quotation_name)} quotation_name: {quotation_name}")
 
 	empty_card = False
 	qty = flt(qty)
@@ -203,6 +204,7 @@ def update_cart(item_code, qty, additional_notes=None, with_items=False, quotati
 				{
 					"doctype": "Quotation Item",
 					"item_code": item_code,
+					"service_start_date": service_start_date,
 					"qty": qty,
 					"additional_notes": additional_notes,
 					"warehouse": warehouse,
@@ -222,6 +224,9 @@ def update_cart(item_code, qty, additional_notes=None, with_items=False, quotati
 	else:
 		quotation.delete()
 		quotation = None
+
+		if not cint(with_items):
+			return
 
 	set_cart_count(quotation)
 
@@ -458,7 +463,7 @@ def _get_cart_quotation(party=None, quotation_name=None):
 		qdoc.flags.ignore_permissions = True
 		qdoc.run_method("set_missing_values")
 		apply_cart_settings(party, qdoc)
-
+		
 	return qdoc
 
 

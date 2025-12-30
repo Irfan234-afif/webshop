@@ -58,6 +58,9 @@ export interface CartItem {
   description?: string // Product description
   route?: string // Website item route
   warehouse?: string // Warehouse location
+  service_start_date?: string
+  service_end_date?: string
+  isSubscription?: number
 
   // Variant information
   variant_attributes?: VariantAttribute[] // Complete variant attributes array
@@ -79,6 +82,7 @@ export interface CartItem {
 export interface AddToCartPayload {
   item_code: string // ERPNext item code
   qty: number // Quantity to add
+  service_start_date?: string // Required for service items
   additional_notes?: string // Optional notes
   student?: string // Optional student name to add item to specific student's cart
 }

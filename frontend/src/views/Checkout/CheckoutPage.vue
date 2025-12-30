@@ -11,10 +11,7 @@
             <h2 class="text-xl font-semibold">{{ stepTitle }}</h2>
           </div>
           <!-- Close/Cancel Button -->
-          <button
-            @click="handleClose"
-            class="text-gray-400 hover:text-gray-600 transition-colors"
-          >
+          <button @click="handleClose" class="text-gray-400 hover:text-gray-600 transition-colors">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -24,10 +21,8 @@
         <!-- Progress Bar -->
         <div class="px-6 pt-4">
           <div class="w-full bg-gray-200 rounded-full h-2">
-            <div
-              class="bg-primary h-2 rounded-full transition-all duration-300"
-              :style="{ width: progressWidth }"
-            ></div>
+            <div class="bg-primary h-2 rounded-full transition-all duration-300" :style="{ width: progressWidth }">
+            </div>
           </div>
         </div>
 
@@ -39,25 +34,15 @@
         <!-- Content -->
         <div class="px-6 py-4 min-h-[400px]">
           <!-- Address Form (shown if no address) -->
-          <AddressForm
-            v-if="needsAddress"
-            :student-name="studentName"
-            @address-created="handleAddressCreated"
-          />
+          <AddressForm v-if="needsAddress" :student-name="studentName" @address-created="handleAddressCreated" />
 
           <!-- Regular checkout steps (shown if has address) -->
           <template v-else>
             <!-- Step 1: Pickup Type -->
-            <PickupTypeSelector
-              v-if="currentStep === 1"
-              ref="pickupTypeSelectorRef"
-            />
+            <PickupTypeSelector v-if="currentStep === 1" ref="pickupTypeSelectorRef" />
 
             <!-- Step 2: Payment Method -->
-            <PaymentMethodSelector
-              v-if="currentStep === 2"
-              ref="paymentMethodSelectorRef"
-            />
+            <PaymentMethodSelector v-if="currentStep === 2" ref="paymentMethodSelectorRef" />
 
             <!-- Step 3: Order Confirmation -->
             <OrderConfirmation v-if="currentStep === 3" />
@@ -78,21 +63,12 @@
         <div v-if="!needsAddress" class="border-t border-gray-200 p-6">
           <div class="flex gap-4">
             <!-- Back Button -->
-            <button
-              v-if="currentStep > 1"
-              @click="handleBack"
-              class="btn-secondary flex-1"
-              :disabled="isLoading"
-            >
+            <button v-if="currentStep > 1" @click="handleBack" class="btn-secondary flex-1" :disabled="isLoading">
               {{ backButtonText }}
             </button>
 
             <!-- Next/Confirm Button -->
-            <button
-              @click="handleNext"
-              class="btn-primary flex-1"
-              :disabled="!canProceed || isLoading"
-            >
+            <button @click="handleNext" class="btn-primary flex-1" :disabled="!canProceed || isLoading">
               {{ nextButtonText }}
             </button>
           </div>
@@ -250,13 +226,14 @@ async function handleNext() {
       // Save pickup type (data already synced to store via watchers)
       const selectedType = checkoutStore.pickupType
       const selectedDate = checkoutStore.deliveryDate
+      const selectedTime = checkoutStore.deliveryTime
 
-      if (!selectedType || !selectedDate) {
+      if (!selectedType || !selectedDate || !selectedTime) {
         return
       }
 
       // Save to backend
-      await checkoutStore.setPickupType(selectedType, selectedDate)
+      await checkoutStore.setPickupType(selectedType, selectedDate, selectedTime)
       checkoutStore.nextStep()
     } else if (currentStep.value === 2) {
       // Save payment method

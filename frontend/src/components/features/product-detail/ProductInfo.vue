@@ -3,7 +3,7 @@ import { computed, onMounted } from 'vue'
 import type { ProductDetail, ProductVariant, VariantAttribute } from '@/types/productDetail'
 import ProductRating from '@/components/common/ProductRating.vue'
 import ProductPricing from './ProductPricing.vue'
-import SizeSelector from './SizeSelector.vue'
+import ServiceField from './ServiceField.vue'
 import VariantSelector from './VariantSelector.vue'
 import AddToCartSection from './AddToCartSection.vue'
 
@@ -33,9 +33,10 @@ const emit = defineEmits<{
   'selectSize': [size: string]
   'selectVariant': [variant: VariantAttribute]
   'customize': []
-  'addToCart': []
+  'addToCart': [serviceStartDate?: string]
   'toggleWishlist': []
   'showLoginModal': []
+  'selectDate': [date: string]
 }>()
 
 // Check if size selection is required and valid
@@ -43,7 +44,7 @@ const canAddToCart = computed(() => {
   if (props.product.variants && props.product.variants.length > 0) {
     return props.selectedVariant !== null
   }
-  
+
   // If product has sizes, size must be selected
   // if (props.product.sizes && props.product.sizes.length > 0) {
   //   return props.selectedSize !== null
@@ -58,28 +59,26 @@ const displayPrice = computed(() => {
   if (props.selectedVariant) {
     return props.selectedVariant.price
   }
-  
+
   // If product has variants and a price range, return undefined to show range
   if (props.product.variants && props.product.variants.length > 0 && props.product.priceRange) {
     return undefined
   }
-  
+
   // Otherwise show product base price
   return props.product.price
 })
 
 // Check if product is globally out of stock
 const isOutOfStock = computed(() => {
-  if (props.product.type === 'service') return false
-
   // For products with variants
   if (props.product.variants && props.product.variants.length > 0) {
-    // Check if ALL variants have 0 stock
-    return props.product.variants.every(variant => (variant.stockQuantity || 0) <= 0)
+    // Check if ALL variants are out of stock
+    return props.product.variants.every(variant => !variant.inStock)
   }
 
   // For simple products
-  return (props.product.stockQuantity || 0) <= 0
+  return !props.product.inStock
 })
 
 // Info notes for discounts (displayed after pricing)
@@ -107,11 +106,7 @@ const infoNotes = computed(() => {
     </div>
 
     <!-- Rating -->
-    <ProductRating
-      :rating="product.rating"
-      :review-count="product.reviewCount"
-      size="md"
-    />
+    <ProductRating :rating="product.rating" :review-count="product.reviewCount" size="md" />
 
     <!-- Title and Description -->
     <div class="flex flex-col gap-5">
@@ -124,20 +119,16 @@ const infoNotes = computed(() => {
     </div>
 
     <!-- Pricing Section -->
-    <ProductPricing
-      v-if="product.type === 'product'"
-      :price="displayPrice"
-      :price-range="product.priceRange"
-      :original-price="product.originalPrice"
-      :discount="product.discountPercent"
-      :has-discount="product.hasDiscount"
-      :offers="product.offers"
-    />
-    <div v-else-if="product.type === 'service'" class="flex flex-col gap-4">
+    <ProductPricing :price="displayPrice" :price-range="product.priceRange" :original-price="product.originalPrice"
+      :discount="product.discountPercent" :has-discount="product.hasDiscount" :offers="product.offers" />
+
+    <!-- Service Field -->
+    <ServiceField v-if="product.is_subscription_item" @select-date="emit('selectDate', $event)" />
+    <!-- <div v-else-if="product.type === 'service'" class="flex flex-col gap-4">
       <p class="text-xl font-bold capitalize text-primary">
         {{ product.priceLabel }}
       </p>
-      <!-- Service Info Notes -->
+      Service Info Notes
       <div v-if="product.infoNotes && product.infoNotes.length > 0" class="flex flex-col gap-2">
         <div
           v-for="(note, index) in product.infoNotes"
@@ -152,17 +143,13 @@ const infoNotes = computed(() => {
           </span>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- Variant Selector (Only for products with variants) -->
-    <VariantSelector
-      v-if="product.type === 'product' && product.attributes && product.attributes.length > 0"
-      :variants="product.attributes"
-      :selected-variant="selectedVariant"
-      :has-variant-stock="hasVariantStock"
-      :some-selected-variant="someSelectedVariant"
-      @select-variant="emit('selectVariant', $event)"
-    />
+    <VariantSelector v-if="product.attributes && product.attributes.length > 0" :variants="product.attributes"
+      :is-service="product.is_subscription_item" :selected-variant="selectedVariant"
+      :has-variant-stock="hasVariantStock" :some-selected-variant="someSelectedVariant"
+      @select-variant="emit('selectVariant', $event)" />
 
     <!-- Size Selector (Only for products with sizes and no variants) -->
     <!-- <SizeSelector
@@ -181,19 +168,11 @@ const infoNotes = computed(() => {
 
 
     <!-- Add to Cart Section -->
-    <AddToCartSection
-      :quantity="quantity"
-      :is-in-wishlist="isInWishlist"
-      :is-adding-to-cart="isAddingToCart"
-      :is-toggling-wishlist="isTogglingWishlist"
-      :can-add-to-cart="canAddToCart"
-      :max-quantity="product.stockQuantity"
-      :selected-variant="selectedVariant"
-      :is-out-of-stock="isOutOfStock"
-      @update:quantity="emit('update:quantity', $event)"
-      @add-to-cart="emit('addToCart')"
-      @toggle-wishlist="emit('toggleWishlist')"
-      @show-login-modal="emit('showLoginModal')"
-    />
+    <AddToCartSection :quantity="quantity" :is-in-wishlist="isInWishlist" :is-adding-to-cart="isAddingToCart"
+      :is-toggling-wishlist="isTogglingWishlist" :can-add-to-cart="canAddToCart" :max-quantity="product.stockQuantity"
+      :selected-variant="selectedVariant" :is-out-of-stock="isOutOfStock"
+      :is-subscription-item="product.is_subscription_item" @update:quantity="emit('update:quantity', $event)"
+      @add-to-cart="emit('addToCart')" @toggle-wishlist="emit('toggleWishlist')"
+      @show-login-modal="emit('showLoginModal')" />
   </div>
 </template>

@@ -19,7 +19,8 @@
   "need_admin_approval",
   "enabled",
   "icon",
-  "sort_order"
+  "sort_order",
+  "payment_channels"
  ],
  "fields": [
   {
@@ -110,6 +111,13 @@
    "label": "Payment Duration",
    "mandatory_depends_on": "eval:doc.payment_type == 'Transfer Manual'",
    "options": "Bank Account"
+  },
+  {
+   "fieldname": "payment_channels",
+   "fieldtype": "Table",
+   "label": "Payment Channels",
+   "options": "Webshop Payment Channel",
+   "depends_on": "eval:doc.payment_type == 'Payment Gateway'"
   }
  ],
  "links": [],

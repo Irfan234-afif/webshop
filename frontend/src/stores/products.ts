@@ -11,6 +11,11 @@ export const useProductsStore = defineStore('products', () => {
   const categories = ref<{name: string, item_group_name: string}[]>([])
   const isLoading = ref(false)
   const error = ref<Error | null>(null)
+  
+  // Pagination State
+  const hasMore = ref(true)
+  const nextStart = ref(0)
+  const pageLength = ref(12)
 
   // Active Filters (synced with URL query params)
   const activeFilters = ref<ProductFilters>({
@@ -78,7 +83,9 @@ export const useProductsStore = defineStore('products', () => {
     }
   }
 
-  const fetchProducts = async () => {
+  const fetchProducts = async ({ loadMore = false } = {}) => {
+    if (isLoading.value) return
+
     isLoading.value = true
     error.value = null
     
@@ -88,6 +95,14 @@ export const useProductsStore = defineStore('products', () => {
     }
 
     try {
+      // Reset if not loading more
+      if (!loadMore) {
+        nextStart.value = 0
+        hasMore.value = true
+        // temporary clear provided we aren't appending
+        // allProducts.value = [] // Optional: clear immediately or wait for response to avoid flicker
+      }
+
       // Calculate price params
       let priceMin: number | undefined
       let priceMax: number | undefined
@@ -117,7 +132,8 @@ export const useProductsStore = defineStore('products', () => {
       }
 
       const params: any = {
-           page_length: 1000
+           start: nextStart.value,
+           page_length: pageLength.value
       }
 
       if (activeFilters.value.categories.length > 0) {
@@ -138,7 +154,24 @@ export const useProductsStore = defineStore('products', () => {
         params
       })
       
-      allProducts.value = response.items
+      const newItems = response.items || []
+      const pagination = response.pagination || {}
+
+      if (loadMore) {
+        allProducts.value = [...allProducts.value, ...newItems]
+      } else {
+        allProducts.value = newItems
+      }
+
+      // Update pagination state
+      if (pagination.next_start !== undefined) {
+          nextStart.value = pagination.next_start
+          hasMore.value = pagination.has_more
+      } else {
+          // Fallback if backend doesn't return standard pagination object
+          hasMore.value = newItems.length === pageLength.value
+          nextStart.value += newItems.length
+      }
       
     } catch (e) {
       error.value = e as Error
@@ -195,6 +228,8 @@ export const useProductsStore = defineStore('products', () => {
 
     availablePriceRanges,
     hasActiveFilters,
+    hasMore,
+    nextStart,
     // Actions
     fetchProducts,
     setFilters,

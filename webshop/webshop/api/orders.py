@@ -128,6 +128,67 @@ def get_orders(search_text=None, status=None, student=None, tab="orders", start=
 				
 			for order in orders:
 				order.items = items_map.get(order.name, [])
+			
+			# Fetch Delivery Note Image for history orders (completed/shipped)
+			if tab == "history" or filters.get("status") == "Completed":
+				# Find Delivery Note Items linked to these orders
+				dn_items = frappe.get_all(
+					"Delivery Note Item",
+					filters={
+						"against_sales_order": ["in", order_names],
+						"docstatus": 1
+					},
+					fields=["parent", "against_sales_order", "item_code"]
+				)
+				
+				if dn_items:
+					dn_names = list(set([d.parent for d in dn_items]))
+					
+					# Get Delivery Notes with image
+					delivery_notes = frappe.get_all(
+						"Delivery Note",
+						filters={"name": ["in", dn_names]},
+						fields=["name", "image"],
+						order_by="creation desc"
+					)
+					
+					dn_image_map = {d.name: d.image for d in delivery_notes}
+					
+					# Map Sales Order -> Delivery Note Image (use latest DN if multiple)
+					so_dn_map = {}
+					for item in dn_items:
+						if item.against_sales_order not in so_dn_map:
+							# Since we don't have easy linking here without more queries or logic,
+							# let's try to map the first one found or rely on the order?
+							# Better approach: Group DNs by SO.
+							pass
+					
+					# Re-map: specific logic
+					# We have list of DN items. We want the image from the DN that contains items from this SO.
+					# A SO can have multiple DNs. We'll pick the latest one that has an image.
+					
+					# Create a map of SO -> List of DN names
+					so_to_dns = {}
+					for item in dn_items:
+						if item.against_sales_order not in so_to_dns:
+							so_to_dns[item.against_sales_order] = set()
+						so_to_dns[item.against_sales_order].add(item.parent)
+						
+					# Assign image to order
+					for order in orders:
+						if order.name in so_to_dns:
+							# Check associated DNs for an image
+							associated_dns = so_to_dns[order.name]
+							# Find the first DN that has an image (checking in order of creation desc if possible, but our dn_names list is just names)
+							# We have `delivery_notes` ordered by creation desc.
+							found_image = None
+							for dn in delivery_notes:
+								if dn.name in associated_dns and dn.image:
+									found_image = dn.image
+									break # Found latest DN with image
+							
+							if found_image:
+								order.delivery_image = found_image
 
 		return {"orders": orders}
 
@@ -225,6 +286,13 @@ def get_order_details(order_name):
 			"items": items,
 			"currency": order.currency
 		}
+		
+		# Fetch Delivery Note Image
+		dn = frappe.db.get_value("Delivery Note Item", {"against_sales_order": order_name}, "parent")
+		if dn:
+			image = frappe.db.get_value("Delivery Note", dn, "image")
+			if image:
+				order_data["delivery_image"] = image
 
 		return order_data
 

@@ -39,6 +39,7 @@
   "column_break_27",
   "website_specifications",
   "copy_from_item_group",
+  "key_features",
   "display_additional_information_section",
   "show_tabbed_section",
   "tabs",
@@ -355,6 +356,12 @@
    "fieldname": "on_backorder",
    "fieldtype": "Check",
    "label": "On Backorder"
+  },
+  {
+   "fieldname": "key_features",
+   "fieldtype": "Table",
+   "label": "Key Features",
+   "options": "Item Website Key Features"
   }
  ],
  "has_web_view": 1,
@@ -362,7 +369,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "make_attachments_public": 1,
- "modified": "2025-12-20 12:30:00.000000",
+ "modified": "2025-12-25 17:48:46.557614",
  "modified_by": "Administrator",
  "module": "Webshop",
  "name": "Website Item",
@@ -418,6 +425,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "web_item_name, item_code, item_group",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
