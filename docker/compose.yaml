@@ -1,5 +1,5 @@
 x-customizable-image: &customizable_image
-  image: irfan33/koperasi-webshop:latest
+  image: irfan33/koperasi-webshop:sha256:d9bc12465031c05f20931f3abe88c359428507d74e1cc7b6e244755be47424a0
   pull_policy: ${PULL_POLICY:-always}
   restart: ${RESTART_POLICY:-unless-stopped}
 
