@@ -64,42 +64,121 @@ def remove_ecommerce_settings_doctype():
 
 def add_custom_fields():
 	custom_fields = {
-		# "Quotation": [
-		# 	{
-		# 		"fieldname": "school_section",
-		# 		"fieldtype": "Section Break",
-		# 		"label": "School Information",
-		# 		"insert_after": "party_name",
-		# 		"depends_on": "eval:doc.order_type=='Shopping Cart'",
-		# 		"collapsible": 1,
-		# 	},
-		# 	{
-		# 		"fieldname": "student",
-		# 		"fieldtype": "Link",
-		# 		"label": "Student",
-		# 		"options": "Student",
-		# 		"insert_after": "school_section",
-		# 		"read_only": 1,
-		# 		"depends_on": "eval:doc.order_type=='Shopping Cart'",
-		# 	}
-		# ],
-		# "Sales Order": [
-		# 	{
-		# 		"fieldname": "school_section",
-		# 		"fieldtype": "Section Break",
-		# 		"label": "School Information",
-		# 		"insert_after": "customer",
-		# 		"collapsible": 1,
-		# 	},
-		# 	{
-		# 		"fieldname": "student",
-		# 		"fieldtype": "Link",
-		# 		"label": "Student",
-		# 		"options": "Student",
-		# 		"insert_after": "school_section",
-		# 		"read_only": 1,
-		# 	}
-		# ],
+		"Quotation": [
+			{
+				"fieldname": "school_section",
+				"fieldtype": "Section Break",
+				"label": "School Information",
+				"insert_after": "party_name",
+				"depends_on": "eval:doc.order_type=='Shopping Cart'",
+				"collapsible": 1
+			},
+			{
+				"fieldname": "student",
+				"fieldtype": "Link",
+				"label": "Student",
+				"options": "Student",
+				"insert_after": "school_section",
+				"read_only": 1,
+				"depends_on": "eval:doc.order_type=='Shopping Cart'"
+			},
+			{
+				"fieldname": "delivery_date",
+				"fieldtype": "Date",
+				"label": "Delivery Date",
+				"insert_after": "transaction_date",
+				"depends_on": "eval:doc.order_type=='Shopping Cart'"
+			},
+			{
+				"fieldname": "delivery_time",
+				"fieldtype": "Time",
+				"label": "Delivery Time",
+				"insert_after": "delivery_date",
+				"depends_on": "eval:doc.order_type=='Shopping Cart'"
+			},
+			{
+				"fieldname": "checkout_section",
+				"fieldtype": "Section Break",
+				"label": "Checkout Information",
+				"insert_after": "student",
+				"depends_on": "eval:doc.order_type=='Shopping Cart'",
+				"collapsible": 1
+			},
+			{
+				"fieldname": "pickup_type",
+				"fieldtype": "Select",
+				"label": "Jenis Pengambilan",
+				"options": "\nAmbil di koperasi\nAmbil secara online",
+				"insert_after": "checkout_section",
+				"depends_on": "eval:doc.order_type=='Shopping Cart'"
+			},
+			{
+				"fieldname": "column_break_checkout",
+				"fieldtype": "Column Break",
+				"insert_after": "pickup_type"
+			},
+			{
+				"fieldname": "payment_method_type",
+				"fieldtype": "Link",
+				"label": "Metode Pembayaran",
+				"options": "Webshop Payment Method",
+				"insert_after": "column_break_checkout",
+				"depends_on": "eval:doc.order_type=='Shopping Cart'"
+			}
+		],
+		"Sales Order": [
+			{
+				"fieldname": "school_section",
+				"fieldtype": "Section Break",
+				"label": "School Information",
+				"insert_after": "customer",
+				"collapsible": 1
+			},
+			{
+				"fieldname": "student",
+				"fieldtype": "Link",
+				"label": "Student",
+				"options": "Student",
+				"insert_after": "school_section",
+				"read_only": 1
+			},
+			{
+				"fieldname": "delivery_time",
+				"fieldtype": "Time",
+				"label": "Delivery Time",
+				"insert_after": "delivery_date",
+				"depends_on": "eval:doc.order_type=='Shopping Cart'",
+				"read_only": 1
+			},
+			{
+				"fieldname": "checkout_section",
+				"fieldtype": "Section Break",
+				"label": "Checkout Information",
+				"insert_after": "student",
+				"collapsible": 1
+			},
+			{
+				"fieldname": "pickup_type",
+				"fieldtype": "Select",
+				"label": "Jenis Pengambilan",
+				"options": "\nAmbil di koperasi\nAmbil secara online",
+				"insert_after": "checkout_section",
+				"read_only": 1
+			},
+			{
+				"fieldname": "column_break_checkout",
+				"fieldtype": "Column Break",
+				"insert_after": "pickup_type"
+			},
+			{
+				"fieldname": "payment_method_type",
+				"fieldtype": "Link",
+				"label": "Metode Pembayaran",
+				"options": "Webshop Payment Method",
+				"insert_after": "column_break_checkout",
+				"read_only": 1
+			}
+		],
 		"Item": [
 			{
 				"default": 0,
@@ -111,6 +190,26 @@ def add_custom_fields():
 				"label": "Published In Website",
 				"read_only": 1,
 				"no_copy": 1,
+			},
+			{
+				"fieldname": "subscription_config_section",
+				"fieldtype": "Section Break",
+				"label": "Subscription Config",
+				"insert_after": "image"
+			},
+			{
+				"fieldname": "is_subscription_item",
+				"fieldtype": "Check",
+				"label": "Is Subscription Item",
+				"insert_after": "subscription_config_section"
+			},
+			{
+				"fieldname": "subscription_plan",
+				"fieldtype": "Link",
+				"options": "Subscription Plan",
+				"label": "Subscription Plan",
+				"depends_on": "is_subscription_item",
+				"insert_after": "is_subscription_item"
 			}
 		],
 		"Item Group": [
@@ -213,29 +312,108 @@ def add_custom_fields():
 				"insert_after": "filter_fields",
 			},
 		],
-		# "Payment Request": [
-		# 	{
-		# 		"fieldname": "payment_channel_code",
-		# 		"fieldtype": "Data",
-		# 		"label": "Payment Channel Code",
-		# 		"read_only": 1,
-		# 		"insert_after": "payment_channel"
-		# 	},
-		# 	{
-		# 		"fieldname": "virtual_account_number",
-		# 		"fieldtype": "Data",
-		# 		"label": "Virtual Account Number",
-		# 		"read_only": 1,
-		# 		"insert_after": "payment_channel_code"
-		# 	},
-		# 	{
-		# 		"fieldname": "virtual_account_bank",
-		# 		"fieldtype": "Data",
-		# 		"label": "Virtual Account Bank",
-		# 		"read_only": 1,
-		# 		"insert_after": "virtual_account_number"
-		# 	}
-		# ]
+		"Payment Request": [
+			{
+				"fieldname": "webshop_approval_section",
+				"fieldtype": "Section Break",
+				"label": "Webshop Approval Details",
+				"insert_after": "payment_url",
+				"collapsible": 1
+			},
+			{
+				"fieldname": "payment_proof",
+				"fieldtype": "Attach",
+				"label": "Payment Proof",
+				"insert_after": "webshop_approval_section",
+				"description": "Upload proof of payment (bank transfer receipt, etc.)"
+			},
+			{
+				"fieldname": "column_break_webshop",
+				"fieldtype": "Column Break",
+				"insert_after": "payment_proof"
+			},
+			{
+				"fieldname": "remarks",
+				"fieldtype": "Text",
+				"label": "Remarks",
+				"insert_after": "column_break_webshop",
+				"description": "Admin notes or rejection reasons"
+			},
+			{
+				"fieldname": "approval_metadata_section",
+				"fieldtype": "Section Break",
+				"label": "Approval Metadata",
+				"insert_after": "remarks",
+				"collapsible": 1,
+				"depends_on": "eval:doc.docstatus > 0"
+			},
+			{
+				"fieldname": "admin_approval_by",
+				"fieldtype": "Link",
+				"label": "Approved/Rejected By",
+				"options": "User",
+				"insert_after": "approval_metadata_section",
+				"read_only": 1
+			},
+			{
+				"fieldname": "admin_approval_time",
+				"fieldtype": "Datetime",
+				"label": "Approval/Rejection Time",
+				"insert_after": "admin_approval_by",
+				"read_only": 1
+			},
+			{
+				"fieldname": "payment_channel_code",
+				"fieldtype": "Data",
+				"label": "Payment Channel Code",
+				"read_only": 1,
+				"insert_after": "payment_channel"
+			},
+			{
+				"fieldname": "virtual_account_number",
+				"fieldtype": "Data",
+				"label": "Virtual Account Number",
+				"read_only": 1,
+				"insert_after": "payment_channel_code"
+			},
+			{
+				"fieldname": "virtual_account_bank",
+				"fieldtype": "Data",
+				"label": "Virtual Account Bank",
+				"read_only": 1,
+				"insert_after": "virtual_account_number"
+			}
+		],
+		"Subscription": [
+			{
+				"fieldname": "sales_order_ref",
+				"fieldtype": "Link",
+				"options": "Sales Order",
+				"label": "Source Sales Order",
+				"read_only": 1,
+				"insert_after": "party"
+			}
+		],
+		"Subscription Plan": [
+			{
+				"fieldname": "billing_timing",
+				"fieldtype": "Select",
+				"label": "Billing Timing",
+				"options": "Pre-Paid\nPost-Paid",
+				"default": "Pre-Paid",
+				"insert_after": "billing_interval_count",
+				"description": "Pre-Paid: Subscription starts AFTER initial period. Post-Paid: Subscription starts IMMEDIATELY.",
+				"reqd": 1
+			},
+			{
+				"fieldname": "use_fixed_period",
+				"label": "Use Fixed Period",
+				"fieldtype": "Check",
+				"insert_after": "billing_interval_count",
+				"description": "If checked, subscription will use the Subscription End Date as invoice end date instead of calculating from billing interval. Useful for one-time fixed period subscriptions (e.g., catering service for specific date range).",
+				"default": 0
+			}
+		]
 	}
 
 	frappe.make_property_setter(

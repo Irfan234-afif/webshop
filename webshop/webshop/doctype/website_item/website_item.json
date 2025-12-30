@@ -21,6 +21,9 @@
   "column_break_11",
   "description",
   "brand",
+  "subscription_config_section",
+  "is_subscription_item",
+  "subscription_plan",
   "display_section",
   "website_image",
   "website_image_alt",
@@ -362,7 +365,24 @@
    "fieldtype": "Table",
    "label": "Key Features",
    "options": "Item Website Key Features"
-  }
+  },
+  {
+        "fieldname": "subscription_config_section",
+        "fieldtype": "Section Break",
+        "label": "Subscription Config"
+    },
+    {
+        "fieldname": "is_subscription_item",
+        "fieldtype": "Check",
+        "label": "Is Subscription Item"
+    },
+    {
+        "fieldname": "subscription_plan",
+        "fieldtype": "Link",
+        "options": "Subscription Plan",
+        "label": "Subscription Plan",
+        "depends_on": "is_subscription_item"
+    }
  ],
  "has_web_view": 1,
  "image_field": "website_image",
