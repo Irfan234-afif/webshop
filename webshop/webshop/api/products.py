@@ -187,36 +187,30 @@ def get_product_detail(route):
 def get_item_variants(item_code):
     """
     Get all variants for a template item with their attributes and pricing.
-
     Args:
         item_code: Template item code
 
     Returns:
-        list: List of variant dictionaries with attributes and stock info
+        tuple: (variants list, attributes list)
+            - variants: List of variant dictionaries with attributes, pricing, and stock
+            - attributes: List of available attributes with their values
     """
     from webshop.webshop.shopping_cart.cart import _set_price_list, get_party
     from webshop.webshop.doctype.webshop_settings.webshop_settings import get_shopping_cart_settings
 
-    # Get all published variants
-    # variants_list = frappe.get_all(
-    #     "Website Item",
-    #     filters={
-    #         "variant_of": item_code,
-    #         "published": 1
-    #     },
-    #     fields=["name", "item_code", "web_item_name", "website_image"]
-    # )
+    # Get all enabled variants
     variants_list = frappe.get_all(
         "Item",
         filters={"variant_of": item_code, "disabled": 0},
-        fields=["name", "item_name", "item_code", "stock_uom", "sales_uom"],
+        fields=["name", "item_name", "item_code", "stock_uom", "sales_uom", "is_stock_item"],
     )
+
+    if not variants_list:
+        return [], []
 
     cart_settings = get_shopping_cart_settings()
     variants = []
-    attributes_detail = (
-        {}
-    )
+    attributes_detail = {}
     
     variant_codes = [v.item_code for v in variants_list]
     variant_attributes = frappe.get_all(
@@ -234,7 +228,7 @@ def get_item_variants(item_code):
         attributes_by_variant[attr.parent].append(
             {"attribute": attr.attribute, "attribute_value": attr.attribute_value}
         )
-        # Collect attribute values (unique)
+        # Collect unique attribute values for frontend filter
         if attr.attribute not in attributes_detail:
             attributes_detail[attr.attribute] = set()
         attributes_detail[attr.attribute].add(attr.attribute_value)
@@ -242,63 +236,75 @@ def get_item_variants(item_code):
     # Format attributes detail for frontend
     attributes_list = []
     for attr_name, attr_values in attributes_detail.items():
-        # Convert set to sorted list of dicts with unique values
         unique_values = sorted(list(attr_values))
-        values_list = [value for value in unique_values]
-        attributes_list.append({"attribute": attr_name, "values": values_list})
+        attributes_list.append({"attribute": attr_name, "values": unique_values})
 
+    prices_map = {}
+    if cart_settings and cart_settings.enabled and cart_settings.show_price:
+        is_guest = frappe.session.user == "Guest"
+        if not is_guest or not cart_settings.hide_price_for_guest:
+            price_list = _set_price_list(cart_settings, None)
+            party = get_party()
+            
+            # Batch fetch prices for all variants
+            price_data = frappe.get_all(
+                "Item Price",
+                filters={
+                    "item_code": ["in", variant_codes],
+                    "price_list": price_list,
+                    "selling": 1
+                },
+                fields=["item_code", "price_list_rate"],
+                order_by="valid_from desc"
+            )
+            
+            # Map prices by item_code (take first/latest price)
+            for price in price_data:
+                if price.item_code not in prices_map:
+                    prices_map[price.item_code] = flt(price.price_list_rate)
+
+    stock_map = {}
+    bin_data = frappe.get_all(
+        "Bin",
+        filters={"item_code": ["in", variant_codes]},
+        fields=["item_code", "actual_qty", "warehouse"],
+    )
+    
+    # Aggregate stock by item_code (sum across warehouses)
+    for bin_item in bin_data:
+        if bin_item.item_code not in stock_map:
+            stock_map[bin_item.item_code] = 0
+        stock_map[bin_item.item_code] += flt(bin_item.actual_qty)
+
+    # Build variant data using pre-fetched data (no more queries in loop!)
     for variant in variants_list:
-        # Get variant attributes
-        attributes = frappe.get_all(
-            "Item Variant Attribute",
-            filters={"parent": variant.item_code},
-            fields=["attribute", "attribute_value"]
-        )
+        # Use already-fetched attributes instead of querying again
+        attributes = attributes_by_variant.get(variant.item_code, [])
+
+        # Determine stock status based on whether item maintains stock
+        is_stock_item = variant.get("is_stock_item", 1)
+        if is_stock_item:
+            # For stock items, check actual stock quantity
+            in_stock = stock_map.get(variant.item_code, 0) > 0
+            stock_qty = stock_map.get(variant.item_code, 0)
+        else:
+            # For non-stock items (services, digital goods, etc.), always in stock
+            in_stock = True
+            stock_qty = 0
 
         # Build variant data
         variant_data = {
             "id": variant.name,
             "item_code": variant.item_code,
             "sku": variant.item_code,
-            "inStock": True,
-            "stockQuantity": 0
+            "attributes": attributes,
+            "inStock": in_stock,
+            "stockQuantity": stock_qty
         }
-        
-        variant_data["attributes"] = attributes
 
-        # Extract size and color from attributes
-        # for attr in attributes:
-        #     variant_data[attr.attribute] = attr.attribute_value
-            # if attr.attribute.lower() in ["size", "ukuran"]:
-            #     variant_data["size"] = attr.attribute_value
-            # elif attr.attribute.lower() in ["color", "warna", "colour"]:
-            #     variant_data["color"] = attr.attribute_value
-
-        # Get price for this variant
-        if cart_settings and cart_settings.enabled and cart_settings.show_price:
-            is_guest = frappe.session.user == "Guest"
-            if not is_guest or not cart_settings.hide_price_for_guest:
-                price_list = _set_price_list(cart_settings, None)
-                party = get_party()
-                price_info = get_price(
-                    variant.item_code,
-                    price_list,
-                    cart_settings.default_customer_group,
-                    cart_settings.company,
-                    party=party
-                )
-                if price_info:
-                    variant_data["price"] = flt(price_info.get("price_list_rate", 0))
-
-        # Get stock info
-        product_info = get_product_info_for_website(variant.item_code, skip_quotation_creation=True)
-        if product_info and product_info.product_info:
-            variant_data["inStock"] = product_info.product_info.get("in_stock", False)
-            variant_data["stockQuantity"] = flt(product_info.product_info.get("stock_qty", 0))
-
-        # Add image if available
-        if variant.website_image:
-            variant_data["image"] = variant.website_image
+        # Use pre-fetched price
+        if variant.item_code in prices_map:
+            variant_data["price"] = prices_map[variant.item_code]
 
         variants.append(variant_data)
 
