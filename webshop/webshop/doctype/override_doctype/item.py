@@ -173,3 +173,122 @@ def generate_variant_prices(
 		"failed": failed,
 		"total": len(variants),
 	}
+
+
+@frappe.whitelist()
+def generate_subscription_plans(
+	template_item,
+	price_list,
+	division_factor=1,
+	billing_interval="Month",
+	billing_timing="Post-Paid",
+	use_fixed_period=0,
+):
+	"""Generate Subscription Plan records for all variants of a template item"""
+
+	if not frappe.has_permission("Subscription Plan", "write"):
+		frappe.throw(_("No Permission to create Subscription Plan"))
+
+	# Validate inputs
+	if not template_item:
+		frappe.throw(_("Template Item is required"))
+	if not price_list:
+		frappe.throw(_("Price List is required"))
+	
+	try:
+		division_factor = float(division_factor)
+	except ValueError:
+		frappe.throw(_("Division Factor must be a number"))
+
+	if division_factor <= 0:
+		frappe.throw(_("Division Factor must be greater than 0"))
+
+	# Get all variants
+	variants = get_item_variants(template_item)
+	if not variants:
+		frappe.throw(_("No variants found for template item {0}").format(template_item))
+
+	created = 0
+	failed = 0
+
+	# Generate plans for each variant
+	for variant_item_code in variants:
+		try:
+			# 1. Get Item Price
+			item_price = frappe.db.get_value(
+				"Item Price",
+				{"item_code": variant_item_code, "price_list": price_list},
+				"price_list_rate",
+			)
+
+			if not item_price:
+				# Skip if no price found
+				continue
+
+			# 2. Calculate Cost
+			plan_cost = item_price / division_factor
+
+			# 3. Create or Update Subscription Plan
+			# Check existing plan for this item and interval
+			existing_plan = frappe.db.get_value(
+				"Subscription Plan",
+				{
+					"item": variant_item_code, 
+					"billing_interval": billing_interval,
+					"billing_interval_count": 1
+				},
+				"name"
+			)
+
+			if existing_plan:
+				plan_doc = frappe.get_doc("Subscription Plan", existing_plan)
+				plan_doc.cost = plan_cost
+				plan_doc.billing_timing = billing_timing
+				plan_doc.use_fixed_period = use_fixed_period
+				plan_doc.save(ignore_permissions=True)
+				
+				# Update Item with this plan
+				frappe.db.set_value("Item", variant_item_code, "subscription_plan", existing_plan)
+				
+				created += 1
+			else:
+				variant_item = frappe.db.get_value("Item", variant_item_code, "item_name")
+				plan_name = f"{variant_item} - {billing_interval}"
+				
+				new_plan = frappe.new_doc("Subscription Plan")
+				new_plan.plan_name = plan_name
+				new_plan.item = variant_item_code
+				new_plan.price_determination = "Fixed Rate"
+				new_plan.cost = plan_cost
+				new_plan.billing_interval = billing_interval
+				new_plan.billing_interval_count = 1
+				new_plan.billing_timing = billing_timing # Custom field
+				new_plan.use_fixed_period = use_fixed_period
+				
+				# Fetch currency from Price List if not set (Subscription Plan usually inherits or has currency)
+				# Standard Subscription Plan might not have currency field directly, usually it's in the Plan or derived.
+				# Checking schema, usually it has currency.
+				price_list_currency = frappe.db.get_value("Price List", price_list, "currency")
+				if price_list_currency:
+					new_plan.currency = price_list_currency
+
+				new_plan.insert(ignore_permissions=True)
+				
+				# Update Item with this plan
+				frappe.db.set_value("Item", variant_item_code, "subscription_plan", new_plan.name)
+				
+				created += 1
+
+		except Exception as e:
+			frappe.log_error(
+				title=_("Error creating subscription plan for variant {0}").format(variant_item_code),
+				message=str(e),
+			)
+			failed += 1
+			continue
+
+	return {
+		"created": created,
+		"failed": failed,
+		"total": len(variants),
+	}

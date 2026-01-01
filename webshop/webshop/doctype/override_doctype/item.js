@@ -7,6 +7,16 @@ frappe.ui.form.on("Item", {
             },
             __("Actions")
         );
+
+        if (frm.doc.has_variants) {
+            frm.add_custom_button(
+                __("Generate Subscription Plans"),
+                function () {
+                    erpnext.item.show_generate_subscription_plans_dialog(frm);
+                },
+                __("Actions")
+            );
+        }
     }
 })
 
@@ -173,4 +183,137 @@ $.extend(erpnext.item, {
             },
         });
     },
+
+    show_generate_subscription_plans_dialog: function (frm) {
+        frappe.call({
+            method: "webshop.webshop.doctype.override_doctype.item.get_item_variants",
+            args: {
+                item_code: frm.doc.name,
+            },
+            callback: function (r) {
+                if (!r.message || r.message.length === 0) {
+                    frappe.msgprint({
+                        message: __("No variants found for this item template."),
+                        indicator: "orange",
+                        title: __("No Variants"),
+                    });
+                    return;
+                }
+
+                let variant_count = r.message.length;
+                let dialog = new frappe.ui.Dialog({
+                    title: __("Generate Subscription Plans"),
+                    fields: [
+                        {
+                            fieldtype: "HTML",
+                            fieldname: "info",
+                            options: `<div class="alert alert-info">
+                                ${__("This will create Subscription Plan records for all {0} variants of this template.", [variant_count])}
+                            </div>`,
+                        },
+                        {
+                            fieldname: "price_list",
+                            fieldtype: "Link",
+                            options: "Price List",
+                            label: __("Source Price List"),
+                            reqd: 1,
+                            description: __("The price from this list will be used as the base cost."),
+                            get_query: function () {
+                                return {
+                                    filters: {
+                                        enabled: 1,
+                                    },
+                                };
+                            },
+                        },
+                        {
+                            fieldname: "division_factor",
+                            fieldtype: "Int",
+                            label: __("Divide Cost By"),
+                            default: 12,
+                            reqd: 1,
+                            description: __("Example: If Source Price is Yearly (1200) and you want Monthly plans, divide by 12 to get 100."),
+                        },
+                        {
+                            fieldtype: "Section Break",
+                            label: __("Plan Details"),
+                        },
+                        {
+                            fieldname: "billing_interval",
+                            fieldtype: "Select",
+                            label: __("Billing Interval"),
+                            options: "Month\nYear\nDay\nWeek",
+                            default: "Month",
+                            reqd: 1,
+                        },
+                        {
+                            fieldname: "billing_timing",
+                            fieldtype: "Select",
+                            label: __("Billing Timing"),
+                            options: "Pre-Paid\nPost-Paid",
+                            default: "Post-Paid",
+                            reqd: 1,
+                        },
+                         {
+                            fieldtype: "Column Break",
+                        },
+                        {
+                            fieldname: "currency",
+                            fieldtype: "Data",
+                            label: __("Currency"),
+                            read_only: 1,
+                        },
+                    ],
+                    primary_action_label: __("Generate Plans"),
+                    primary_action: function (values) {
+                        if (!values) return;
+
+                        dialog.hide();
+                        frappe.call({
+                            method: "webshop.webshop.doctype.override_doctype.item.generate_subscription_plans",
+                            args: {
+                                template_item: frm.doc.name,
+                                price_list: values.price_list,
+                                division_factor: values.division_factor,
+                                billing_interval: values.billing_interval,
+                                billing_timing: values.billing_timing,
+                            },
+                            freeze: true,
+                            freeze_message: __("Generating subscription plans..."),
+                            callback: function (r) {
+                                if (r.message) {
+                                    frappe.show_alert({
+                                        message: __("Successfully created/updated {0} plans.", [r.message.created]),
+                                        indicator: "green",
+                                    });
+                                    if (r.message.failed > 0) {
+                                        frappe.show_alert({
+                                            message: __("{0} plans failed to create.", [r.message.failed]),
+                                            indicator: "red",
+                                        });
+                                    }
+                                }
+                            },
+                        });
+                    },
+                });
+
+                // Update currency when price list changes
+                dialog.fields_dict.price_list.$input.on("change", function () {
+                    let price_list = dialog.get_value("price_list");
+                    if (price_list) {
+                        frappe.db.get_value("Price List", price_list, "currency", (r) => {
+                            if (r && r.currency) {
+                                dialog.set_value("currency", r.currency);
+                            }
+                        });
+                    } else {
+                        dialog.set_value("currency", "");
+                    }
+                });
+
+                dialog.show();
+            },
+        });
+    }
 });
