@@ -167,6 +167,7 @@ export function useProductDetail() {
     selectedImageIndex.value = 0
     selectedSize.value = null
     selectedVariant.value = []
+    selectedItemVariant.value = null  // Reset selected item variant
     quantity.value = 1
     activeTab.value = 'details'
   }

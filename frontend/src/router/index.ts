@@ -13,6 +13,7 @@ import CheckoutPage from '../views/Checkout/CheckoutPage.vue'
 import WishlistPage from '../views/Wishlist/WishlistPage.vue'
 import { useAuthStore } from '@/stores/auth'
 import BillsPage from '@/views/Bills/BillsPage.vue'
+import { KeepAlive } from 'vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,7 +23,7 @@ const router = createRouter({
       name: 'home',
       component: HomeView,
       meta: {
-        keepAlive: true // Preserve component state during navigation
+        keepAlive: true
       }
     },
     {
@@ -39,7 +40,7 @@ const router = createRouter({
       component: ProductsPage,
       meta: {
         title: 'Produk & Layanan',
-        keepAlive: true // Preserve component state during navigation
+        keepAlive: true
       }
     },
     {
@@ -48,7 +49,7 @@ const router = createRouter({
       component: ProductDetailPage,
       meta: {
         title: 'Detail Produk',
-        keepAlive: true // Preserve component state during navigation
+        keepAlive: true
       }
     },
     {
@@ -75,7 +76,8 @@ const router = createRouter({
       component: CartPage,
       meta: {
         title: 'Keranjang Belanja',
-        requiresAuth: true
+        requiresAuth: true,
+        keepAlive: true
       }
     },
     {

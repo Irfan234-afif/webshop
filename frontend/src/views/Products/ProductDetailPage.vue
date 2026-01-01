@@ -194,6 +194,9 @@ const loadProduct = async (id: string) => {
   try {
     // Only fetch if product ID changed or no product loaded
     if (lastLoadedProductId.value !== id) {
+      // CRITICAL: Reset product detail logic state to prevent stale data
+      productDetailLogic.reset()
+
       // Fetch banner in parallel (only once)
       if (!promotionalBannerContent.value) {
         fetchPromotionalBanner()
