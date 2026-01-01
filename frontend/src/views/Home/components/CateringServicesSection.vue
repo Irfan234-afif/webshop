@@ -30,7 +30,7 @@ const services: ServiceCard[] = [
     ctaLink: '#',
     iconType: 'catering',
     backgroundGradient: 'linear-gradient(158.23deg, #FBB554 0%, #FFCB82 100.03%)',
-    imageUrl: 'https://www.figma.com/api/mcp/asset/f48ecc5e-f151-41d3-adf4-5d742e851558'
+    imageUrl: 'catering.png'
   },
   {
     title: 'CATERING',
@@ -45,7 +45,7 @@ const services: ServiceCard[] = [
     ctaLink: '#',
     iconType: 'shuttle',
     backgroundGradient: 'linear-gradient(158.23deg, #327ABA 0%, #5E9DD5 100.03%)',
-    imageUrl: 'https://www.figma.com/api/mcp/asset/b663daa9-204e-473a-ab70-32f8963ed708'
+    imageUrl: 'antar-jemput.png'
   }
 ]
 </script>
@@ -61,19 +61,12 @@ const services: ServiceCard[] = [
       <!-- Services Cards Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <!-- Service Card -->
-        <div
-          v-for="(service, index) in services"
-          :key="index"
+        <div v-for="(service, index) in services" :key="index"
           class="relative flex flex-col justify-between rounded-xl overflow-hidden p-8 sm:p-12 min-h-[512px]"
-          :style="{ background: service.backgroundGradient }"
-        >
+          :style="{ background: service.backgroundGradient }">
           <!-- Background Image -->
           <div class="absolute bottom-0 right-0 pointer-events-none opacity-90">
-            <img
-              :src="service.imageUrl"
-              :alt="service.title"
-              class="w-[280px] sm:w-[400px] h-auto object-contain"
-            />
+            <img :src="service.imageUrl" :alt="service.title" class="w-[280px] sm:w-[400px] h-auto object-contain" />
           </div>
 
           <!-- Content -->
@@ -81,48 +74,31 @@ const services: ServiceCard[] = [
             <!-- Icon & Title -->
             <div class="flex gap-6 sm:gap-8 items-center">
               <!-- Icon Circle -->
-              <div class="bg-white rounded-full w-14 h-14 sm:w-[58px] sm:h-[58px] flex items-center justify-center flex-shrink-0">
+              <div
+                class="bg-white rounded-full w-14 h-14 sm:w-[58px] sm:h-[58px] flex items-center justify-center flex-shrink-0">
                 <!-- Catering Icon -->
-                <svg
-                  v-if="service.iconType === 'catering'"
-                  width="32"
-                  height="32"
-                  viewBox="0 0 32 32"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                <svg v-if="service.iconType === 'catering'" width="32" height="32" viewBox="0 0 32 32" fill="none"
+                  xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M28 9.33301H4C2.89543 9.33301 2 10.2284 2 11.333V25.333C2 26.4376 2.89543 27.333 4 27.333H28C29.1046 27.333 30 26.4376 30 25.333V11.333C30 10.2284 29.1046 9.33301 28 9.33301Z"
-                    fill="#FBB554"
-                  />
+                    fill="#FBB554" />
                   <path
                     d="M6 9.33301V6.66634C6 5.56177 6.89543 4.66634 8 4.66634H24C25.1046 4.66634 26 5.56177 26 6.66634V9.33301"
-                    stroke="#FBB554"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                  />
+                    stroke="#FBB554" stroke-width="2" stroke-linecap="round" />
                 </svg>
 
                 <!-- Shuttle/Bus Icon -->
-                <svg
-                  v-else
-                  width="32"
-                  height="32"
-                  viewBox="0 0 32 32"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                <svg v-else width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M26.6667 21.333H24V10.6663C24 9.55977 23.1046 8.66634 22 8.66634H10C8.89543 8.66634 8 9.55977 8 10.6663V21.333H5.33333C4.59695 21.333 4 21.9299 4 22.6663V24.6663C4 25.4027 4.59695 25.9997 5.33333 25.9997H26.6667C27.403 25.9997 28 25.4027 28 24.6663V22.6663C28 21.9299 27.403 21.333 26.6667 21.333Z"
-                    fill="#327ABA"
-                  />
+                    fill="#327ABA" />
                   <circle cx="11" cy="21.333" r="1.5" fill="white" />
                   <circle cx="21" cy="21.333" r="1.5" fill="white" />
                 </svg>
               </div>
 
               <!-- Title -->
-              <h3 class="text-white text-xl sm:text-2xl font-bold capitalize">
+              <h3 class="text-white text-xl sm:text-2xl !font-bold capitalize">
                 {{ service.title }}
               </h3>
             </div>
@@ -134,24 +110,14 @@ const services: ServiceCard[] = [
 
             <!-- Features List -->
             <div class="flex flex-col gap-3">
-              <div
-                v-for="(feature, featureIndex) in service.features"
-                :key="featureIndex"
-                class="flex gap-4 items-center"
-              >
+              <div v-for="(feature, featureIndex) in service.features" :key="featureIndex"
+                class="flex gap-4 items-center">
                 <!-- Check Icon -->
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="flex-shrink-0"
-                >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  class="flex-shrink-0">
                   <path
                     d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z"
-                    fill="white"
-                  />
+                    fill="white" />
                 </svg>
 
                 <!-- Feature Text -->
@@ -164,29 +130,15 @@ const services: ServiceCard[] = [
 
           <!-- CTA Button -->
           <div class="relative z-10 mt-8">
-            <a
-              :href="service.ctaLink"
-              class="inline-flex items-center gap-3 cursor-pointer group"
-            >
+            <a :href="service.ctaLink" class="inline-flex items-center gap-3 cursor-pointer group">
               <span class="text-white text-sm font-bold capitalize">
                 {{ service.ctaText }}
               </span>
               <!-- Arrow Icon -->
-              <svg
-                width="19"
-                height="18"
-                viewBox="0 0 19 18"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                class="transition-transform group-hover:translate-x-1"
-              >
-                <path
-                  d="M11.5 4.5L16 9M16 9L11.5 13.5M16 9H3"
-                  stroke="white"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
+              <svg width="19" height="18" viewBox="0 0 19 18" fill="none" xmlns="http://www.w3.org/2000/svg"
+                class="transition-transform group-hover:translate-x-1">
+                <path d="M11.5 4.5L16 9M16 9L11.5 13.5M16 9H3" stroke="white" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" />
               </svg>
             </a>
           </div>
