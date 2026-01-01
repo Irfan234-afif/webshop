@@ -220,31 +220,13 @@ const loadProduct = async (id: string) => {
   }
 }
 
-// Watch for productId changes (when navigating between products while component is cached)
+// Watch for productId changes (handles initial load, navigation, and KeepAlive re-activation)
 watch(productId, (newId) => {
   if (newId) {
     loadProduct(newId)
   }
-}, { immediate: false })
+}, { immediate: true })
 
-// Lifecycle hooks
-onMounted(async () => {
-  // Initial load
-  await loadProduct(productId.value)
-})
-
-// Called when component is re-activated from KeepAlive cache
-onActivated(() => {
-  // Re-check if we need to load a different product
-  if (productId.value && lastLoadedProductId.value !== productId.value) {
-    loadProduct(productId.value)
-  }
-})
-
-// onUnmounted(() => {
-//   productDetailStore.clearProductDetail()
-//   productDetailLogic.reset()
-// })
 </script>
 
 <template>

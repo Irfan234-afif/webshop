@@ -16,6 +16,7 @@ const emit = defineEmits(['select-variant'])
 const props = defineProps<Props>()
 
 const selectVariant = (variant: VariantAttribute) => {
+  // Always emit the variant - the parent will handle toggle logic
   emit('select-variant', variant)
 }
 // const { hasVariantStock, someSelectedVariant, selectedVariant } = useProductDetail()

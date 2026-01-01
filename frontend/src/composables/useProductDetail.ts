@@ -54,11 +54,23 @@ export function useProductDetail() {
 
   // Variant selection methods
   const selectVariant = (variant: VariantAttribute) => {
-    // Select: remove existing variant with the same attribute_name and add new one
-    selectedVariant.value = selectedVariant.value?.filter(
-      v => v.attribute !== variant.attribute
-    ) ?? [];
-    selectedVariant.value?.push(variant)
+    // Check if this exact variant (same attribute AND value) is already selected
+    const isAlreadySelected = selectedVariant.value?.some(
+      v => v.attribute === variant.attribute && v.attribute_value === variant.attribute_value
+    ) ?? false;
+
+    if (isAlreadySelected) {
+      // Unselect: remove this variant from the array
+      selectedVariant.value = selectedVariant.value?.filter(
+        v => !(v.attribute === variant.attribute && v.attribute_value === variant.attribute_value)
+      ) ?? [];
+    } else {
+      // Select: remove existing variant with the same attribute_name and add new one
+      selectedVariant.value = selectedVariant.value?.filter(
+        v => v.attribute !== variant.attribute
+      ) ?? [];
+      selectedVariant.value?.push(variant)
+    }
 
     // Update Selected Item Variant
     selectedItemVariant.value = productStore.currentProduct?.variants?.find(

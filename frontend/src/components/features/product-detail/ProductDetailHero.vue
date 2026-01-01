@@ -38,11 +38,8 @@ const emit = defineEmits<{
   <div class="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
     <!-- Left: Image Gallery -->
     <div v-if="product.images && product.images.length > 0">
-      <ProductImageGallery
-        :images="product.images"
-        :selected-index="selectedImageIndex"
-        @select-image="emit('selectImage', $event)"
-      />
+      <ProductImageGallery :images="product.images" :selected-index="selectedImageIndex"
+        @select-image="emit('selectImage', $event)" />
     </div>
 
     <!-- Service Icon Display (for services without image gallery) -->
@@ -60,24 +57,12 @@ const emit = defineEmits<{
     </div> -->
 
     <!-- Right: Product Info -->
-    <ProductInfo
-      :product="product"
-      :selected-size="selectedSize"
-      :selected-variant="selectedVariant"
-      :quantity="quantity"
-      :is-in-wishlist="isInWishlist"
-      :is-adding-to-cart="isAddingToCart"
-      :is-toggling-wishlist="isTogglingWishlist"
-      :has-variant-stock="hasVariantStock"
-      :some-selected-variant="someSelectedVariant"
-      @update:quantity="emit('update:quantity', $event)"
-      @select-size="emit('selectSize', $event)"
-      @select-variant="emit('selectVariant', $event)"
-      @customize="emit('customize')"
-      @add-to-cart="emit('addToCart', $event)"
-      @toggle-wishlist="emit('toggleWishlist')"
-      @show-login-modal="emit('showLoginModal')"
-      @select-date="emit('selectDate', $event)"
-    />
+    <ProductInfo :product="product" :selected-size="selectedSize" :selected-variant="selectedVariant"
+      :quantity="quantity" :is-in-wishlist="isInWishlist" :is-adding-to-cart="isAddingToCart"
+      :is-toggling-wishlist="isTogglingWishlist" :has-variant-stock="hasVariantStock"
+      :some-selected-variant="someSelectedVariant" @update:quantity="emit('update:quantity', $event)"
+      @select-size="emit('selectSize', $event)" @select-variant="emit('selectVariant', $event)"
+      @customize="emit('customize')" @add-to-cart="emit('addToCart', $event)" @toggle-wishlist="emit('toggleWishlist')"
+      @show-login-modal="emit('showLoginModal')" @select-date="emit('selectDate', $event)" />
   </div>
 </template>

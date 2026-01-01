@@ -171,7 +171,7 @@ const infoNotes = computed(() => {
     <AddToCartSection :quantity="quantity" :is-in-wishlist="isInWishlist" :is-adding-to-cart="isAddingToCart"
       :is-toggling-wishlist="isTogglingWishlist" :can-add-to-cart="canAddToCart" :max-quantity="product.stockQuantity"
       :selected-variant="selectedVariant" :is-out-of-stock="isOutOfStock"
-      :is-subscription-item="product.is_subscription_item" @update:quantity="emit('update:quantity', $event)"
+      :is-subscription-item="!!product.is_subscription_item" @update:quantity="emit('update:quantity', $event)"
       @add-to-cart="emit('addToCart')" @toggle-wishlist="emit('toggleWishlist')"
       @show-login-modal="emit('showLoginModal')" />
   </div>
