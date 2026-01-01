@@ -34,20 +34,23 @@ const showRegistrationModal = () => {
 
 <template>
   <div id="app">
-    <RouterView />
+    <RouterView v-slot="{ Component, route }">
+      <template v-if="route.meta.keepAlive">
+        <KeepAlive>
+          <component :is="Component" />
+        </KeepAlive>
+      </template>
+      <template v-else>
+        <component :is="Component" />
+      </template>
+    </RouterView>
 
     <!-- Dynamic Modal -->
-    <DynamicModal
-      :is-open="modalStore.isOpen"
-      :component="modalStore.options.component"
-      :component-props="modalStore.options.props"
-      :show-close-button="modalStore.options.showCloseButton"
-      :close-on-backdrop="modalStore.options.closeOnBackdrop"
-      :close-on-escape="modalStore.options.closeOnEscape"
-      @close="modalStore.closeModal"
-      @login-success="modalStore.handleLoginSuccess"
-      @showRegistrationModal="showRegistrationModal"
-    />
+    <DynamicModal :is-open="modalStore.isOpen" :component="modalStore.options.component"
+      :component-props="modalStore.options.props" :show-close-button="modalStore.options.showCloseButton"
+      :close-on-backdrop="modalStore.options.closeOnBackdrop" :close-on-escape="modalStore.options.closeOnEscape"
+      @close="modalStore.closeModal" @login-success="modalStore.handleLoginSuccess"
+      @showRegistrationModal="showRegistrationModal" />
 
     <!-- Global Alert / Toast System -->
     <GlobalAlert />

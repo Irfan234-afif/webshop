@@ -21,6 +21,9 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      meta: {
+        keepAlive: true // Preserve component state during navigation
+      }
     },
     {
       path: '/about',
@@ -35,7 +38,8 @@ const router = createRouter({
       name: 'products',
       component: ProductsPage,
       meta: {
-        title: 'Produk & Layanan'
+        title: 'Produk & Layanan',
+        keepAlive: true // Preserve component state during navigation
       }
     },
     {
@@ -43,7 +47,8 @@ const router = createRouter({
       name: 'product-detail',
       component: ProductDetailPage,
       meta: {
-        title: 'Detail Produk'
+        title: 'Detail Produk',
+        keepAlive: true // Preserve component state during navigation
       }
     },
     {

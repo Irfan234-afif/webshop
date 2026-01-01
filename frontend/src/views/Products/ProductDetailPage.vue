@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, onActivated, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductDetailStore } from '@/stores/productDetail'
 import { useCartStore } from '@/stores/cart'
@@ -13,6 +13,11 @@ import ProductDetailHero from '@/components/features/product-detail/ProductDetai
 import ProductTabs from '@/components/features/product-detail/ProductTabs.vue'
 import PromotionalBanner from '@/components/features/product-detail/PromotionalBanner.vue'
 import RelatedProducts from '@/components/features/product-detail/RelatedProducts.vue'
+
+// Set component name for KeepAlive caching
+defineOptions({
+  name: 'ProductDetailPage'
+})
 
 const route = useRoute()
 const router = useRouter()
@@ -181,35 +186,65 @@ const fetchPromotionalBanner = async () => {
   }
 }
 
-// Lifecycle hooks
-onMounted(async () => {
+// Track last loaded product ID to prevent unnecessary refetches
+const lastLoadedProductId = ref<string>('')
+
+// Function to load product data
+const loadProduct = async (id: string) => {
   try {
-    // Fetch banner in parallel
-    fetchPromotionalBanner()
+    // Only fetch if product ID changed or no product loaded
+    if (lastLoadedProductId.value !== id) {
+      // Fetch banner in parallel (only once)
+      if (!promotionalBannerContent.value) {
+        fetchPromotionalBanner()
+      }
 
-    await productDetailStore.fetchProductDetail(productId.value)
+      await productDetailStore.fetchProductDetail(id)
+      lastLoadedProductId.value = id
 
-    // Handle case where product has no variants
-    if (!productDetailStore.currentProduct?.variants) {
-      productDetailLogic.selectedItemVariant.value = {
-        id: productDetailStore.currentProduct!.id,
-        price: productDetailStore.currentProduct!.price,
-        stockQuantity: productDetailStore.currentProduct!.stockQuantity ?? 0,
-        attributes: [],
-        inStock: productDetailStore.currentProduct!.inStock,
-        item_code: productDetailStore.currentProduct!.item_code
+      // Handle case where product has no variants
+      if (!productDetailStore.currentProduct?.variants) {
+        productDetailLogic.selectedItemVariant.value = {
+          id: productDetailStore.currentProduct!.id,
+          price: productDetailStore.currentProduct!.price,
+          stockQuantity: productDetailStore.currentProduct!.stockQuantity ?? 0,
+          attributes: [],
+          inStock: productDetailStore.currentProduct!.inStock,
+          item_code: productDetailStore.currentProduct!.item_code
+        }
       }
     }
   } catch (error) {
     console.error('Error fetching product:', error)
     // Optionally redirect to products page or show error
   }
+}
+
+// Watch for productId changes (when navigating between products while component is cached)
+watch(productId, (newId) => {
+  if (newId) {
+    loadProduct(newId)
+  }
+}, { immediate: false })
+
+// Lifecycle hooks
+onMounted(async () => {
+  // Initial load
+  await loadProduct(productId.value)
 })
 
-onUnmounted(() => {
-  productDetailStore.clearProductDetail()
-  productDetailLogic.reset()
+// Called when component is re-activated from KeepAlive cache
+onActivated(() => {
+  // Re-check if we need to load a different product
+  if (productId.value && lastLoadedProductId.value !== productId.value) {
+    loadProduct(productId.value)
+  }
 })
+
+// onUnmounted(() => {
+//   productDetailStore.clearProductDetail()
+//   productDetailLogic.reset()
+// })
 </script>
 
 <template>

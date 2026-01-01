@@ -13,37 +13,47 @@ import WebshopOffers from './components/WebshopOffers.vue'
 import { transformApiProducts } from '@/utils/productTransformers'
 import type { ApiProduct } from '@/types/itemGroup'
 
+// Set component name for KeepAlive caching
+defineOptions({
+  name: 'HomePage'
+})
+
 interface BannerContent {
-    type?: string
-    image?: string
-    title?: string
-    subtitle?: string
-    cta_text?: string
-    cta_url?: string
-    secondary_cta_text?: string
-    secondary_cta_url?: string
-    right_image?: string
+  type?: string
+  image?: string
+  title?: string
+  subtitle?: string
+  cta_text?: string
+  cta_url?: string
+  secondary_cta_text?: string
+  secondary_cta_url?: string
+  right_image?: string
 }
 
 const heroBannerContent = ref<BannerContent | undefined>(undefined)
 
 const fetchHomeHeroBanner = async () => {
-    try {
-        const response = await fetch('/api/method/webshop.webshop.api.website.get_banner_content?banner_key=Home Hero')
-        const data = await response.json()
-        if (data.message) {
-            heroBannerContent.value = data.message
-        }
-    } catch (error) {
-        console.error('Failed to fetch Home Hero banner:', error)
+  try {
+    const response = await fetch('/api/method/webshop.webshop.api.website.get_banner_content?banner_key=Home Hero')
+    const data = await response.json()
+    if (data.message) {
+      heroBannerContent.value = data.message
     }
+  } catch (error) {
+    console.error('Failed to fetch Home Hero banner:', error)
+  }
 }
 
 onMounted(async () => {
-  await Promise.all([
-    items.fetch(),
-    fetchHomeHeroBanner()
-  ])
+  // Only fetch if data hasn't been loaded yet, preventing unnecessary reloads on back/forward navigation
+  if (!items.data?.items || Object.keys(items.data.items).length === 0) {
+    await items.fetch()
+  }
+
+  // Only fetch banner if not already loaded
+  if (!heroBannerContent.value) {
+    await fetchHomeHeroBanner()
+  }
 })
 
 // Transform items data for display
@@ -73,10 +83,7 @@ const itemGroups = computed(() => {
     <ProductServicesSection />
 
     <template v-for="group in itemGroups" :key="group.itemGroup">
-      <ItemGroupSection
-        :title="group.itemGroup"
-        :products="group.products"
-      />
+      <ItemGroupSection :title="group.itemGroup" :products="group.products" />
     </template>
 
     <!-- Catering & Shuttle Services Section -->
