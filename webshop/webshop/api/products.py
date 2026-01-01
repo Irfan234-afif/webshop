@@ -133,22 +133,13 @@ def get_product_detail(route):
     # Get variants if item has variants
     variants = []
     attributes_list = []
+    price_range = None
     if doc.has_variants:
-        variants, attributes_list = get_item_variants(doc.item_code)
-
-        prices = [v.get("price", 0) for v in variants if v.get("price")]
-        if prices:
-            min_price = min(prices)
-            max_price = max(prices)
-            
-            # key 'min_price' and 'max_price' to match frontend expectation
-            if min_price != max_price:
-                product_detail["priceRange"] = {
-                    "min_price": min_price,
-                    "max_price": max_price
-                }
-            else:
-                product_detail["price"] = min_price
+        variants, attributes_list, price_range = get_item_variants(doc.item_code)
+        
+        # Set price range if available (estimasi tanpa pricing rules)
+        if price_range:
+            product_detail["priceRange"] = price_range
 
     product_detail["variants"] = variants if variants else None
     product_detail["attributes"] = attributes_list if attributes_list else None
@@ -184,18 +175,98 @@ def get_product_detail(route):
     return product_detail
 
 
+@frappe.whitelist(allow_guest=True)
+def get_variant_price(item_code):
+    """
+    Get accurate price for a single variant with pricing rules applied.
+    Called when user selects a variant in the frontend.
+    
+    This endpoint preserves all pricing logic including:
+    - Pricing Rules (discount percentages, promotional pricing)
+    - Customer-specific pricing
+    - Party-based discounts
+    - Dynamic pricing calculations
+    
+    Args:
+        item_code: Variant item code
+        
+    Returns:
+        dict: {
+            "price": float,              # Discounted price
+            "originalPrice": str,         # Formatted MRP/original price
+            "discountPercent": float,     # Discount percentage if any
+            "formattedPrice": str,        # Formatted currency string
+            "formattedDiscount": str,     # Formatted discount string
+            "currency": str               # Currency code
+        }
+    """
+    from webshop.webshop.shopping_cart.cart import _set_price_list, get_party
+    from webshop.webshop.doctype.webshop_settings.webshop_settings import get_shopping_cart_settings
+    from erpnext.utilities.product import get_price
+    
+    cart_settings = get_shopping_cart_settings()
+    
+    if not cart_settings or not cart_settings.enabled:
+        frappe.throw(frappe._("Shopping cart is not enabled"))
+    
+    # Check if price should be shown
+    is_guest = frappe.session.user == "Guest"
+    if is_guest and cart_settings.hide_price_for_guest:
+        frappe.throw(frappe._("Price not available for guests"))
+    
+    price_list = _set_price_list(cart_settings, None)
+    party = get_party()
+    
+    # Call get_price with pricing rules
+    price_info = get_price(
+        item_code,
+        price_list,
+        cart_settings.default_customer_group,
+        cart_settings.company,
+        qty=1,
+        party=party
+    )
+    
+    if not price_info:
+        return {"price": 0, "error": "Price not found"}
+    
+    # Build response
+    result = {
+        "price": flt(price_info.get("price_list_rate", 0)),
+        "currency": price_info.get("currency", "IDR"),
+        "formattedPrice": price_info.get("formatted_price", ""),
+    }
+    
+    # Add discount info if applicable
+    if price_info.get("formatted_mrp"):
+        result["originalPrice"] = price_info.get("formatted_mrp")
+    
+    if price_info.get("discount_percent"):
+        result["discountPercent"] = flt(price_info.get("discount_percent"))
+    
+    if price_info.get("formatted_discount_percent"):
+        result["formattedDiscount"] = price_info.get("formatted_discount_percent")
+    
+    return result
+
+
 def get_item_variants(item_code):
     """
-    Get all variants for a template item with their attributes and pricing.
+    Get all variants for a template item with their attributes and stock.
+    
+    NOTE: Prices are NOT included in variants for performance.
+    Use get_variant_price() endpoint to fetch price on-demand when user selects a variant.
+    
     Args:
         item_code: Template item code
 
     Returns:
-        tuple: (variants list, attributes list)
-            - variants: List of variant dictionaries with attributes, pricing, and stock
+        tuple: (variants list, attributes list, price_range dict)
+            - variants: List of variant dictionaries with attributes and stock (NO PRICES)
             - attributes: List of available attributes with their values
+            - price_range: Dict with min_price and max_price (estimasi tanpa pricing rules)
     """
-    from webshop.webshop.shopping_cart.cart import _set_price_list, get_party
+    from webshop.webshop.shopping_cart.cart import _set_price_list
     from webshop.webshop.doctype.webshop_settings.webshop_settings import get_shopping_cart_settings
 
     # Get all enabled variants
@@ -206,7 +277,7 @@ def get_item_variants(item_code):
     )
 
     if not variants_list:
-        return [], []
+        return [], [], None
 
     cart_settings = get_shopping_cart_settings()
     variants = []
@@ -239,30 +310,7 @@ def get_item_variants(item_code):
         unique_values = sorted(list(attr_values))
         attributes_list.append({"attribute": attr_name, "values": unique_values})
 
-    prices_map = {}
-    if cart_settings and cart_settings.enabled and cart_settings.show_price:
-        is_guest = frappe.session.user == "Guest"
-        if not is_guest or not cart_settings.hide_price_for_guest:
-            price_list = _set_price_list(cart_settings, None)
-            party = get_party()
-            
-            # Batch fetch prices for all variants
-            price_data = frappe.get_all(
-                "Item Price",
-                filters={
-                    "item_code": ["in", variant_codes],
-                    "price_list": price_list,
-                    "selling": 1
-                },
-                fields=["item_code", "price_list_rate"],
-                order_by="valid_from desc"
-            )
-            
-            # Map prices by item_code (take first/latest price)
-            for price in price_data:
-                if price.item_code not in prices_map:
-                    prices_map[price.item_code] = flt(price.price_list_rate)
-
+    # Batch fetch all variant stock in ONE query
     stock_map = {}
     bin_data = frappe.get_all(
         "Bin",
@@ -276,9 +324,36 @@ def get_item_variants(item_code):
             stock_map[bin_item.item_code] = 0
         stock_map[bin_item.item_code] += flt(bin_item.actual_qty)
 
-    # Build variant data using pre-fetched data (no more queries in loop!)
+    # Batch fetch price range (estimasi, WITHOUT pricing rules for speed)
+    # Actual prices with pricing rules will be fetched on-demand via get_variant_price()
+    price_range = None
+    if cart_settings and cart_settings.enabled and cart_settings.show_price:
+        is_guest = frappe.session.user == "Guest"
+        if not is_guest or not cart_settings.hide_price_for_guest:
+            price_list = _set_price_list(cart_settings, None)
+            
+            # Batch query untuk min/max price (tanpa pricing rules)
+            price_data = frappe.get_all(
+                "Item Price",
+                filters={
+                    "item_code": ["in", variant_codes],
+                    "price_list": price_list,
+                    "selling": 1
+                },
+                fields=["price_list_rate"],
+            )
+            
+            if price_data:
+                prices = [flt(p.price_list_rate) for p in price_data if p.price_list_rate]
+                if prices:
+                    price_range = {
+                        "min_price": min(prices),
+                        "max_price": max(prices)
+                    }
+
+    # Build variant data - NO PRICES (lazy loaded on demand)
     for variant in variants_list:
-        # Use already-fetched attributes instead of querying again
+        # Use already-fetched attributes
         attributes = attributes_by_variant.get(variant.item_code, [])
 
         # Determine stock status based on whether item maintains stock
@@ -292,7 +367,7 @@ def get_item_variants(item_code):
             in_stock = True
             stock_qty = 0
 
-        # Build variant data
+        # Build variant data WITHOUT price (will be fetched on-demand)
         variant_data = {
             "id": variant.name,
             "item_code": variant.item_code,
@@ -300,15 +375,12 @@ def get_item_variants(item_code):
             "attributes": attributes,
             "inStock": in_stock,
             "stockQuantity": stock_qty
+            # NO PRICE FIELD - use get_variant_price() to fetch on-demand
         }
-
-        # Use pre-fetched price
-        if variant.item_code in prices_map:
-            variant_data["price"] = prices_map[variant.item_code]
 
         variants.append(variant_data)
 
-    return variants, attributes_list
+    return variants, attributes_list, price_range
 
 
 def format_reviews(reviews):

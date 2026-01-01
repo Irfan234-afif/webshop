@@ -4,12 +4,25 @@ import type { ProductDetail } from '@/types/productDetail'
 import type { Product } from '@/types/product'
 import { productsMockData } from '@/data/products'
 
+// Interface for variant price response
+interface VariantPrice {
+  price: number
+  originalPrice?: string
+  discountPercent?: number
+  formattedPrice?: string
+  formattedDiscount?: string
+  currency?: string
+  loading: boolean
+  error?: string
+}
+
 export const useProductDetailStore = defineStore('productDetail', () => {
   // State
   const currentProduct = ref<ProductDetail | null>(null)
   const relatedProducts = ref<Product[]>([])
   const isLoading = ref(false)
   const error = ref<Error | null>(null)
+  const selectedVariantPrice = ref<VariantPrice | null>(null)
 
   // Getters
   const hasImages = computed(() =>
@@ -91,10 +104,52 @@ export const useProductDetailStore = defineStore('productDetail', () => {
     }
   }
 
+  const fetchVariantPrice = async (itemCode: string) => {
+    selectedVariantPrice.value = { loading: true, price: 0 }
+
+    try {
+      const response = await fetch('/api/method/webshop.webshop.api.products.get_variant_price', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Frappe-CSRF-Token': (window as any).csrf_token || ''
+        },
+        body: JSON.stringify({ item_code: itemCode })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch variant price')
+      }
+
+      const data = await response.json()
+
+      if (data.message) {
+        selectedVariantPrice.value = {
+          ...data.message,
+          loading: false
+        }
+      } else {
+        throw new Error('Invalid price response')
+      }
+    } catch (e) {
+      console.error('Failed to fetch variant price:', e)
+      selectedVariantPrice.value = {
+        loading: false,
+        price: 0,
+        error: 'Failed to load price'
+      }
+    }
+  }
+
+  const clearVariantPrice = () => {
+    selectedVariantPrice.value = null
+  }
+
   const clearProductDetail = () => {
     currentProduct.value = null
     relatedProducts.value = []
     error.value = null
+    selectedVariantPrice.value = null
   }
 
   return {
@@ -103,6 +158,7 @@ export const useProductDetailStore = defineStore('productDetail', () => {
     relatedProducts,
     isLoading,
     error,
+    selectedVariantPrice,
     // Getters
     hasImages,
     hasReviews,
@@ -112,6 +168,8 @@ export const useProductDetailStore = defineStore('productDetail', () => {
     // Actions
     fetchProductDetail,
     fetchRelatedProducts,
+    fetchVariantPrice,
+    clearVariantPrice,
     clearProductDetail
   }
 })

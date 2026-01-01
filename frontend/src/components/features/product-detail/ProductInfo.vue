@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
+import { useProductDetailStore } from '@/stores/productDetail'
 import type { ProductDetail, ProductVariant, VariantAttribute } from '@/types/productDetail'
 import ProductRating from '@/components/common/ProductRating.vue'
 import ProductPricing from './ProductPricing.vue'
@@ -24,6 +25,8 @@ const props = withDefaults(defineProps<Props>(), {
   isTogglingWishlist: false
 })
 
+const productDetailStore = useProductDetailStore()
+
 onMounted(() => {
   console.log("ProductInfo mounted with product: ", props.product);
 })
@@ -44,52 +47,87 @@ const canAddToCart = computed(() => {
   if (props.product.variants && props.product.variants.length > 0) {
     return props.selectedVariant !== null
   }
-
-  // If product has sizes, size must be selected
-  // if (props.product.sizes && props.product.sizes.length > 0) {
-  //   return props.selectedSize !== null
-  // }
-  // For products without sizes or services, allow adding to cart
   return true
 })
 
-// Calculate price to display (single price or undefined to show range)
-const displayPrice = computed(() => {
-  // If a variant is selected, show its price
-  if (props.selectedVariant) {
-    return props.selectedVariant.price
-  }
+// Verify if variant prices are lazy loaded (checking if priceRange exists and no explicit price on variant)
+const isLazyLoadingPrice = computed(() => {
+  return props.product.variants && props.product.variants.length > 0 && props.product.priceRange
+})
 
-  // If product has variants and a price range, return undefined to show range
-  if (props.product.variants && props.product.variants.length > 0 && props.product.priceRange) {
+// Watch selected variant to fetch price
+watch(() => props.selectedVariant, async (newVariant) => {
+  if (newVariant && newVariant.item_code) {
+    // Only fetch if we are in lazy loading mode or if price is missing
+    if (isLazyLoadingPrice.value || !newVariant.price) {
+      await productDetailStore.fetchVariantPrice(newVariant.item_code)
+    }
+  } else {
+    productDetailStore.clearVariantPrice()
+  }
+})
+
+// Calculate price to display
+const displayPrice = computed(() => {
+  // If variant selected
+  if (props.selectedVariant) {
+    // Use fetched price from store if available
+    if (productDetailStore.selectedVariantPrice?.price) {
+      return productDetailStore.selectedVariantPrice.price
+    }
+    // Fallback to variant price on prop (if exists)
+    if (props.selectedVariant.price) {
+      return props.selectedVariant.price
+    }
+    // If loading or error, return undefined to handle in template
     return undefined
   }
 
-  // Otherwise show product base price
+  // If lazy loading mode and no variant selected, show range (return undefined to ProductPricing)
+  if (isLazyLoadingPrice.value) {
+    return undefined
+  }
+
+  // Fallback to product base price
   return props.product.price
+})
+
+const displayOriginalPrice = computed(() => {
+  if (props.selectedVariant && productDetailStore.selectedVariantPrice?.originalPrice) {
+    return productDetailStore.selectedVariantPrice.originalPrice
+  }
+  return props.product.originalPrice
+})
+
+const displayDiscount = computed(() => {
+  if (props.selectedVariant && productDetailStore.selectedVariantPrice?.discountPercent) {
+    return productDetailStore.selectedVariantPrice.discountPercent
+  }
+  return props.product.discountPercent
+})
+
+const displayHasDiscount = computed(() => {
+  if (props.selectedVariant && productDetailStore.selectedVariantPrice?.discountPercent) {
+    return productDetailStore.selectedVariantPrice.discountPercent > 0
+  }
+  return props.product.hasDiscount
 })
 
 // Check if product is globally out of stock
 const isOutOfStock = computed(() => {
-  // For products with variants
   if (props.product.variants && props.product.variants.length > 0) {
-    // Check if ALL variants are out of stock
     return props.product.variants.every(variant => !variant.inStock)
   }
-
-  // For simple products
   return !props.product.inStock
 })
 
-// Info notes for discounts (displayed after pricing)
+// Info notes for discounts
 const infoNotes = computed(() => {
   const notes: string[] = []
-
-  if (props.product.hasDiscount) {
+  if (displayHasDiscount.value) {
     notes.push('Diskon 15% Khusus untuk siswa baru tahun ini')
     notes.push('Diskon Gratis Ongkos kirim')
   }
-
   return notes.length > 0 ? notes : undefined
 })
 </script>
@@ -119,8 +157,12 @@ const infoNotes = computed(() => {
     </div>
 
     <!-- Pricing Section -->
-    <ProductPricing :price="displayPrice" :price-range="product.priceRange" :original-price="product.originalPrice"
-      :discount="product.discountPercent" :has-discount="product.hasDiscount" :offers="product.offers" />
+    <div v-if="productDetailStore.selectedVariantPrice?.loading" class="animate-pulse">
+      <div class="h-8 w-48 rounded bg-gray-200"></div>
+    </div>
+    <ProductPricing v-else :price="displayPrice" :price-range="product.priceRange"
+      :original-price="displayOriginalPrice" :discount="displayDiscount" :has-discount="displayHasDiscount"
+      :offers="product.offers" />
 
     <!-- Service Field -->
     <ServiceField v-if="product.is_subscription_item" @select-date="emit('selectDate', $event)" />

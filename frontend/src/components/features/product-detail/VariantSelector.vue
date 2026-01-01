@@ -25,7 +25,10 @@ const selectVariant = (variant: VariantAttribute) => {
 
 <template>
   <div class="mb-6" v-for="variant in variants">
-    <h3 class="mb-4 text-sm font-semibold text-gray-900">{{ variant.attribute }}</h3>
+    <div class="mb-4 flex items-center justify-between">
+      <h3 class="text-sm font-semibold text-gray-900">{{ variant.attribute }}</h3>
+      <span v-if="!selectedVariant" class="text-xs text-gray-500">Pilih varian</span>
+    </div>
     <div class="flex flex-wrap gap-3">
       <button v-for="value in variant.values" type="button"
         class="rounded-lg px-4 py-2.5 text-sm font-semibold transition-all" :class="[
