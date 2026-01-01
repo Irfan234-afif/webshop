@@ -110,7 +110,7 @@ const infoNotes = computed(() => {
 
     <!-- Title and Description -->
     <div class="flex flex-col gap-5">
-      <h1 class="text-xl font-bold capitalize leading-tight text-gray-900 md:text-2xl">
+      <h1 class="text-xl !font-bold capitalize leading-tight text-gray-900 md:text-2xl">
         {{ product.title }}
       </h1>
       <p class="text-sm font-medium leading-relaxed text-gray-500">

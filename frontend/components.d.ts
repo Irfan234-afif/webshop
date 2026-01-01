@@ -13,6 +13,7 @@ declare module 'vue' {
     ArrowRightIcon: typeof import('./src/components/icons/ArrowRightIcon.vue')['default']
     BillIcon: typeof import('./src/components/icons/BillIcon.vue')['default']
     BillListIcon: typeof import('./src/components/icons/BillListIcon.vue')['default']
+    BillPaymentModal: typeof import('./src/components/features/bills/BillPaymentModal.vue')['default']
     BookIcon: typeof import('./src/components/icons/BookIcon.vue')['default']
     Breadcrumb: typeof import('./src/components/common/Breadcrumb.vue')['default']
     BusIcon: typeof import('./src/components/icons/BusIcon.vue')['default']

@@ -90,10 +90,20 @@ class PaymentRequest(OriginalPaymentRequest):
         Check if this is a webshop manual payment that needs admin approval
 
         Returns True if:
-        - Reference doctype is Sales Order
-        - Sales Order has order_type = "Shopping Cart"
-        - Payment method type has need_admin_approval = 1
+        - Payment Request has payment_method_type custom field set (NEW - supports all doctypes)
+        - OR Reference doctype is Sales Order with order_type = "Shopping Cart"
         """
+        # Check if this Payment Request has payment_method_type field (NEW)
+        # This supports Sales Invoice, Sales Order, and any other reference doctype
+        if hasattr(self, 'payment_method_type') and self.payment_method_type:
+            needs_approval = frappe.get_cached_value(
+                "Webshop Payment Method",
+                self.payment_method_type,
+                "need_admin_approval"
+            )
+            return bool(needs_approval)
+        
+        # Fallback to existing Sales Order logic for backward compatibility
         if self.reference_doctype != "Sales Order":
             return False
 

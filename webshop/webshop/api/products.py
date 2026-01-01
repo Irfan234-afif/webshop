@@ -120,15 +120,15 @@ def get_product_detail(route):
                 product_detail["hasDiscount"] = True
 
     # Subscription Logic: Display Price Override for Post-Paid
-    if doc.is_subscription_item and doc.subscription_plan:
-        plan = frappe.get_cached_doc("Subscription Plan", doc.subscription_plan)
-        if plan.billing_timing == "Post-Paid":
-            # Show Plan Cost as the display price (e.g. 100,000)
-            # Even though Item Price is 0 for signup
-            # Formatting uses standard helper or raw currency
-            product_detail["price"] = flt(plan.cost)
-            product_detail["originalPrice"] = flt(plan.cost)
-            product_detail["priceLabel"] = f"{frappe.db.get_value('Currency', plan.currency, 'symbol') or plan.currency} {flt(plan.cost):,.0f} / {plan.billing_interval}"
+    # if doc.is_subscription_item and doc.subscription_plan:
+    #     plan = frappe.get_cached_doc("Subscription Plan", doc.subscription_plan)
+    #     if plan.billing_timing == "Post-Paid":
+    #         # Show Plan Cost as the display price (e.g. 100,000)
+    #         # Even though Item Price is 0 for signup
+    #         # Formatting uses standard helper or raw currency
+    #         product_detail["price"] = flt(plan.cost)
+    #         product_detail["originalPrice"] = flt(plan.cost)
+    #         product_detail["priceLabel"] = f"{frappe.db.get_value('Currency', plan.currency, 'symbol') or plan.currency} {flt(plan.cost):,.0f} / {plan.billing_interval}"
 
     # Get variants if item has variants
     variants = []

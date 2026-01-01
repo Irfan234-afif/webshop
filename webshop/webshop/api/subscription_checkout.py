@@ -1,6 +1,8 @@
 import frappe
 from frappe import _
 from frappe.utils import getdate
+from webshop.webshop.shopping_cart.product_info import get_product_info_for_website
+from frappe.utils import flt
 
 @frappe.whitelist()
 def create_subscription_request(data):
@@ -77,13 +79,19 @@ def get_subscription_item_details(item_code):
 	if not image:
 		image = frappe.db.get_value("Website Item", {"item_code": item_code}, "website_image")
 
+	product_info = get_product_info_for_website(item_code, skip_quotation_creation=True)
+	cost = 0
+	if product_info and product_info.product_info:
+		price_info = product_info.product_info.get("price")
+		if price_info:
+			cost = flt(price_info.price_list_rate) if price_info.price_list_rate else 0
 	return {
 		"item_name": item.item_name,
 		"item_code": item.item_code,
 		"image": image,
 		"description": item.description,
 		"plan_name": plan.plan_name if plan else None,
-		"cost": plan.cost if plan else 0, # Assuming 'cost' field on Plan
+		"cost": cost,
 		"billing_interval": plan.billing_interval if plan else "Month",
 		"billing_timing": plan.billing_timing if plan else "Pre-Paid"
 	}

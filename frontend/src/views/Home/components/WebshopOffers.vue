@@ -93,15 +93,15 @@ const getImageContainerGradient = (color: string) => {
     <Container class="flex flex-col gap-8">
       <!-- Header -->
       <div class="flex items-center justify-between">
-        <h2 class="font-bold text-[28px] text-[#1e1e1e]">Dapatkan Diskon Hingga 70%</h2>
+        <h2 class="!font-bold text-xl md:text-3xl text-[#1e1e1e]">Dapatkan Diskon Hingga 70%</h2>
 
         <!-- Navigation Arrows -->
         <div class="flex items-center gap-4">
           <!-- Left Arrow -->
           <button class="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center transition-colors"
             :class="isAtStart
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-primary text-white hover:bg-secondary-alt'
+              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              : 'bg-primary text-white hover:bg-secondary-alt'
               " @click="scroll('left')" :disabled="isAtStart" aria-label="Scroll left">
             <ArrowIcon class="h-5 w-5" />
           </button>
@@ -109,8 +109,8 @@ const getImageContainerGradient = (color: string) => {
           <!-- Right Arrow -->
           <button class="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center transition-colors"
             :class="isAtEnd
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-primary text-white hover:bg-secondary-alt'
+              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              : 'bg-primary text-white hover:bg-secondary-alt'
               " @click="scroll('right')" :disabled="isAtEnd" aria-label="Scroll right">
             <ArrowIcon class="h-5 w-5 rotate-180" />
           </button>

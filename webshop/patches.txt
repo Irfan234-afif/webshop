@@ -27,3 +27,4 @@ webshop.patches.add_payment_due_date_to_payment_request
 webshop.patches.add_xendit_fields_to_payment_request
 webshop.patches.update_delivery_date_sales
 webshop.patches.add_use_fixed_period_to_subscription_plan
+webshop.patches.add_payment_method_type_to_payment_request

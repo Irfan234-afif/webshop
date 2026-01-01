@@ -134,6 +134,15 @@ const router = createRouter({
         title: 'Daftar Akun'
       }
     },
+    {
+      path: '/bills/:id/payment',
+      name: 'bill-payment',
+      component: () => import('../views/Bills/BillPaymentPage.vue'),
+      meta: {
+        title: 'Pembayaran Tagihan',
+        requiresAuth: true
+      }
+    },
   ],
   scrollBehavior(to, from, savedPosition) {
     // Selalu scroll ke atas saat pindah halaman
@@ -150,7 +159,7 @@ router.beforeEach((to, from, next) => {
   
   // Update document title
   if (to.meta.title) {
-    document.title = `${to.meta.title} - Lafiye`
+    document.title = `${to.meta.title}`
   }
   
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {

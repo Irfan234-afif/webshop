@@ -1,4 +1,6 @@
 import frappeUIPreset from "frappe-ui/tailwind"
+import typography from "@tailwindcss/typography"
+
 export default {
 	presets: [frappeUIPreset],
 	content: [
@@ -83,5 +85,5 @@ export default {
 			},
 		},
 	},
-	plugins: [],
+	plugins: [typography],
 }

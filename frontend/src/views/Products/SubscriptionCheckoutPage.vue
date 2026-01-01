@@ -22,7 +22,8 @@ const currentStep = ref(1)
 const checkoutData = reactive({
     item: null as any,
     start_date: startDateQuery || '',
-    notes: ''
+    notes: '',
+    termsAccepted: false
 })
 
 const breadcrumbItems = [
@@ -77,6 +78,11 @@ const prevStep = () => {
 const showSuccessPopup = ref(false)
 
 const submitRequest = async () => {
+    if (!checkoutData.termsAccepted) {
+        alert('Mohon setujui syarat dan ketentuan terlebih dahulu')
+        return
+    }
+
     submitting.value = true
     try {
         const payload = {
@@ -129,9 +135,9 @@ const handleFinish = () => {
                     <div class="mb-8 flex items-center justify-between px-12">
                         <div class="flex flex-col items-center gap-2">
                             <div
-                                :class="['flex h-10 w-10 items-center justify-center rounded-full font-bold', currentStep >= 1 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500']">
+                                :class="['flex h-7 w-7 items-center justify-center rounded-full font-bold text-sm', currentStep >= 1 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500']">
                                 1</div>
-                            <span class="text-sm font-medium">Details</span>
+                            <span class="text-sm font-medium">Detail</span>
                         </div>
                         <div class="h-1 flex-1 bg-gray-200 mx-4">
                             <div class="h-full bg-primary transition-all duration-300"
@@ -139,15 +145,21 @@ const handleFinish = () => {
                         </div>
                         <div class="flex flex-col items-center gap-2">
                             <div
-                                :class="['flex h-10 w-10 items-center justify-center rounded-full font-bold', currentStep >= 2 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500']">
+                                :class="['flex h-7 w-7 items-center justify-center rounded-full font-bold text-sm', currentStep >= 2 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500']">
                                 2</div>
-                            <span class="text-sm font-medium">Confirmation</span>
+                            <span class="text-sm font-medium">Konfirmasi</span>
                         </div>
                     </div>
 
                     <!-- Step 1: Details -->
                     <div v-if="currentStep === 1" class="rounded-2xl bg-white p-8 shadow-sm">
-                        <h2 class="mb-6 text-xl font-bold">Subscription Details</h2>
+                        <div class="mb-6 flex items-center gap-6">
+                            <div
+                                class="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-white font-bold text-sm">
+                                1
+                            </div>
+                            <h2 class="text-xl font-bold">Detail Pendaftaran</h2>
+                        </div>
 
                         <div class="flex mb-8 gap-6 border p-4 rounded-xl">
                             <img v-if="checkoutData.item.image" :src="checkoutData.item.image"
@@ -165,79 +177,140 @@ const handleFinish = () => {
                                 <div class="text-gray-500 text-sm prose prose-sm max-w-none"
                                     v-html="checkoutData.item.description"></div>
                                 <div class="mt-2 text-primary font-bold">
-                                    {{ checkoutData.item.cost.toLocaleString() }} / {{
-                                        checkoutData.item.billing_interval }}
+                                    {{ checkoutData.item.cost.toLocaleString() }}
                                 </div>
                             </div>
                         </div>
 
                         <div class="space-y-6">
                             <div>
-                                <label class="mb-2 block text-sm font-medium text-gray-700">Start Date</label>
+                                <label class="mb-2 block text-sm font-medium text-gray-700">Tanggal Mulai</label>
                                 <ServiceField :mini="true" @select-date="(d) => checkoutData.start_date = d" />
                                 <p class="mt-1 text-sm text-primary font-medium">Selected: {{ checkoutData.start_date ||
                                     'None' }}</p>
                             </div>
 
                             <div>
-                                <label class="mb-2 block text-sm font-medium text-gray-700">Notes (Optional)</label>
+                                <label class="mb-2 block text-sm font-medium text-gray-700">Notes</label>
                                 <textarea v-model="checkoutData.notes"
                                     class="w-full rounded-xl border border-gray-300 p-3 focus:border-primary focus:ring-1 focus:ring-primary"
-                                    rows="3" placeholder="Add any special instructions..."></textarea>
+                                    rows="3" placeholder="Tambahkan catatan khusus (opsional)..."></textarea>
                             </div>
                         </div>
 
                         <div class="mt-8 flex justify-end">
                             <button @click="nextStep"
                                 class="rounded-xl bg-primary px-8 py-3 font-bold text-white transition hover:bg-opacity-90">
-                                Next Step
+                                Selanjutnya
                             </button>
                         </div>
                     </div>
 
                     <!-- Step 2: Confirmation -->
-                    <div v-if="currentStep === 2" class="rounded-2xl bg-white p-8 shadow-sm">
-                        <h2 class="mb-6 text-xl font-bold">Confirm Request</h2>
-
-                        <div class="space-y-4 rounded-xl bg-gray-50 p-6 mb-6">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Plan</span>
-                                <span class="font-medium">{{ checkoutData.item.plan_name }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Billing Interval</span>
-                                <span class="font-medium capitalize">{{ checkoutData.item.billing_interval }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Start Date</span>
-                                <span class="font-medium">{{ checkoutData.start_date }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Payment Type</span>
-                                <span class="font-medium capitalize">{{ checkoutData.item.billing_timing }}</span>
-                            </div>
-                            <div class="border-t pt-4 flex justify-between items-center">
-                                <span class="font-bold text-lg">Total Recurring</span>
-                                <span class="font-bold text-xl text-primary">{{ checkoutData.item.cost.toLocaleString()
-                                }}</span>
+                    <div v-if="currentStep === 2" class="flex flex-col">
+                        <!-- Header Card -->
+                        <div class="bg-white rounded-t-xl p-8">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-6">
+                                    <div
+                                        class="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-white font-bold text-sm">
+                                        2
+                                    </div>
+                                    <h2 class="text-base font-bold">Konfirmasi Pendaftaran</h2>
+                                </div>
+                                <button @click="prevStep" class="text-sm text-gray-500 hover:text-gray-800">
+                                    Edit
+                                </button>
                             </div>
                         </div>
 
-                        <div v-if="checkoutData.notes" class="mb-6">
-                            <h3 class="text-sm font-medium text-gray-700 mb-2">Notes</h3>
-                            <p class="text-gray-600 bg-gray-50 p-4 rounded-xl">{{ checkoutData.notes }}</p>
+                        <!-- Informasi Siswa Card -->
+                        <div class="bg-white border-t border-gray-200 p-8">
+                            <h3 class="text-sm font-bold mb-4">Informasi Siswa</h3>
+                            <div class="flex flex-col gap-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Nama Lengkap</span>
+                                    <span class="text-sm font-medium">{{ authStore.user?.full_name || 'N/A' }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Email</span>
+                                    <span class="text-sm font-medium">{{ authStore.user?.email || 'N/A' }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Nomor Telepon</span>
+                                    <span class="text-sm font-medium">{{ (authStore.user as any)?.phone || '-' }}</span>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="flex justify-between mt-8">
-                            <button @click="prevStep" class="text-gray-500 font-medium hover:text-gray-800">
-                                Back
-                            </button>
-                            <button @click="submitRequest" :disabled="submitting"
-                                class="rounded-xl bg-primary px-8 py-3 font-bold text-white transition hover:bg-opacity-90 disabled:opacity-50 flex items-center gap-2">
-                                <span v-if="submitting"
-                                    class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
-                                {{ submitting ? 'Submitting...' : 'Confirm Request' }}
-                            </button>
+                        <!-- Informasi Layanan Card -->
+                        <div class="bg-white border-t border-gray-200 p-8">
+                            <h3 class="text-sm font-bold mb-4">Informasi Layanan</h3>
+                            <div class="flex flex-col gap-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Nama Layanan</span>
+                                    <span class="text-sm font-medium">{{ checkoutData.item.item_name }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Tanggal Mulai</span>
+                                    <span class="text-sm font-medium">{{ checkoutData.start_date }}</span>
+                                </div>
+                                <div v-if="checkoutData.notes" class="flex justify-between items-start">
+                                    <span class="text-sm text-gray-600">Catatan</span>
+                                    <span class="text-sm font-medium text-right max-w-[60%]">{{ checkoutData.notes
+                                    }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Estimasi Harga Card -->
+                        <div class="bg-white border-t border-gray-200 p-8">
+                            <div class="bg-gray-100/80 border border-black/10 rounded-xl p-6 flex flex-col gap-8">
+                                <!-- Price Section -->
+                                <div class="flex flex-col gap-6 items-start justify-center py-1.5">
+                                    <p class="text-sm font-bold text-black text-left w-full">
+                                        Total Estimasi Harga Layanan
+                                    </p>
+                                    <div class="flex flex-col gap-4 w-full">
+                                        <p class="text-xl font-bold text-primary text-left">
+                                            Rp {{ checkoutData.item.cost.toLocaleString('id-ID') }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Checkbox Card -->
+                        <div class="bg-white border-t border-gray-200 p-8">
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox" v-model="checkoutData.termsAccepted"
+                                    class="mt-0.5 h-6 w-6 rounded border-2 border-gray-300 text-primary focus:ring-2 focus:ring-primary focus:ring-offset-0 cursor-pointer" />
+                                <div class="flex-1">
+                                    <p class="text-sm text-gray-700 leading-relaxed">
+                                        Dengan ini saya menyatakan bahwa data yang saya masukkan adalah benar dan saya
+                                        bersedia untuk mengikuti proses selanjutnya
+                                    </p>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Button Card -->
+                        <div class="bg-white rounded-b-xl border-t border-gray-200 p-8">
+                            <div class="flex gap-3">
+                                <button @click="prevStep"
+                                    class="flex-1 rounded-lg bg-gray-400 px-8 py-3 font-bold text-sm text-white transition hover:bg-gray-500">
+                                    Kembali (isi data alergi)
+                                </button>
+                                <button @click="submitRequest" :disabled="submitting || !checkoutData.termsAccepted"
+                                    :class="[
+                                        'flex-1 rounded-lg px-8 py-3 font-bold text-sm text-white transition flex items-center justify-center gap-2',
+                                        checkoutData.termsAccepted ? 'bg-primary hover:bg-opacity-90' : 'bg-gray-400 cursor-not-allowed'
+                                    ]">
+                                    <span v-if="submitting"
+                                        class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                                    {{ submitting ? 'Submitting...' : 'Konfirmasi Pendaftaran' }}
+                                </button>
+                            </div>
                         </div>
                     </div>
 

@@ -66,12 +66,16 @@ class SubscriptionRequest(Document):
 		if self.end_date:
 			subscription.end_date = self.end_date
 		
-		# Set post-paid settings (generate invoice at end of period)
-		subscription.generate_invoice_at = "End of the current subscription period"
+		billing_timing = frappe.db.get_value("Subscription Plan", self.subscription_plan, "billing_timing")
+		if billing_timing == "Post-Paid":
+			subscription.generate_invoice_at = "End of the current subscription period"
+		else:
+			subscription.generate_invoice_at = "Days before the current subscription period"
+			subscription.number_of_days = 30
 		
 		# Submit to activate
 		subscription.insert()
-		subscription.submit()
+		subscription.save()
 		
 		# Link back
 		self.db_set("subscription_ref", subscription.name)

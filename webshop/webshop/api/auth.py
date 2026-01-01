@@ -114,14 +114,14 @@ def login(email, password):
 def register(name, email, phone_number, password, students=None):
 	"""
 	Registration API endpoint
-	Creates Customer, Contact, User, and optionally Students
+	Creates Customer, Contact, User, and Students
 
 	Args:
 		name (str): Customer full name
 		email (str): Customer email
 		phone_number (str): Customer phone number
 		password (str): Account password
-		students (list, optional): List of student objects to create
+		students (list): List of student objects to create (at least one required)
 			Each student object: {"student_name": str, "school_unit": str, "grade_level": str (optional)}
 
 	Returns:
@@ -149,6 +149,16 @@ def register(name, email, phone_number, password, students=None):
 		if students and isinstance(students, str):
 			import json
 			students = json.loads(students)
+
+		# Validate that at least one student is provided
+		if not students:
+			frappe.throw(_("At least one student is required for registration"))
+
+		if not isinstance(students, list):
+			frappe.throw(_("Students must be a list"))
+
+		if len(students) == 0:
+			frappe.throw(_("At least one student is required for registration"))
 
 		# Validate students data
 		validated_students = []
