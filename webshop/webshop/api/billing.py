@@ -37,7 +37,7 @@ def get_unpaid_bills():
 	for invoice in invoices:
 		pr_exists = frappe.db.exists("Payment Request", {
 			"reference_doctype": "Sales Invoice",
-			"reference_name": invoice.name,
+			"reference_name": invoice["name"],
 			"docstatus": ["in", [0, 1]],  # Draft or Submitted
 			"status": ["!=", "Paid"]
 		})

@@ -26,13 +26,24 @@ class PaymentRequest(OriginalPaymentRequest):
             self.validate_payment_proof_on_submit()
 
     def before_submit(self):
-        """Capture admin approval metadata before submission"""
+        """Capture admin approval metadata and set mode_of_payment before submission"""
         super().before_submit()
 
         if self.is_webshop_manual_payment():
             # Capture who approved and when
             self.admin_approval_by = frappe.session.user
             self.admin_approval_time = frappe.utils.now()
+            
+            # Get and set mode_of_payment from Webshop Payment Method
+            # This must be done BEFORE submit to avoid UpdateAfterSubmitError
+            if self.payment_method_type and not self.mode_of_payment:
+                mode_of_payment = frappe.get_cached_value(
+                    "Webshop Payment Method",
+                    self.payment_method_type,
+                    "mode_of_payment"
+                )
+                if mode_of_payment:
+                    self.mode_of_payment = mode_of_payment
 
     def on_submit(self):
         """
@@ -48,6 +59,7 @@ class PaymentRequest(OriginalPaymentRequest):
         if self.is_webshop_manual_payment():
             try:
                 # Mark payment as paid - creates Payment Entry automatically
+                # Payment Entry will use the mode_of_payment we set in before_submit
                 self.set_as_paid()
                 frappe.msgprint(
                     _("Payment marked as paid successfully"),

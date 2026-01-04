@@ -679,6 +679,7 @@ def get_payment_gateway_url(sales_order_name, payment_method_type, payment_chann
 							}
 					except Exception as e:
 						frappe.log_error(f"Xendit VA Creation Error: {str(e)}", "Checkout")
+						frappe.errprint(f"Xendit VA Creation Error: {str(e)}") # Debugging
 						# Fallback to standard flow or re-raise? 
 						# If creation fails, we might want to tell basic checkout page
 						pass

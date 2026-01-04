@@ -9,6 +9,46 @@ from frappe.utils import getdate, nowdate
 class SubscriptionRequest(Document):
 	def validate(self):
 		self.calculate_end_date()
+		self.update_effective_days()
+	
+	def update_effective_days(self):
+		"""Update effective_days field based on start_date, end_date, and holiday_list"""
+		if self.start_date and self.end_date:
+			self.effective_days = self.calculate_effective_days()
+	
+	def calculate_effective_days(self):
+		"""
+		Calculate effective days between start_date and end_date, excluding holidays.
+		Returns:
+			int: Number of effective working days
+		"""
+		if not self.start_date or not self.end_date:
+			return 0
+		
+		from frappe.utils import date_diff, getdate
+		
+		# Get total days between start and end date (inclusive)
+		total_days = date_diff(self.end_date, self.start_date)
+		
+		# Get holidays if holiday_list is specified
+		holiday_count = 0
+		if self.holiday_list:
+			# Query holidays from Holiday List within the date range
+			holidays = frappe.db.sql("""
+				SELECT COUNT(*) as count
+				FROM `tabHoliday`
+				WHERE parent = %s
+				AND holiday_date BETWEEN %s AND %s
+			""", (self.holiday_list, self.start_date, self.end_date), as_dict=True)
+			
+			if holidays:
+				holiday_count = holidays[0].count or 0
+		
+		# Effective days = total days - holidays
+		effective_days = total_days - holiday_count
+		
+		return max(effective_days, 0)  # Ensure non-negative
+
 	
 	def input_validate(self):
 		if not self.subscription_plan:
@@ -54,13 +94,27 @@ class SubscriptionRequest(Document):
 		self.create_subscription_from_request()
 
 	def create_subscription_from_request(self):
+		# Get plan details to check billing timing and interval
+		plan_details = frappe.db.get_value(
+			"Subscription Plan", 
+			self.subscription_plan, 
+			["billing_timing", "billing_interval"], 
+			as_dict=True
+		)
+		
+		# Determine quantity based on billing timing and interval
+		qty = 1  # Default quantity
+		if plan_details.billing_timing == "Post-Paid" and plan_details.billing_interval == "Day":
+			# For consumption-based (post-paid, day-based), use effective days as quantity
+			qty = self.calculate_effective_days() or 1
+
 		# Create Subscription
 		subscription = frappe.new_doc("Subscription")
 		subscription.party_type = "Customer"
 		subscription.party = self.customer
 		subscription.append("plans", {
 			"plan": self.subscription_plan,
-			"qty": 1
+			"qty": qty
 		})
 		subscription.start_date = self.start_date
 		if self.end_date:
@@ -75,7 +129,7 @@ class SubscriptionRequest(Document):
 		
 		# Submit to activate
 		subscription.insert()
-		subscription.save()
+		subscription.submit()
 		
 		# Link back
 		self.db_set("subscription_ref", subscription.name)

@@ -291,6 +291,29 @@ class TestBillPaymentFlow(unittest.TestCase):
 			})
 			payment_method.insert(ignore_permissions=True)
 		
+		# Create Mode of Payment for Bank Transfer
+		if not frappe.db.exists("Mode of Payment", "Test Bank Transfer"):
+			mop = frappe.get_doc({
+				"doctype": "Mode of Payment",
+				"mode_of_payment": "Test Bank Transfer",
+				"type": "Bank",
+				"enabled": 1,
+				"accounts": [{
+					"company": "_Test Company",
+					"default_account": test_bank
+				}]
+			})
+			mop.insert(ignore_permissions=True)
+		
+		# Update Webshop Payment Method to link Mode of Payment
+		frappe.db.set_value(
+			"Webshop Payment Method",
+			"Test Manual Transfer",
+			"mode_of_payment",
+			"Test Bank Transfer",
+			update_modified=False
+		)
+		
 		# Create Payment Gateway for gateway tests
 		if not frappe.db.exists("Payment Gateway", "Test Gateway"):
 			frappe.get_doc({
@@ -481,6 +504,49 @@ class TestBillPaymentFlow(unittest.TestCase):
 		# In a real scenario, this should mark invoice as paid
 		# For tests, we just verify the mechanism is in place
 		self.assertTrue(len(payment_entries) >= 0)  # Lenient check for test environment
+	
+	def test_payment_entry_uses_correct_gl_account(self):
+		"""Test that Payment Entry created uses GL Account from Mode of Payment"""
+		# Create Payment Request
+		result = initiate_bill_payment(
+			sales_invoice_name=self.invoice_name,
+			payment_method_type="Test Manual Transfer"
+		)
+		pr_name = result["payment_request"]
+		
+		# Upload proof and approve
+		upload_payment_proof(
+			sales_invoice=self.invoice_name,
+			file_url="/files/test_proof.jpg"
+		)
+		
+		# Submit Payment Request (as admin)
+		frappe.set_user("Administrator")
+		pr = frappe.get_doc("Payment Request", pr_name)
+		pr.submit()
+		
+		# Verify Payment Request has mode_of_payment set
+		self.assertEqual(pr.mode_of_payment, "Test Bank Transfer")
+		
+		# Find created Payment Entry
+		payment_entries = frappe.get_all("Payment Entry", {
+			"reference_no": pr_name,
+			"docstatus": 1
+		}, ["name", "paid_to", "mode_of_payment"])
+		
+		if payment_entries:
+			pe = payment_entries[0]
+			
+			# Verify mode_of_payment is set
+			self.assertEqual(pe.mode_of_payment, "Test Bank Transfer")
+			
+			# Verify paid_to account matches Mode of Payment's default account
+			expected_account = frappe.db.get_value("Mode of Payment Account", {
+				"parent": "Test Bank Transfer",
+				"company": "_Test Company"
+			}, "default_account")
+			
+			self.assertEqual(pe.paid_to, expected_account)
 	
 	def test_invalid_invoice_throws_error(self):
 		"""Test that invalid invoice throws error"""

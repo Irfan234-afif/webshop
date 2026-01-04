@@ -64,7 +64,9 @@ A submittable DocType (`is_submittable = 1`) to capture subscription requests pe
 - `subscription_plan`: Link to Subscription Plan
 - `item`: Link to Item (Read Only)
 - `start_date`: Date (Required) - Subscription start date
-- `end_date`: Date (Optional) - Subscription end date
+- `end_date`: Date (Auto-calculated or Admin-editable) - Subscription end date
+- `holiday_list`: Link to Holiday List (Optional) - For effective days calculation
+- `effective_days`: Int (Read Only, Auto-calculated) - Working days excluding holidays
 - `notes`: Small Text - Customer instructions/special requests
 - `subscription_ref`: Link to Subscription (Read Only) - Populated on submit
 - `amended_from`: Link to Subscription Request (Standard amend support)
@@ -89,19 +91,59 @@ A submittable DocType (`is_submittable = 1`) to capture subscription requests pe
 - Triggers `on_submit()` hook:
   1. Validates required fields (`subscription_plan`, `item`, `start_date`)
   2. Calls `create_subscription_from_request()`
-  3. Creates ERPNext `Subscription` document:
+  3. **Consumption-Based Quantity Calculation** (for Post-Paid + Day-based plans):
+     - Checks if `billing_timing = "Post-Paid"` AND `billing_interval = "Day"`
+     - If true, calculates `qty = effective_days` (total days - holidays)
+     - Otherwise, uses default `qty = 1`
+  4. Creates ERPNext `Subscription` document:
      - Maps `start_date` and `end_date`
-     - Adds plan via `append("plans", {"plan": ..., "qty": 1})`
-     - Sets `generate_invoice_at = "End of the current subscription period"` (Post-Paid)
-     - Submits to activate (docstatus = 1)
-  4. Links Subscription via `subscription_ref`
-  5. Displays success message
+     - Adds plan via `append("plans", {"plan": ..., "qty": <calculated_qty>})`
+     - Sets `generate_invoice_at` based on billing timing
+     - Inserts and saves to activate
+  5. Links Subscription via `subscription_ref`
+  6. Displays success message
 
 **No Sales Invoice Generation**: Focus on Post-Paid model - invoices generated automatically by ERPNext Subscription system at period end.
 
 ### C. Deprecated / Removed Logic
 
 - _Old Flow_: Sales Order -> Subscription autogeneration hook is **DEPRECATED** for this specific flow, though it might remain for legacy or mixed-cart scenarios if needed. for now, we assume this replaces it for subscription items.
+
+### D. Consumption-Based (Post-Paid Day-Based) Subscriptions
+
+**Feature**: Automatic quantity calculation for consumption-based subscriptions.
+
+**Applies To**: Subscription Plans with:
+
+- `billing_timing = "Post-Paid"`
+- `billing_interval = "Day"`
+
+**How It Works**:
+
+1. When a Subscription Request is created or updated, the system automatically:
+
+   - Calculates `end_date` based on the plan's billing interval
+   - Calculates `effective_days` = (end_date - start_date + 1) - holidays
+
+2. When the request is submitted, the system:
+   - Checks if the plan is Post-Paid AND Day-based
+   - Uses `qty = effective_days` instead of default `qty = 1`
+   - This allows the subscription price to scale based on actual working days
+
+**Example**:
+
+- Subscription Plan: "Internet Service - Daily Rate" @ IDR 50,000/day
+- Start Date: 2026-01-06 (Monday)
+- End Date: 2026-01-10 (Friday) - Auto-calculated for 5 days
+- Holiday List: Contains 2026-01-08 (Wednesday - Public Holiday)
+- **Effective Days**: 5 - 1 = 4 days
+- **Result**: Subscription created with `qty = 4`, invoice will be 4 × 50,000 = IDR 200,000
+
+**Benefits**:
+
+- Fair billing based on actual service days
+- Automatic exclusion of holidays
+- No manual quantity adjustment needed
 
 ---
 
