@@ -314,6 +314,14 @@ def add_custom_fields():
 		],
 		"Payment Request": [
 			{
+				"fieldname": "payment_due_date",
+				"label": "Payment Due Date",
+				"fieldtype": "Datetime",
+				"insert_after": "transaction_date",
+				"no_copy": 1,
+				"print_hide": 1
+			},
+			{
 				"fieldname": "webshop_approval_section",
 				"fieldtype": "Section Break",
 				"label": "Webshop Approval Details",
