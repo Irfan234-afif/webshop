@@ -26,6 +26,7 @@
   "show_attachments",
   "section_break_18",
   "company",
+  "default_warehouse",
   "price_list",
   "enabled",
   "store_page_docs",
@@ -382,12 +383,22 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Allow Non Website Items in Cart Quotation"
+  },
+  {
+   "depends_on": "enabled",
+   "fieldname": "default_warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Default Warehouse",
+   "mandatory_depends_on": "eval: doc.enabled === 1",
+   "options": "Warehouse",
+   "remember_last_selected_value": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-03-22 13:01:51.906319",
+ "modified": "2026-01-09 23:04:59.125866",
  "modified_by": "Administrator",
  "module": "Webshop",
  "name": "Webshop Settings",
@@ -408,6 +419,7 @@
    "role": "All"
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
