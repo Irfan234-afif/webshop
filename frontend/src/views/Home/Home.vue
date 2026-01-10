@@ -2,10 +2,7 @@
 import { onMounted, computed, ref } from 'vue'
 import DefaultLayout from '@/components/layout/DefaultLayout.vue'
 import HeroSection from './components/HeroSection.vue'
-import SchoolYearPreparationSection from './components/SchoolYearPreparationSection.vue'
 import ProductServicesSection from './components/ProductServicesSection.vue'
-import SchoolUniformsSection from './components/SchoolUniformsSection.vue'
-import StationerySection from './components/StationerySection.vue'
 import CateringServicesSection from './components/CateringServicesSection.vue'
 import { items } from '@/data/home'
 import ItemGroupSection from './components/ItemGroupSection.vue'
@@ -45,14 +42,13 @@ const fetchHomeHeroBanner = async () => {
 }
 
 onMounted(async () => {
-  // Only fetch if data hasn't been loaded yet, preventing unnecessary reloads on back/forward navigation
-  if (!items.data?.items || Object.keys(items.data.items).length === 0) {
-    await items.fetch()
-  }
-
   // Only fetch banner if not already loaded
   if (!heroBannerContent.value) {
-    await fetchHomeHeroBanner()
+    fetchHomeHeroBanner()
+  }
+  // Only fetch if data hasn't been loaded yet, preventing unnecessary reloads on back/forward navigation
+  if (!items.data?.items || Object.keys(items.data.items).length === 0) {
+    items.fetch()
   }
 })
 
