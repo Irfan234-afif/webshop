@@ -19,6 +19,7 @@
         "cb_payment_details",
         "need_admin_approval",
         "enabled",
+        "allow_on_return",
         "icon",
         "sort_order",
         "payment_channels"
@@ -100,6 +101,13 @@
             "fieldname": "enabled",
             "fieldtype": "Check",
             "label": "Enabled"
+        },
+        {
+            "default": "0",
+            "description": "Allow this payment method for refunds",
+            "fieldname": "allow_on_return",
+            "fieldtype": "Check",
+            "label": "Allow on Return"
         },
         {
             "fieldname": "icon",

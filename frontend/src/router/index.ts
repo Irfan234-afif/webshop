@@ -5,7 +5,6 @@ import ProductsPage from '../views/Products/ProductsPage.vue'
 import ProductDetailPage from '@/views/Products/ProductDetailPage.vue'
 import CartPage from '../views/Cart/CartPage.vue'
 import OrdersPage from '../views/Orders/OrdersPage.vue'
-import OrderDetailPage from '../views/Orders/OrderDetailPage.vue'
 import CheckoutPaymentPage from '../views/Checkout/CheckoutPaymentPage.vue'
 import LoginPage from '../views/Authentication/LoginPage.vue'
 import RegistrationPage from '../views/Authentication/RegistrationPage.vue'
@@ -108,15 +107,6 @@ const router = createRouter({
       }
     },
     {
-      path: '/order/:id',
-      name: 'order-detail',
-      component: OrderDetailPage,
-      meta: {
-        title: 'Detail Pesanan',
-        requiresAuth: true
-      }
-    },
-    {
       path: '/order/:id/checkout',
       name: 'checkout-payment',
       component: CheckoutPaymentPage,
@@ -147,6 +137,24 @@ const router = createRouter({
       component: () => import('../views/Bills/BillPaymentPage.vue'),
       meta: {
         title: 'Pembayaran Tagihan',
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/order/:orderId/return',
+      name: 'return-request',
+      component: () => import('../views/Returns/ReturnRequestWizard.vue'),
+      meta: {
+        title: 'Ajukan Pengembalian',
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/returns',
+      name: 'returns',
+      component: () => import('../views/Returns/ReturnRequestsPage.vue'),
+      meta: {
+        title: 'Pengembalian Saya',
         requiresAuth: true
       }
     },

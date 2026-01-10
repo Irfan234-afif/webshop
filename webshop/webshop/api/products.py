@@ -87,7 +87,6 @@ def get_product_detail(route):
         "short_description": doc.short_description or doc.description or "",
         "description": doc.web_long_description or doc.description or "",
         "is_subscription_item": doc.is_subscription_item,
-        "subscription_plan": doc.subscription_plan,
         "rating": 0,  # Will be calculated from reviews
         "reviewCount": 0,  # Will be calculated from reviews
     }

@@ -183,3 +183,9 @@ def check_shopping_cart_enabled():
 
 def show_attachments():
 	return get_shopping_cart_settings().show_attachments
+
+
+def get_return_eligibility_days():
+	"""Get configured return eligibility days from settings"""
+	settings = get_shopping_cart_settings()
+	return settings.get("return_eligibility_days") or 7

@@ -111,13 +111,24 @@ def get_orders(search_text=None, status=None, student=None, tab="orders", start=
 			for order in orders:
 				order.payment_request_status = pr_map.get(order.name)
 
-			# Fetch items for these orders (optimized)
-			all_items = frappe.get_all(
-				"Sales Order Item",
-				filters={"parent": ["in", order_names]},
-				fields=["parent", "item_code", "item_name", "qty", "image", "amount"],
-				order_by="idx asc"
-			)
+			all_items = frappe.db.sql("""
+				SELECT 
+					soi.parent,
+					soi.item_code,
+					soi.item_name,
+					soi.qty,
+					soi.amount,
+					soi.idx,
+					COALESCE(wi_parent.website_image, wi_direct.website_image, soi.image) as image
+				FROM `tabSales Order Item` soi
+				LEFT JOIN `tabItem` item ON item.name = soi.item_code
+				LEFT JOIN `tabWebsite Item` wi_parent ON wi_parent.item_code = item.variant_of
+				LEFT JOIN `tabWebsite Item` wi_direct ON wi_direct.item_code = soi.item_code
+				WHERE soi.parent IN ({order_names})
+				ORDER BY soi.parent, soi.idx ASC
+			""".format(
+				order_names=', '.join(['%s'] * len(order_names))
+			), order_names, as_dict=True)
 			
 			# Map items to orders
 			items_map = {}
@@ -252,21 +263,24 @@ def get_order_details(order_name):
 		if order.customer != party.name:
 			frappe.throw(_("You don't have permission to view this order"), title=_("Access Denied"))
 
-		# Get order items
-		items = frappe.get_all(
-			"Sales Order Item",
-			fields=[
-				"item_code",
-				"item_name",
-				"qty",
-				"rate",
-				"amount",
-				"description",
-				"image"
-			],
-			filters={"parent": order_name},
-			order_by="idx asc"
-		)
+		# Get order items with images in a single optimized query
+		items = frappe.db.sql("""
+			SELECT 
+				soi.item_code,
+				soi.item_name,
+				soi.qty,
+				soi.rate,
+				soi.amount,
+				soi.description,
+				soi.idx,
+				COALESCE(wi_parent.website_image, wi_direct.website_image, soi.image) as image
+			FROM `tabSales Order Item` soi
+			LEFT JOIN `tabItem` item ON item.name = soi.item_code
+			LEFT JOIN `tabWebsite Item` wi_parent ON wi_parent.item_code = item.variant_of
+			LEFT JOIN `tabWebsite Item` wi_direct ON wi_direct.item_code = soi.item_code
+			WHERE soi.parent = %s
+			ORDER BY soi.idx ASC
+		""", order_name, as_dict=True)
 
 		# Get student name if applicable
 		student_name = None

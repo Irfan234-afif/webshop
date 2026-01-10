@@ -87,6 +87,12 @@ doc_events = {
             "webshop.webshop.crud_events.price_list.check_impact_on_cart.execute"
         ],
     },
+    "Delivery Note": {
+        "on_submit": "webshop.webshop.doctype.return_request.return_request.update_return_request_on_dn_submit"
+    },
+    "Sales Invoice": {
+        "on_submit": "webshop.webshop.doctype.return_request.return_request.update_return_request_on_si_submit"
+    },
     "Tax Rule": {
         "validate": [
             "webshop.webshop.crud_events.tax_rule.validate_use_for_cart.execute",

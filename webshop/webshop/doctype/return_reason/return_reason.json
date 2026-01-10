@@ -1,0 +1,81 @@
+{
+    "actions": [],
+    "allow_rename": 1,
+    "autoname": "field:reason_name",
+    "creation": "2026-01-10 09:43:00",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "reason_name",
+        "description",
+        "enabled"
+    ],
+    "fields": [
+        {
+            "fieldname": "reason_name",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Reason Name",
+            "reqd": 1,
+            "unique": 1
+        },
+        {
+            "fieldname": "description",
+            "fieldtype": "Text",
+            "label": "Description"
+        },
+        {
+            "default": "1",
+            "fieldname": "enabled",
+            "fieldtype": "Check",
+            "in_list_view": 1,
+            "label": "Enabled"
+        }
+    ],
+    "links": [],
+    "modified": "2026-01-10 09:43:00",
+    "modified_by": "Administrator",
+    "module": "Webshop",
+    "name": "Return Reason",
+    "naming_rule": "By fieldname",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        },
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Webshop Manager",
+            "share": 1,
+            "write": 1
+        },
+        {
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Customer",
+            "share": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [],
+    "track_changes": 1
+}

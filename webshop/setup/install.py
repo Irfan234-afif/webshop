@@ -124,6 +124,34 @@ def add_custom_fields():
 				"options": "Webshop Payment Method",
 				"insert_after": "column_break_checkout",
 				"depends_on": "eval:doc.order_type=='Shopping Cart'"
+			},
+			{
+				"fieldname": "school_unit",
+				"fieldtype": "Link",
+				"label": "School Unit",
+				"options": "School Unit",
+				"insert_after": "student",
+				"depends_on": "eval:doc.order_type=='Shopping Cart'",
+				"fetch_from": "student.school_unit",
+    			"read_only": 1
+			},
+			{
+				"fieldname": "return_request",
+				"label": "Return Request",
+				"fieldtype": "Link",
+				"options": "Return Request",
+				"insert_after": "is_return",
+				"read_only": 1,
+				"print_hide": 1
+			},
+			{
+				"fieldname": "return_request",
+				"label": "Return Request",
+				"fieldtype": "Link",
+				"options": "Return Request",
+				"insert_after": "is_return",
+				"read_only": 1,
+				"print_hide": 1
 			}
 		],
 		"Sales Order": [
@@ -177,6 +205,16 @@ def add_custom_fields():
 				"options": "Webshop Payment Method",
 				"insert_after": "column_break_checkout",
 				"read_only": 1
+			},
+			{
+				"fieldname": "school_unit",
+				"fieldtype": "Link",
+				"label": "School Unit",
+				"options": "School Unit",
+				"insert_after": "student",
+				"depends_on": "eval:doc.order_type=='Shopping Cart'",
+    			"fetch_from": "student.school_unit",
+    			"read_only": 1
 			}
 		],
 		"Item": [
@@ -314,6 +352,15 @@ def add_custom_fields():
 		],
 		"Payment Request": [
 			{
+				"fieldname": "payment_method_type",
+				"fieldtype": "Link",
+				"label": "Payment Method Type",
+				"options": "Webshop Payment Method",
+				"insert_after": "mode_of_payment",
+				"read_only": 1,
+				"description": "Webshop payment method selected by customer",
+			},
+			{
 				"fieldname": "payment_due_date",
 				"label": "Payment Due Date",
 				"fieldtype": "Datetime",
@@ -420,6 +467,15 @@ def add_custom_fields():
 				"insert_after": "billing_interval_count",
 				"description": "If checked, subscription will use the Subscription End Date as invoice end date instead of calculating from billing interval. Useful for one-time fixed period subscriptions (e.g., catering service for specific date range).",
 				"default": 0
+			}
+		],
+		"Delivery Note": [
+			{
+				"fieldname": "image",
+				"label": "Image",
+				"fieldtype": "Attach Image",
+				"insert_after": "driver_name",
+				"print_hide": 1
 			}
 		]
 	}

@@ -153,12 +153,18 @@
                     class="bg-white border-l-[1.5px] border-r-[1.5px] border-b-[1.5px] border-gray-100 rounded-b-xl p-6">
                     <h4 class="text-sm font-bold text-gray-900 mb-6 capitalize">Metode Pembayaran</h4>
                     <div class="space-y-4">
+                      <div v-if="order.payment_method_type"
+                        class="flex items-center justify-between text-sm font-semibold text-text-secondary">
+                        <span>Metode Pembayaran</span>
+                        <span class="text-right">{{ order.payment_method_type }}</span>
+                      </div>
                       <div v-if="order.virtual_account"
                         class="flex items-center justify-between text-sm font-semibold text-text-secondary">
                         <span>Nomor Virtual Account</span>
                         <span class="text-right">{{ order.virtual_account }}</span>
                       </div>
-                      <div class="flex items-center justify-between text-sm font-semibold text-text-secondary">
+                      <div v-if="order.payment_gateway"
+                        class="flex items-center justify-between text-sm font-semibold text-text-secondary">
                         <span>Payment Gateway</span>
                         <span class="text-right">{{ order.payment_gateway || 'Xendit' }}</span>
                       </div>
@@ -173,29 +179,45 @@
             </div>
 
             <!-- Footer Actions -->
-            <div
-              class="bg-white border-t-[1.5px] border-gray-100 rounded-b-xl p-8 flex items-center justify-between gap-4">
-              <router-link v-if="order.per_billed < 100" :to="{ name: 'checkout-payment', params: { id: order.name } }"
-                class="flex-1 py-4 px-8 bg-primary text-white font-bold text-sm rounded-lg hover:bg-primary-dark transition-colors capitalize text-center">
-                Bayar Pesanan - {{ formatIDR(order.grand_total) }}
-              </router-link>
-              <button v-else @click="emit('close')"
-                class="flex-1 py-4 px-8 bg-primary text-white font-bold text-sm rounded-lg hover:bg-primary-dark transition-colors capitalize">
-                Tutup
+            <div class="bg-white border-t-[1.5px] border-gray-100 rounded-b-xl p-8 flex flex-col gap-4">
+              <!-- Primary action buttons -->
+              <div class="flex items-center gap-4">
+                <router-link v-if="order.per_billed < 100"
+                  :to="{ name: 'checkout-payment', params: { id: order.name } }"
+                  class="flex-1 py-4 px-8 bg-primary text-white font-bold text-sm rounded-lg hover:bg-primary-dark transition-colors capitalize text-center">
+                  Bayar Pesanan - {{ formatIDR(order.grand_total) }}
+                </router-link>
+                <button v-else-if="!canRequestReturn" @click="emit('close')"
+                  class="flex-1 py-4 px-8 bg-primary text-white font-bold text-sm rounded-lg hover:bg-primary-dark transition-colors capitalize">
+                  Tutup
+                </button>
+              </div>
+
+              <!-- Return request button for completed orders -->
+              <button v-if="canRequestReturn" @click="openReturnModal"
+                class="w-full py-4 px-8 bg-[#ac208e] hover:opacity-90 text-white font-bold text-sm rounded-lg transition-opacity capitalize">
+                Ajukan Pengembalian
               </button>
             </div>
           </div>
         </Transition>
       </div>
     </Transition>
+
+    <!-- Terms & Conditions Modal -->
+    <ReturnRequestModal :isOpen="isReturnModalOpen" @accept="navigateToReturnWizard" @close="closeReturnModal" />
   </Teleport>
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, watch, ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { call } from 'frappe-ui'
 import { formatIDR } from '@/utils/formatters'
+import { useReturnsStore } from '@/stores/returns'
 import ReceiptIcon from '@/components/icons/ReceiptIcon.vue'
 import InfoCircleIcon from '@/components/icons/InfoCircleIcon.vue'
+import ReturnRequestModal from '@/components/features/returns/ReturnRequestModal.vue'
 import type { Order } from '@/types/order'
 
 interface Props {
@@ -210,6 +232,57 @@ const emit = defineEmits<{
   payOrder: [orderId: string]
   backToPaymentMethod: [orderId: string]
 }>()
+
+const router = useRouter()
+const returnsStore = useReturnsStore()
+const isReturnModalOpen = ref(false)
+const isEligibleForReturn = ref<boolean | null>(null) // null = not checked yet, true/false = eligibility status
+
+console.log('OrderDetailModal component loaded')
+
+// Check eligibility when component mounts (if modal is open)
+onMounted(() => {
+  console.log('Component mounted, isOpen:', props.isOpen, 'order:', props.order?.name)
+  if (props.isOpen && props.order?.name) {
+    checkReturnEligibility()
+  }
+})
+
+// Check order return eligibility via API
+const checkReturnEligibility = async () => {
+  console.log('Checking return eligibility for order:', props.order)
+  if (!props.order?.name) {
+    isEligibleForReturn.value = false
+    return
+  }
+
+  try {
+    const response = await call('webshop.webshop.api.returns.check_order_return_eligibility', {
+      sales_order: props.order.name
+    })
+
+    if (response) {
+      isEligibleForReturn.value = response.eligible || false
+    } else {
+      isEligibleForReturn.value = false
+    }
+  } catch (error) {
+    console.error('Error checking return eligibility:', error)
+    isEligibleForReturn.value = false
+  }
+}
+
+// Check if return can be requested for this order
+const canRequestReturn = computed(() => {
+  if (!props.order) return false
+
+  // Check if order is completed/delivered
+  const eligibleStatuses = ['Completed', 'Delivered', 'To Bill', 'To Deliver']
+  const hasEligibleStatus = eligibleStatuses.includes(props.order.status)
+
+  // Must have eligible status AND be confirmed eligible by API
+  return hasEligibleStatus && isEligibleForReturn.value === true
+})
 
 
 // Format date to readable format
@@ -300,14 +373,21 @@ const handleBackToPaymentMethod = () => {
   emit('backToPaymentMethod', props.order.name)
 }
 
-// Prevent body scroll when modal is open
+// Prevent body scroll when modal is open and check return eligibility
 watch(
-  () => props.isOpen,
-  (isOpen) => {
+  () => [props.isOpen, props.order] as const,
+  ([isOpen, order]) => {
+    console.log('Watch fired - isOpen:', isOpen, 'Order:', order?.name)
     if (isOpen) {
       document.body.style.overflow = 'hidden'
+      // Check return eligibility when modal opens or order changes
+      if (order?.name) {
+        checkReturnEligibility()
+      }
     } else {
       document.body.style.overflow = ''
+      // Reset eligibility when modal closes
+      isEligibleForReturn.value = null
     }
   }
 )
@@ -316,10 +396,24 @@ watch(
 const openImage = (url: string) => {
   window.open(url, '_blank')
 }
+
+// Return request functions
+const openReturnModal = () => {
+  isReturnModalOpen.value = true
+}
+
+const closeReturnModal = () => {
+  isReturnModalOpen.value = false
+}
+
+const navigateToReturnWizard = () => {
+  isReturnModalOpen.value = false
+  emit('close') // Close the order detail modal first
+  router.push(`/order/${props.order.name}/return`)
+}
 </script>
 
 <style scoped>
-/* Fade transition for backdrop */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
@@ -330,7 +424,6 @@ const openImage = (url: string) => {
   opacity: 0;
 }
 
-/* Scale transition for modal */
 .scale-enter-active,
 .scale-leave-active {
   transition: all 0.3s ease;

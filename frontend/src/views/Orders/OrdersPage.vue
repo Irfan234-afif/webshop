@@ -12,7 +12,7 @@
 
       <!-- Tab Navigation -->
       <div class="flex gap-6 mb-8 border-b border-gray-200">
-        <button @click="activeTab = 'orders'" :class="[
+        <button @click="changeTab('orders')" :class="[
           'pb-3 text-lg font-medium transition-colors relative',
           activeTab === 'orders'
             ? 'text-gray-900'
@@ -22,7 +22,7 @@
           <div v-if="activeTab === 'orders'"
             class="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full" />
         </button>
-        <button @click="activeTab = 'history'" :class="[
+        <button @click="changeTab('history')" :class="[
           'pb-3 text-lg font-medium transition-colors relative',
           activeTab === 'history'
             ? 'text-gray-900'
@@ -32,7 +32,7 @@
           <div v-if="activeTab === 'history'"
             class="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full" />
         </button>
-        <button @click="activeTab = 'subscriptions'" :class="[
+        <button @click="changeTab('subscriptions')" :class="[
           'pb-3 text-lg font-medium transition-colors relative',
           activeTab === 'subscriptions'
             ? 'text-gray-900'
@@ -40,6 +40,16 @@
         ]">
           Langganan
           <div v-if="activeTab === 'subscriptions'"
+            class="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full" />
+        </button>
+        <button @click="changeTab('returns')" :class="[
+          'pb-3 text-lg font-medium transition-colors relative',
+          activeTab === 'returns'
+            ? 'text-gray-900'
+            : 'text-gray-500 hover:text-gray-700'
+        ]">
+          Pengembalian
+          <div v-if="activeTab === 'returns'"
             class="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full" />
         </button>
       </div>
@@ -68,18 +78,33 @@
           </div>
 
           <!-- Status Filter -->
-          <div v-if="activeTab === 'orders'"
+          <div v-if="['orders', 'returns'].includes(activeTab)"
             class="relative min-w-[200px] bg-white border border-gray-200 rounded-lg px-3 py-2 flex items-center gap-3">
-            <span class="text-xs text-gray-500 font-medium">Status Pesanan :</span>
+            <span class="text-xs text-gray-500 font-medium">Status {{ activeTab === 'returns' ? 'Pengajuan' : 'Pesanan'
+              }} :</span>
             <select v-model="filters.status"
               class="appearance-none bg-transparent font-bold text-gray-900 text-sm focus:outline-none w-full pr-6 cursor-pointer">
               <option value="">Semua</option>
-              <option value="To Deliver and Bill">Menunggu Pembayaran</option>
-              <option value="To Deliver">Pesanan Diproses</option>
-              <option value="Processing">Pesanan Diproses</option>
-              <option value="Shipped">Pesanan Dikirim</option>
-              <option value="Completed">Selesai</option>
-              <option value="Cancelled">Dibatalkan</option>
+
+              <!-- Order Statuses -->
+              <template v-if="activeTab === 'orders'">
+                <option value="To Deliver and Bill">Menunggu Pembayaran</option>
+                <option value="To Deliver">Pesanan Diproses</option>
+                <option value="Processing">Pesanan Diproses</option>
+                <option value="Shipped">Pesanan Dikirim</option>
+                <option value="Completed">Selesai</option>
+                <option value="Cancelled">Dibatalkan</option>
+              </template>
+
+              <!-- Return Statuses -->
+              <template v-if="activeTab === 'returns'">
+                <option value="Draft">Draft</option>
+                <option value="Pending Approval">Menunggu Persetujuan</option>
+                <option value="Approved">Disetujui</option>
+                <option value="Processing">Diproses</option>
+                <option value="Completed">Selesai</option>
+                <option value="Rejected">Ditolak</option>
+              </template>
             </select>
             <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
               <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -113,6 +138,8 @@
 
       <SubscriptionTab v-if="activeTab === 'subscriptions'" :subscriptions="subscriptions"
         :loading="subscriptionsResource.loading" @view-subscription="viewSubscription" />
+
+      <ReturnRequestsTab v-if="activeTab === 'returns'" :filters="filters" />
 
       <!-- Infinite Scroll Trigger -->
       <div ref="infiniteScrollTrigger" class="flex justify-center p-6 h-20 opacity-0">
@@ -155,7 +182,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed, reactive, watch, nextTick } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { formatIDR } from '@/utils/formatters'
 import { createResource, debounce, createListResource } from 'frappe-ui'
 import Container from '@/components/layout/Container.vue'
@@ -168,10 +195,17 @@ import OrdersTab from '@/components/features/orders/OrdersTab.vue'
 import HistoryTab from '@/components/features/orders/HistoryTab.vue'
 import SubscriptionTab from '@/components/features/orders/SubscriptionTab.vue'
 import SubscriptionDetailModal from '@/components/features/orders/SubscriptionDetailModal.vue'
+import ReturnRequestsTab from '@/components/features/orders/ReturnRequestsTab.vue'
 import type { Order, SubscriptionItem } from '@/types/order'
 import { useAuthStore } from '@/stores/auth'
 
-const activeTab = ref<'orders' | 'history' | 'subscriptions'>('orders')
+const route = useRoute()
+const router = useRouter()
+
+// Initialize activeTab from URL query parameter, default to 'orders'
+const activeTab = ref<'orders' | 'history' | 'subscriptions' | 'returns'>(
+  (route.query.tab as 'orders' | 'history' | 'subscriptions' | 'returns') || 'orders'
+)
 const isModalOpen = ref(false)
 const isSubscriptionModalOpen = ref(false)
 const selectedOrder = ref<Order | null>(null)
@@ -318,6 +352,19 @@ const fetchSubscriptions = async (reset = false) => {
     page_length: paginationSubscriptions.pageLength
   })
 }
+
+// Change tab and update URL
+const changeTab = (tab: 'orders' | 'history' | 'subscriptions' | 'returns') => {
+  router.push({ query: { ...route.query, tab } })
+}
+
+// Watch route changes to sync activeTab
+watch(() => route.query.tab, (newTab) => {
+  const validTab = (newTab as 'orders' | 'history' | 'subscriptions' | 'returns') || 'orders'
+  if (activeTab.value !== validTab) {
+    activeTab.value = validTab
+  }
+}, { immediate: true })
 
 // Watchers
 watch(activeTab, () => {

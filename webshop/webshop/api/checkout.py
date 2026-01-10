@@ -752,6 +752,9 @@ def create_payment_request_for_manual_approval(sales_order, payment_method):
 	payment_duration_seconds = payment_method.payment_duration or 86400  # Default 24h if 0 or None
 	payment_request.payment_due_date = now_datetime() + timedelta(seconds=payment_duration_seconds)
 
+	if payment_method.bank_account:
+		payment_request.bank_account = payment_method.bank_account
+
 	# Insert as Draft (docstatus=0) - this is the "Pending" state
 	payment_request.insert(ignore_permissions=True)
 
