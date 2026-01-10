@@ -13,8 +13,8 @@
         <!-- Filter tabs -->
         <div class="bg-white border border-gray-200 rounded-xl p-4 mb-6">
           <div class="flex flex-wrap gap-2">
-            <button v-for="status in filterStatuses" :key="status.value" @click="selectedStatus = status.value"
-              class="px-4 py-2 rounded-lg font-medium transition-colors" :class="{
+            <button v-for="status in filterStatuses" :key="status.value ?? status.label"
+              @click="selectedStatus = status.value" class="px-4 py-2 rounded-lg font-medium transition-colors" :class="{
                 'bg-primary text-white': selectedStatus === status.value,
                 'bg-gray-100 text-gray-700 hover:bg-gray-200': selectedStatus !== status.value
               }">
