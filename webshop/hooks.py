@@ -56,12 +56,41 @@ doc_events = {
         "on_update": [
             "webshop.webshop.crud_events.item.update_website_item.execute",
             "webshop.webshop.crud_events.item.invalidate_item_variants_cache.execute",
+            "webshop.webshop.api.cache_utils.clear_product_cache",
+        ],
+        "after_insert": [
+            "webshop.webshop.api.cache_utils.clear_product_cache",
+        ],
+        "on_trash": [
+            "webshop.webshop.api.cache_utils.clear_product_cache",
         ],
         "before_rename": [
             "webshop.webshop.crud_events.item.validate_duplicate_website_item.execute",
         ],
         "after_rename": [
             "webshop.webshop.crud_events.item.invalidate_item_variants_cache.execute",
+        ],
+    },
+    "Website Item": {
+        "on_update": [
+            "webshop.webshop.api.cache_utils.clear_product_cache",
+        ],
+        "after_insert": [
+            "webshop.webshop.api.cache_utils.clear_product_cache",
+        ],
+        "on_trash": [
+            "webshop.webshop.api.cache_utils.clear_product_cache",
+        ],
+    },
+    "Item Price": {
+        "on_update": [
+            "webshop.webshop.api.cache_utils.clear_product_cache",
+        ],
+        "after_insert": [
+            "webshop.webshop.api.cache_utils.clear_product_cache",
+        ],
+        "on_trash": [
+            "webshop.webshop.api.cache_utils.clear_product_cache",
         ],
     },
     "Sales Taxes and Charges Template": {

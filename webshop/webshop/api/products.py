@@ -128,7 +128,7 @@ def get_items_home(student=None):
         'discounts': discounts
     }
     
-    frappe.cache().set_value(cache_key, result, expires_in_sec=300)
+    frappe.cache().set_value(cache_key, result, expires_in_sec=24 * 60 * 60)
     
     return result
 
