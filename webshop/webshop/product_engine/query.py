@@ -201,7 +201,7 @@ class ProductQuery:
                 conditions.append(f"({search_conditions})")
                 params.update(search_params)
 
-        # School Unit Filter
+        # School Unit Filter (Optional: include items with NULL or empty unit)
         if school_unit:
             if isinstance(school_unit, list):
                 su_placeholders = []
@@ -209,12 +209,12 @@ class ProductQuery:
                     p_name = f"su_{i}"
                     params[p_name] = su
                     su_placeholders.append(f"%({p_name})s")
-                conditions.append(f"i.school_unit IN ({', '.join(su_placeholders)})")
+                conditions.append(f"(i.school_unit IN ({', '.join(su_placeholders)}) OR i.school_unit IS NULL OR i.school_unit = '')")
             else:
-                conditions.append("i.school_unit = %(school_unit)s")
+                conditions.append("(i.school_unit = %(school_unit)s OR i.school_unit IS NULL OR i.school_unit = '')")
                 params["school_unit"] = school_unit
 
-        # Grade Filter
+        # Grade Filter (Optional: include items with NULL or empty grade)
         if grade:
             if isinstance(grade, list):
                 grade_placeholders = []
@@ -222,9 +222,9 @@ class ProductQuery:
                     p_name = f"grade_{i}"
                     params[p_name] = g
                     grade_placeholders.append(f"%({p_name})s")
-                conditions.append(f"i.grade IN ({', '.join(grade_placeholders)})")
+                conditions.append(f"(i.grade IN ({', '.join(grade_placeholders)}) OR i.grade IS NULL OR i.grade = '')")
             else:
-                conditions.append("i.grade = %(grade)s")
+                conditions.append("(i.grade = %(grade)s OR i.grade IS NULL OR i.grade = '')")
                 params["grade"] = grade
 
         # Add all conditions
@@ -337,7 +337,7 @@ class ProductQuery:
                 conditions.append(f"({search_conditions})")
                 params.update(search_params)
 
-        # School Unit Filter
+        # School Unit Filter (Optional: include items with NULL or empty unit)
         if school_unit:
             if isinstance(school_unit, list):
                 su_placeholders = []
@@ -345,12 +345,12 @@ class ProductQuery:
                     p_name = f"su_{i}"
                     params[p_name] = su
                     su_placeholders.append(f"%({p_name})s")
-                conditions.append(f"i.school_unit IN ({', '.join(su_placeholders)})")
+                conditions.append(f"(i.school_unit IN ({', '.join(su_placeholders)}) OR i.school_unit IS NULL OR i.school_unit = '')")
             else:
-                conditions.append("i.school_unit = %(school_unit)s")
+                conditions.append("(i.school_unit = %(school_unit)s OR i.school_unit IS NULL OR i.school_unit = '')")
                 params["school_unit"] = school_unit
 
-        # Grade Filter
+        # Grade Filter (Optional: include items with NULL or empty grade)
         if grade:
             if isinstance(grade, list):
                 grade_placeholders = []
@@ -358,9 +358,9 @@ class ProductQuery:
                     p_name = f"grade_{i}"
                     params[p_name] = g
                     grade_placeholders.append(f"%({p_name})s")
-                conditions.append(f"i.grade IN ({', '.join(grade_placeholders)})")
+                conditions.append(f"(i.grade IN ({', '.join(grade_placeholders)}) OR i.grade IS NULL OR i.grade = '')")
             else:
-                conditions.append("i.grade = %(grade)s")
+                conditions.append("(i.grade = %(grade)s OR i.grade IS NULL OR i.grade = '')")
                 params["grade"] = grade
 
         # Add all conditions
