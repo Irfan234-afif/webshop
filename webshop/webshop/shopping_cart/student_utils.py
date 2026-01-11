@@ -19,7 +19,10 @@ def get_active_student():
 	Returns:
 		Student object if active student exists and is valid, None otherwise
 	"""
+	# Try to get from session first, then fallback to cookie
 	student_name = frappe.session.get("active_student")
+	if not student_name and hasattr(frappe, "request"):
+		student_name = frappe.request.cookies.get("active_student")
 
 	if not student_name:
 		return None

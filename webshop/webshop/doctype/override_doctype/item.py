@@ -292,3 +292,60 @@ def generate_subscription_plans(
 		"failed": failed,
 		"total": len(variants),
 	}
+
+
+@frappe.whitelist()
+def bulk_publish_items(items):
+	"""Bulk publish multiple items to website"""
+	
+	if not frappe.has_permission("Website Item", "write"):
+		frappe.throw(_("No Permission to create Website Item"))
+	
+	# Ensure items is a list
+	if isinstance(items, str):
+		import json
+		items = json.loads(items)
+	
+	if not items or not isinstance(items, list):
+		frappe.throw(_("Items list is required"))
+	
+	success = 0
+	skipped = 0
+	failed = 0
+	
+	# Import the website item creation function
+	from webshop.webshop.doctype.website_item.website_item import make_website_item
+	
+	for item_name in items:
+		try:
+			# Check if item exists
+			if not frappe.db.exists("Item", item_name):
+				failed += 1
+				continue
+			
+			# Get item doc
+			item_doc = frappe.get_doc("Item", item_name)
+			
+			# Check if already published
+			if item_doc.published_in_website:
+				skipped += 1
+				continue
+			
+			# Publish to website
+			make_website_item(item_doc)
+			success += 1
+			
+		except Exception as e:
+			frappe.log_error(
+				title=_("Error publishing item {0} to website").format(item_name),
+				message=str(e),
+			)
+			failed += 1
+			continue
+	
+	return {
+		"success": success,
+		"skipped": skipped,
+		"failed": failed,
+		"total": len(items),
+	}

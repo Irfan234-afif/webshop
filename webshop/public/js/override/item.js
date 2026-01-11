@@ -1,3 +1,4 @@
+// Form View Scripts for Item
 frappe.ui.form.on("Item", {
 	refresh: function (frm) {
 		if (!frm.doc.__islocal) {

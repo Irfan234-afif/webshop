@@ -241,17 +241,32 @@ export const useCartStore = defineStore('cart', () => {
     if (students.value.length === 0) {
       await fetchStudents()
     }
-    // Try to get active student from localStorage first
+    // Try to get active student from cookie first
     const storedActiveStudent = getCookie('active_student')
     const cart_count = getCookie('cart_count')
 
     itemCount.value = cart_count ? parseInt(cart_count) : 0
     activeStudent.value = storedActiveStudent
+    
+    // If no active student, select the primary student
+    if (!activeStudent.value && students.value.length > 0) {
+      const primaryStudent = students.value.find(s => s.is_primary)
+      if (primaryStudent) {
+        await setActiveStudent(primaryStudent)
+        console.log('Auto-selected primary student:', primaryStudent.student_name)
+      } else {
+        // Fallback: select the first student if no primary is set
+        const firstStudent = students.value[0]
+        if (firstStudent) {
+          await setActiveStudent(firstStudent)
+          console.log('Auto-selected first student:', firstStudent.student_name)
+        }
+      }
+    }
+    
     // Fetch all student carts to get the current state from backend
     // This ensures we have the most up-to-date information
-    if (!activeStudent.value) {
-      await fetchAllStudentCarts()
-    }
+    await fetchAllStudentCarts()
   }
 
   return {

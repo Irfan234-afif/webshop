@@ -9,7 +9,10 @@ export const useProductsStore = defineStore('products', () => {
   // State
   const allProducts = ref<Product[]>([])
   const categories = ref<{name: string, item_group_name: string}[]>([])
+  const schoolUnits = ref<{name: string}[]>([])
+  const grades = ref<{name: string, grade_name: string, school_unit: string}[]>([])
   const isLoading = ref(false)
+  const isLoadingMore = ref(false)
   const error = ref<Error | null>(null)
   
   // Pagination State
@@ -17,10 +20,11 @@ export const useProductsStore = defineStore('products', () => {
   const nextStart = ref(0)
   const pageLength = ref(12)
 
-  // Active Filters (synced with URL query params)
   const activeFilters = ref<ProductFilters>({
     categories: [],
-    priceRanges: []
+    priceRanges: [],
+    schoolUnits: [],
+    grades: []
   })
 
   // Watchers
@@ -28,6 +32,22 @@ export const useProductsStore = defineStore('products', () => {
     activeFilters,
     () => {
       fetchProducts()
+    },
+    { deep: true }
+  )
+
+  // Clear grade filters when school unit selection changes
+  watch(
+    () => activeFilters.value.schoolUnits,
+    (newUnits, oldUnits) => {
+      // Only clear if school units actually changed
+      if (JSON.stringify(newUnits) !== JSON.stringify(oldUnits)) {
+        // Remove any selected grades that don't belong to the new school unit selection
+        activeFilters.value.grades = activeFilters.value.grades.filter((gradeName) => {
+          const grade = grades.value.find((g) => g.name === gradeName)
+          return grade && newUnits.includes(grade.school_unit)
+        })
+      }
     },
     { deep: true }
   )
@@ -63,10 +83,36 @@ export const useProductsStore = defineStore('products', () => {
     }))
   })
 
+  const availableSchoolUnits = computed((): FilterOption[] => {
+    return schoolUnits.value.map((s) => ({
+      value: s.name,
+      label: s.name,
+      count: undefined
+    }))
+  })
+
+  const availableGrades = computed((): FilterOption[] => {
+    // Only show grades if a school unit is selected
+    if (activeFilters.value.schoolUnits.length === 0) {
+      return []
+    }
+    
+    // Filter grades that belong to selected school units
+    return grades.value
+      .filter((g) => activeFilters.value.schoolUnits.includes(g.school_unit))
+      .map((g) => ({
+        value: g.name,
+        label: g.grade_name,
+        count: undefined
+      }))
+  })
+
   const hasActiveFilters = computed(() => {
     return (
       activeFilters.value.categories.length > 0 ||
-      activeFilters.value.priceRanges.length > 0
+      activeFilters.value.priceRanges.length > 0 ||
+      activeFilters.value.schoolUnits.length > 0 ||
+      activeFilters.value.grades.length > 0
     )
   })
 
@@ -83,15 +129,50 @@ export const useProductsStore = defineStore('products', () => {
     }
   }
 
-  const fetchProducts = async ({ loadMore = false } = {}) => {
-    if (isLoading.value) return
+  const fetchSchoolUnits = async () => {
+    try {
+      const response = await frappeRequest({
+        url: 'webshop.webshop.api.products.get_school_units',
+        method: 'GET'
+      })
+      schoolUnits.value = response || []
+    } catch (e) {
+      console.error('Failed to fetch school units:', e)
+    }
+  }
 
-    isLoading.value = true
+  const fetchGrades = async () => {
+    try {
+      const response = await frappeRequest({
+        url: 'webshop.webshop.api.products.get_grades',
+        method: 'GET'
+      })
+      grades.value = response || []
+    } catch (e) {
+      console.error('Failed to fetch grades:', e)
+    }
+  }
+
+  const fetchProducts = async ({ loadMore = false } = {}) => {
+    if (isLoading.value || isLoadingMore.value) return
+
+    // Set appropriate loading state based on action
+    if (loadMore) {
+      isLoadingMore.value = true
+    } else {
+      isLoading.value = true
+    }
     error.value = null
     
-    // Ensure categories are loaded
+    // Ensure categories and school units are loaded
     if (categories.value.length === 0) {
        fetchCategories()
+    }
+    if (schoolUnits.value.length === 0) {
+       fetchSchoolUnits()
+    }
+    if (grades.value.length === 0) {
+       fetchGrades()
     }
 
     try {
@@ -139,6 +220,38 @@ export const useProductsStore = defineStore('products', () => {
       if (activeFilters.value.categories.length > 0) {
           params.item_group = JSON.stringify(activeFilters.value.categories)
       }
+
+      if (activeFilters.value.schoolUnits.length > 0) {
+          // Backend expects simple list or single value, but handled mostly as list if implemented generic
+          // But our loop implementation expected single string if not adapted
+          // Wait, backend logic for item_group handled list serialization.
+          // For school_unit, I implemented generic check in products.py
+          // products.py passes school_unit directly. Query logic handles it.
+          // If query logic expects single value?
+          // "params['school_unit'] = school_unit" in query.py
+          // "i.school_unit = %(school_unit)s"
+          // This implies single value equality.
+          // If we want multiple, we need "IN".
+          // I implemented "=" in query.py: conditions.append("i.school_unit = %(school_unit)s")
+          // This is single value match.
+          // I should probably restrict frontend to single selection OR update backend to IN.
+          // Given the FilterGroup usually allows multiple, I should probably have used IN.
+          // But for now, let's just pass one if multiple selected, or better pass it properly if backend supports list.
+          // Backend just does condition.append.
+          // I will pass the first one for now to be safe with current backend implementation.
+          // Or even better, pass it and if it fails, it fails (but it will fail if list is passed to %s and expected string in DB driver? no, frappe handles it?)
+          // No, usually in raw sql with %(name)s, it expects value.
+          
+          // Let's pass the list now that backend supports it
+          if (activeFilters.value.schoolUnits.length > 0) {
+             params.school_unit = JSON.stringify(activeFilters.value.schoolUnits)
+          }
+      }
+
+       // Grade filter
+       if (activeFilters.value.grades.length > 0) {
+          params.grade = JSON.stringify(activeFilters.value.grades)
+       }
       
       if (priceMin !== undefined) {
           params.price_min = priceMin
@@ -178,6 +291,7 @@ export const useProductsStore = defineStore('products', () => {
       console.error('Failed to fetch products:', e)
     } finally {
       isLoading.value = false
+      isLoadingMore.value = false
     }
   }
 
@@ -208,11 +322,30 @@ export const useProductsStore = defineStore('products', () => {
     }
   }
 
+  const toggleSchoolUnit = (unit: string) => {
+    const index = activeFilters.value.schoolUnits.indexOf(unit)
+    if (index > -1) {
+      activeFilters.value.schoolUnits.splice(index, 1)
+    } else {
+      activeFilters.value.schoolUnits.push(unit)
+    }
+  }
+
+  const toggleGrade = (grade: string) => {
+    const index = activeFilters.value.grades.indexOf(grade)
+    if (index > -1) {
+      activeFilters.value.grades.splice(index, 1)
+    } else {
+      activeFilters.value.grades.push(grade)
+    }
+  }
+
   const clearFilters = () => {
     activeFilters.value = {
       categories: [],
-
-      priceRanges: []
+      priceRanges: [],
+      schoolUnits: [],
+      grades: []
     }
   }
 
@@ -220,6 +353,7 @@ export const useProductsStore = defineStore('products', () => {
     // State
     allProducts,
     isLoading,
+    isLoadingMore,
     error,
     activeFilters,
     // Getters
@@ -227,6 +361,8 @@ export const useProductsStore = defineStore('products', () => {
     availableCategories,
 
     availablePriceRanges,
+    availableSchoolUnits,
+    availableGrades,
     hasActiveFilters,
     hasMore,
     nextStart,
@@ -234,7 +370,8 @@ export const useProductsStore = defineStore('products', () => {
     fetchProducts,
     setFilters,
     toggleCategory,
-
+    toggleSchoolUnit,
+    toggleGrade,
     togglePriceRange,
     clearFilters
   }

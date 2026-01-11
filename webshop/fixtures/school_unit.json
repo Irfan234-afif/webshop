@@ -1,0 +1,46 @@
+[
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "School Unit",
+  "is_active": 1,
+  "modified": "2026-01-11 21:13:35.239869",
+  "name": "SMP",
+  "sort_order": 3,
+  "unit_code": "SMP",
+  "unit_name": "SMP"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "School Unit",
+  "is_active": 1,
+  "modified": "2026-01-11 21:13:32.245164",
+  "name": "SMA",
+  "sort_order": 4,
+  "unit_code": "SMA",
+  "unit_name": "SMA"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "School Unit",
+  "is_active": 1,
+  "modified": "2026-01-11 21:13:38.166278",
+  "name": "SD",
+  "sort_order": 2,
+  "unit_code": "SD",
+  "unit_name": "SD"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "School Unit",
+  "is_active": 1,
+  "modified": "2026-01-10 14:46:17.531315",
+  "name": "TK",
+  "sort_order": 1,
+  "unit_code": "TK",
+  "unit_name": "TK"
+ }
+]

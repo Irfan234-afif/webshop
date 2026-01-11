@@ -43,6 +43,7 @@ declare module 'vue' {
     NavbarActions: typeof import('./src/components/navbar/NavbarActions.vue')['default']
     NavbarLinks: typeof import('./src/components/navbar/NavbarLinks.vue')['default']
     NavbarLogo: typeof import('./src/components/navbar/NavbarLogo.vue')['default']
+    NoProductIcon: typeof import('./src/components/icons/NoProductIcon.vue')['default']
     OrderCard: typeof import('./src/components/features/orders/OrderCard.vue')['default']
     OrderDetailModal: typeof import('./src/components/features/orders/OrderDetailModal.vue')['default']
     OrdersTab: typeof import('./src/components/features/orders/OrdersTab.vue')['default']

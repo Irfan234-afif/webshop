@@ -3,10 +3,46 @@ from frappe.utils import cint, flt
 from webshop.webshop.shopping_cart.product_info import get_product_info_for_website
 from webshop.webshop.doctype.item_review.item_review import get_item_reviews
 from erpnext.utilities.product import get_price
+import time
 
 @frappe.whitelist(allow_guest=True)
-def get_items_home():
+def get_items_home(student=None):
     from webshop.webshop.product_engine.query import ProductQuery
+    
+    # Initialize filter parameters
+    school_unit = None
+    grade = None
+    
+    # If student is provided, fetch their school unit and grade
+    if student:
+        try:
+            student_doc = frappe.get_cached_doc("Student", student)
+            school_unit = student_doc.school_unit
+            grade = student_doc.grade_level
+        except Exception as e:
+            frappe.log_error(f"Failed to fetch student details: {str(e)}")
+            # Continue without filtering if student fetch fails
+    
+    # Build cache key based on School Unit and Grade combination
+    if school_unit and grade:
+        # Sanitize cache key to avoid special characters
+        safe_unit = school_unit.replace(" ", "_").replace(":", "_")
+        safe_grade = grade.replace(" ", "_").replace(":", "_")
+        cache_key = f"webshop:items_home:{safe_unit}:{safe_grade}"
+    elif school_unit:
+        # Filter by unit only if grade is not available
+        safe_unit = school_unit.replace(" ", "_").replace(":", "_")
+        cache_key = f"webshop:items_home:{safe_unit}:all_grades"
+    else:
+        # General cache for guests or users without student context
+        cache_key = "webshop:items_home:general"
+    
+    # Try to get cached data
+    cached_data = frappe.cache().get_value(cache_key)
+    if cached_data:
+        return cached_data
+    
+    # Get all item groups to show on homepage
     item_groups = frappe.get_all(
         "Item Group",
         filters=[
@@ -15,33 +51,85 @@ def get_items_home():
         pluck="name"
     )
 
+    # Limit to first 3 item groups and set items per group
+    limited_groups = item_groups[:3]
+    items_per_group = 15
+
     engine = ProductQuery()
+    all_items = []
+    all_discounts = []
 
-    try:
-        result = engine.query(
-            fields={
-                "item": [item_groups]
-            },
-            page_length=15
-        )
-    except:
-        frappe.log_error("Product Query with filter failed")
-        return {"exc": "Something went wrong!"}
+    # Query each item group separately to ensure fair distribution
+    for group in limited_groups:
+        try:
+            # Build query parameters with student filters
+            query_params = {
+                'item_group': group,
+                'page_length': items_per_group
+            }
+            
+            # Add School Unit filter if available
+            if school_unit:
+                query_params['school_unit'] = school_unit
+            
+            # Add Grade filter if available
+            if grade:
+                query_params['grade'] = grade
+            
+            group_result = engine.query(**query_params)
+            
+            if group_result and group_result.get('items'):
+                all_items.extend(group_result['items'])
+            
+            # Collect discounts from each result
+            if group_result and group_result.get('discounts'):
+                all_discounts.extend(group_result['discounts'])
+                
+        except Exception as e:
+            frappe.log_error(f"Product Query failed for group {group}: {str(e)}")
+            continue
 
-    result = frappe._dict(result)
+    # Fallback: If no items found with filters, retry without filters
+    if not all_items and (school_unit or grade):
+        frappe.log_error(f"No items found for school_unit={school_unit}, grade={grade}. Falling back to unfiltered results.")
+        
+        for group in limited_groups:
+            try:
+                group_result = engine.query(
+                    item_group=group,
+                    page_length=items_per_group
+                )
+                
+                if group_result and group_result.get('items'):
+                    all_items.extend(group_result['items'])
+                
+                if group_result and group_result.get('discounts'):
+                    all_discounts.extend(group_result['discounts'])
+                    
+            except Exception as e:
+                frappe.log_error(f"Fallback query failed for group {group}: {str(e)}")
+                continue
 
+    # Structure response to match expected format
     filtered_by_item_group = {}
-
-    for group in item_groups:
-        item_by_group = list(filter(
-            lambda x: x['item_group'] == group, result['items']
-            )
-        )
+    for group in limited_groups:
+        item_by_group = [item for item in all_items if item.get('item_group') == group]
         if item_by_group:
             filtered_by_item_group[group] = item_by_group
 
-    result.items = filtered_by_item_group
+    # Calculate overall discount range if any discounts found
+    discounts = []
+    if all_discounts:
+        discounts = [min(all_discounts), max(all_discounts)]
 
+    result = {
+        'items': filtered_by_item_group,
+        'items_count': len(all_items),
+        'discounts': discounts
+    }
+    
+    frappe.cache().set_value(cache_key, result, expires_in_sec=300)
+    
     return result
 
 
@@ -762,8 +850,9 @@ def get_all_student_cart_details():
 
 
 @frappe.whitelist(allow_guest=True)
-def get_products(search_term=None, item_group=None, start=0, page_length=1000, price_min=None, price_max=None):
+def get_products(search_term=None, item_group=None, start=0, page_length=1000, price_min=None, price_max=None, school_unit=None, grade=None):
     from webshop.webshop.product_engine.query import ProductQuery
+    from webshop.webshop.shopping_cart.student_utils import get_active_student
     import json
     from frappe.utils import cint
 
@@ -773,6 +862,30 @@ def get_products(search_term=None, item_group=None, start=0, page_length=1000, p
              item_group = json.loads(item_group)
         except:
              pass
+
+    # Handle school_unit list
+    if isinstance(school_unit, str) and school_unit.startswith("["):
+        try:
+             school_unit = json.loads(school_unit)
+        except:
+             pass
+
+    # Handle grade list
+    if isinstance(grade, str) and grade.startswith("["):
+        try:
+             grade = json.loads(grade)
+        except:
+             pass
+
+    # Auto-filter by active student's school unit if no unit filter provided
+    if not school_unit:
+        try:
+            active_student = get_active_student()
+            if active_student and hasattr(active_student, 'school_unit') and active_student.school_unit:
+                school_unit = active_student.school_unit
+        except Exception as e:
+            # Log error but continue without auto-filtering
+            frappe.log_error(f"Failed to get active student for auto-filtering: {str(e)}")
 
     fields = {}
     if price_min or price_max:
@@ -786,42 +899,13 @@ def get_products(search_term=None, item_group=None, start=0, page_length=1000, p
             search_term=search_term,
             item_group=item_group,
             start=cint(start),
-            page_length=cint(page_length)
+            page_length=cint(page_length),
+            school_unit=school_unit,
+            grade=grade
         )
     except Exception as e:
         frappe.log_error("Product Query failed: " + str(e))
         return []
-
-    # mapped_items = []
-
-    # for item in result.get("items", []):
-    #     mapped_item = {
-    #          "id": item.get("name"),
-    #          "type": "product",
-    #          "title": item.get("web_item_name") or item.get("item_name"),
-    #          "image": item.get("website_image") or "",
-    #          "category": item.get("item_group"),
-    #          "rating": 0,
-    #          "description": item.get("web_long_description") or item.get("description") or "",
-    #          "price": flt(item.get("price_list_rate") or item.get("final_price") or 0),
-    #          "originalPriceRange": item.get("formatted_price"),
-    #          "hasDiscount": bool(item.get("final_discount_percent")),
-    #          "discount": item.get("final_discount_percent"),
-    #          "priceRange": "under-50k"
-    #     }
-
-    #     # Calculate price range for frontend compat
-    #     p = mapped_item["price"]
-    #     if p < 50000:
-    #          mapped_item["priceRange"] = "under-50k"
-    #     elif 50000 <= p < 100000:
-    #          mapped_item["priceRange"] = "50k-100k"
-    #     elif 100000 <= p < 200000:
-    #          mapped_item["priceRange"] = "100k-200k"
-    #     else:
-    #          mapped_item["priceRange"] = "over-200k"
-
-    #     mapped_items.append(mapped_item)
 
     return result
 
@@ -836,3 +920,40 @@ def get_item_groups():
         order_by="idx asc"
     )
     return item_groups
+
+
+@frappe.whitelist(allow_guest=True)
+def get_school_units():
+    """Get all School Units."""
+    try:
+        return frappe.get_all(
+            "School Unit", 
+            filters={"is_active": 1},
+            fields=["name", "unit_name", "unit_code", "sort_order"], 
+            order_by="sort_order asc"
+        )
+    except Exception:
+        return []
+
+
+@frappe.whitelist(allow_guest=True)
+def get_grades(school_unit=None):
+    """Get all available grades, optionally filtered by school unit."""
+    try:
+        filters = {"enabled": 1}
+        
+        # If school_unit provided, filter by it
+        if school_unit:
+            filters["school_unit"] = school_unit
+        
+        grades = frappe.get_all(
+            "Grade",
+            filters=filters,
+            fields=["name", "grade_name", "school_unit", "sort_order"],
+            order_by="sort_order asc, name asc"
+        )
+        
+        return grades
+    except Exception as e:
+        frappe.log_error(f"Error fetching grades", e)
+        return []

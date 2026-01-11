@@ -248,7 +248,23 @@ def add_custom_fields():
 				"label": "Subscription Plan",
 				"depends_on": "is_subscription_item",
 				"insert_after": "is_subscription_item"
-			}
+			},
+			{
+                "fieldname": "grade",
+                "fieldtype": "Link",
+                "label": "Kelas/Grade",
+                "description": "Grade level for this item",
+                "options": "Grade",
+                "insert_after": "school_unit"
+            },
+			{
+                "fieldname": "school_unit",
+                "fieldtype": "Link",
+                "label": "School Unit",
+                "description": "For grouping the categories",
+                "options": "School Unit",
+                "insert_after": "item_group"
+            }
 		],
 		"Item Group": [
 			{

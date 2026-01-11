@@ -30,6 +30,11 @@ export function useFilterQuerySync() {
       filters.priceRanges = query.priceRanges.split(',').filter(Boolean) as PriceRange[]
     }
 
+    // Parse school units (comma-separated string)
+    if (query.schoolUnits && typeof query.schoolUnits === 'string') {
+      filters.schoolUnits = query.schoolUnits.split(',').filter(Boolean)
+    }
+
     return filters
   }
 
@@ -45,6 +50,10 @@ export function useFilterQuerySync() {
 
     if (filters.priceRanges.length > 0) {
       query.priceRanges = filters.priceRanges.join(',')
+    }
+
+    if (filters.schoolUnits.length > 0) {
+      query.schoolUnits = filters.schoolUnits.join(',')
     }
 
     return query

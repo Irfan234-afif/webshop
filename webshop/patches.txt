@@ -30,3 +30,5 @@ webshop.patches.add_use_fixed_period_to_subscription_plan
 webshop.patches.add_payment_method_type_to_payment_request
 webshop.patches.create_return_reason_master_data
 webshop.patches.add_return_request_custom_fields
+webshop.patches.add_school_unit_item
+webshop.patches.add_grade_field_to_item

@@ -26,7 +26,7 @@ const breadcrumbItems = [
 // Count active filters
 const activeFilterCount = computed(() => {
   const filters = productsStore.activeFilters
-  return filters.categories.length + filters.priceRanges.length
+  return filters.categories.length + filters.priceRanges.length + filters.schoolUnits.length + filters.grades.length
 })
 
 onMounted(async () => {
@@ -58,16 +58,15 @@ onMounted(async () => {
 
           <!-- Product Grid -->
           <div class="flex-1">
-            <ProductGrid :products="productsStore.allProducts"
-              :is-loading="productsStore.isLoading && productsStore.allProducts.length === 0" />
+            <ProductGrid :products="productsStore.allProducts" :is-loading="productsStore.isLoading" />
 
             <!-- Load More Button -->
             <div v-if="productsStore.hasMore" class="mt-8 flex justify-center">
-              <PrimaryButton @click="productsStore.fetchProducts({ loadMore: true })" variant="outline" size="large"
-                :disabled="productsStore.isLoading" class="min-w-[200px]">
-                <span v-if="productsStore.isLoading"
-                  class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></span>
-                {{ productsStore.isLoading ? 'Memuat...' : 'Muat Lebih Banyak' }}
+              <PrimaryButton @click="productsStore.fetchProducts({ loadMore: true })" variant="secondary" size="medium"
+                :disabled="productsStore.isLoadingMore" class="min-w-[200px]">
+                <span v-if="productsStore.isLoadingMore"
+                  class="mr-2 h-4 w-4 animate-spin text-white rounded-full border-2 border-white border-t-transparent"></span>
+                {{ productsStore.isLoadingMore ? 'Memuat...' : 'Muat Lebih Banyak' }}
               </PrimaryButton>
             </div>
           </div>

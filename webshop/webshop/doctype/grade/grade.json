@@ -1,61 +1,55 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:unit_code",
- "creation": "2024-12-19 00:00:00",
+ "autoname": "field:grade_name",
+ "creation": "2026-01-11 14:40:00",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "unit_name",
-  "unit_code",
-  "description",
-  "is_active",
-  "sort_order"
+  "grade_name",
+  "school_unit",
+  "sort_order",
+  "enabled"
  ],
  "fields": [
   {
-   "fieldname": "unit_name",
+   "fieldname": "grade_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Unit Name",
+   "label": "Grade Name",
    "reqd": 1,
    "unique": 1
   },
   {
-   "fieldname": "unit_code",
-   "fieldtype": "Data",
+   "fieldname": "school_unit",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Unit Code",
-   "reqd": 1,
-   "unique": 1
+   "label": "School Unit",
+   "options": "School Unit",
+   "reqd": 1
   },
   {
-   "fieldname": "description",
-   "fieldtype": "Text Editor",
-   "label": "Description"
-  },
-  {
-   "default": "1",
-   "fieldname": "is_active",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "label": "Is Active"
-  },
-  {
-   "default": "1",
-   "description": "For show at website",
+   "default": "0",
    "fieldname": "sort_order",
    "fieldtype": "Int",
-   "label": "Order"
+   "in_list_view": 1,
+   "label": "Sort Order"
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-11 21:12:43.056153",
+ "modified": "2026-01-11 15:00:13.315576",
  "modified_by": "Administrator",
  "module": "Webshop",
- "name": "School Unit",
+ "name": "Grade",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
@@ -77,14 +71,14 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Website Manager",
+   "role": "All",
    "share": 1
   }
  ],
  "quick_entry": 1,
  "row_format": "Dynamic",
- "sort_field": "modified",
- "sort_order": "DESC",
+ "sort_field": "sort_order",
+ "sort_order": "ASC",
  "states": [],
  "track_changes": 1
 }

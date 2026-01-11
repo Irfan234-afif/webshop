@@ -38,7 +38,7 @@ class ProductQuery:
             "is_subscription_item",
         ]
 
-    def query(self, attributes=None, fields=None, search_term=None, start=0, item_group=None, page_length=None):
+    def query(self, attributes=None, fields=None, search_term=None, start=0, item_group=None, page_length=None, school_unit=None, grade=None):
         """
         Args:
                 attributes (dict, optional): Item Attribute filters
@@ -91,10 +91,10 @@ class ProductQuery:
         # Query results using raw SQL with final price calculation
         if attributes:
             result, count = self.query_items_with_attributes_raw_sql(
-                attributes, fields, search_term, item_group, start
+                attributes, fields, search_term, item_group, start, school_unit, grade
             )
         else:
-            result, count = self.query_items_raw_sql(fields, search_term, item_group, start)
+            result, count = self.query_items_raw_sql(fields, search_term, item_group, start, school_unit, grade)
 
         # Sort by ranking
         result = sorted(result, key=lambda x: x.get("ranking") or 0, reverse=True)
@@ -142,7 +142,7 @@ class ProductQuery:
             },
         }
 
-    def query_items_raw_sql(self, fields=None, search_term=None, item_group=None, start=0):
+    def query_items_raw_sql(self, fields=None, search_term=None, item_group=None, start=0, school_unit=None, grade=None):
         """Build and execute raw SQL query with base price, then calculate final price in bulk."""
 
         # Build SELECT fields
@@ -156,6 +156,7 @@ class ProductQuery:
 					ip.price_list_rate as base_price
 				FROM `tabWebsite Item` wi
 				INNER JOIN `tabItem Price` ip ON ip.item_code = wi.item_code
+                {"INNER JOIN `tabItem` i ON i.item_code = wi.item_code" if (school_unit or grade) else ""}
 				WHERE wi.published = 1
 				AND ip.price_list = %(price_list)s
 			"""
@@ -163,6 +164,7 @@ class ProductQuery:
             query = f"""
 				SELECT {fields_sql}
 				FROM `tabWebsite Item` wi
+                {"INNER JOIN `tabItem` i ON i.item_code = wi.item_code" if (school_unit or grade) else ""}
 				WHERE wi.published = 1
 			"""
 
@@ -199,6 +201,32 @@ class ProductQuery:
                 conditions.append(f"({search_conditions})")
                 params.update(search_params)
 
+        # School Unit Filter
+        if school_unit:
+            if isinstance(school_unit, list):
+                su_placeholders = []
+                for i, su in enumerate(school_unit):
+                    p_name = f"su_{i}"
+                    params[p_name] = su
+                    su_placeholders.append(f"%({p_name})s")
+                conditions.append(f"i.school_unit IN ({', '.join(su_placeholders)})")
+            else:
+                conditions.append("i.school_unit = %(school_unit)s")
+                params["school_unit"] = school_unit
+
+        # Grade Filter
+        if grade:
+            if isinstance(grade, list):
+                grade_placeholders = []
+                for i, g in enumerate(grade):
+                    p_name = f"grade_{i}"
+                    params[p_name] = g
+                    grade_placeholders.append(f"%({p_name})s")
+                conditions.append(f"i.grade IN ({', '.join(grade_placeholders)})")
+            else:
+                conditions.append("i.grade = %(grade)s")
+                params["grade"] = grade
+
         # Add all conditions
         if conditions:
             query += " AND " + " AND ".join(conditions)
@@ -229,6 +257,7 @@ class ProductQuery:
             count_query = f"""
 				SELECT COUNT(DISTINCT wi.name) as total
 				FROM `tabWebsite Item` wi
+                {"INNER JOIN `tabItem` i ON i.item_code = wi.item_code" if (school_unit or grade) else ""}
 				WHERE wi.published = 1
 			"""
             if conditions:
@@ -254,7 +283,7 @@ class ProductQuery:
         return items, count
 
     def query_items_with_attributes_raw_sql(
-        self, attributes, fields=None, search_term=None, item_group=None, start=0
+        self, attributes, fields=None, search_term=None, item_group=None, start=0, school_unit=None, grade=None
     ):
         """Build and execute raw SQL query with attribute filters."""
 
@@ -275,6 +304,7 @@ class ProductQuery:
         query = f"""
 			SELECT {fields_sql}
 			FROM `tabWebsite Item` wi
+            {"INNER JOIN `tabItem` i ON i.item_code = wi.item_code" if (school_unit or grade) else ""}
 			WHERE wi.published = 1
 			AND wi.item_code IN ({item_codes_placeholders})
 		"""
@@ -307,6 +337,32 @@ class ProductQuery:
                 conditions.append(f"({search_conditions})")
                 params.update(search_params)
 
+        # School Unit Filter
+        if school_unit:
+            if isinstance(school_unit, list):
+                su_placeholders = []
+                for i, su in enumerate(school_unit):
+                    p_name = f"su_{i}"
+                    params[p_name] = su
+                    su_placeholders.append(f"%({p_name})s")
+                conditions.append(f"i.school_unit IN ({', '.join(su_placeholders)})")
+            else:
+                conditions.append("i.school_unit = %(school_unit)s")
+                params["school_unit"] = school_unit
+
+        # Grade Filter
+        if grade:
+            if isinstance(grade, list):
+                grade_placeholders = []
+                for i, g in enumerate(grade):
+                    p_name = f"grade_{i}"
+                    params[p_name] = g
+                    grade_placeholders.append(f"%({p_name})s")
+                conditions.append(f"i.grade IN ({', '.join(grade_placeholders)})")
+            else:
+                conditions.append("i.grade = %(grade)s")
+                params["grade"] = grade
+
         # Add all conditions
         if conditions:
             query += " AND " + " AND ".join(conditions)
@@ -318,6 +374,7 @@ class ProductQuery:
         count_query = f"""
 			SELECT COUNT(DISTINCT wi.name) as total
 			FROM `tabWebsite Item` wi
+            {"INNER JOIN `tabItem` i ON i.item_code = wi.item_code" if (school_unit or grade) else ""}
 			WHERE wi.published = 1
 			AND wi.item_code IN ({item_codes_placeholders})
 		"""

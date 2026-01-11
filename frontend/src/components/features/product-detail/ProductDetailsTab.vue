@@ -29,8 +29,7 @@ defineProps<Props>()
           <dt class="text-sm font-semibold text-gray-700 sm:w-1/3">
             {{ spec.label }}
           </dt>
-          <dd class="text-sm text-gray-600 sm:w-2/3">
-            {{ spec.value }}
+          <dd class="text-sm text-gray-600 sm:w-2/3" v-html="spec.value">
           </dd>
         </div>
       </dl>

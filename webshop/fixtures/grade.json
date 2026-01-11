@@ -1,0 +1,142 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Grade",
+  "enabled": 1,
+  "grade_name": "1",
+  "modified": "2026-01-11 21:18:58.712792",
+  "name": "1",
+  "school_unit": "SD",
+  "sort_order": 3
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Grade",
+  "enabled": 1,
+  "grade_name": "2",
+  "modified": "2026-01-11 21:19:56.803163",
+  "name": "2",
+  "school_unit": "SD",
+  "sort_order": 4
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Grade",
+  "enabled": 1,
+  "grade_name": "3",
+  "modified": "2026-01-11 21:20:20.430383",
+  "name": "3",
+  "school_unit": "SD",
+  "sort_order": 5
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Grade",
+  "enabled": 1,
+  "grade_name": "4",
+  "modified": "2026-01-11 21:20:25.204278",
+  "name": "4",
+  "school_unit": "SD",
+  "sort_order": 6
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Grade",
+  "enabled": 1,
+  "grade_name": "5",
+  "modified": "2026-01-11 21:20:30.287362",
+  "name": "5",
+  "school_unit": "SD",
+  "sort_order": 7
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Grade",
+  "enabled": 1,
+  "grade_name": "6",
+  "modified": "2026-01-11 21:20:41.689456",
+  "name": "6",
+  "school_unit": "SD",
+  "sort_order": 8
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Grade",
+  "enabled": 1,
+  "grade_name": "7",
+  "modified": "2026-01-11 21:20:12.496542",
+  "name": "7",
+  "school_unit": "SMP",
+  "sort_order": 9
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Grade",
+  "enabled": 1,
+  "grade_name": "8",
+  "modified": "2026-01-11 21:19:45.355548",
+  "name": "8",
+  "school_unit": "SMP",
+  "sort_order": 10
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Grade",
+  "enabled": 1,
+  "grade_name": "9",
+  "modified": "2026-01-11 21:19:38.386180",
+  "name": "9",
+  "school_unit": "SMP",
+  "sort_order": 11
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Grade",
+  "enabled": 1,
+  "grade_name": "B",
+  "modified": "2026-01-11 21:19:16.976051",
+  "name": "B",
+  "school_unit": "TK",
+  "sort_order": 2
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Grade",
+  "enabled": 1,
+  "grade_name": "10",
+  "modified": "2026-01-11 21:20:47.026172",
+  "name": "10",
+  "school_unit": "SMA",
+  "sort_order": 12
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Grade",
+  "enabled": 1,
+  "grade_name": "11",
+  "modified": "2026-01-11 21:20:51.665739",
+  "name": "11",
+  "school_unit": "SMA",
+  "sort_order": 13
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Grade",
+  "enabled": 1,
+  "grade_name": "12",
+  "modified": "2026-01-11 21:20:55.498650",
+  "name": "12",
+  "school_unit": "SMA",
+  "sort_order": 15
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Grade",
+  "enabled": 1,
+  "grade_name": "A",
+  "modified": "2026-01-11 21:19:04.330852",
+  "name": "A",
+  "school_unit": "TK",
+  "sort_order": 1
+ }
+]

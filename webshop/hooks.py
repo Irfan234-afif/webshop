@@ -47,6 +47,10 @@ doctype_js = {
     "Payment Request": "webshop/doctype/override_doctype/payment_request.js",
 }
 
+doctype_list_js = {
+    "Item": "public/js/override/item_list.js",
+}
+
 doc_events = {
     "Item": {
         "on_update": [
@@ -104,3 +108,10 @@ has_website_permission = {
     "Website Item": "webshop.webshop.doctype.website_item.website_item.has_website_permission_for_website_item",
     "Item Group": "webshop.webshop.doctype.website_item.website_item.has_website_permission_for_item_group"
 }
+
+# Fixtures
+fixtures = [
+    "Grade",
+    "School Unit",
+    "Item Attribute"
+]

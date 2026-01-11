@@ -22,11 +22,7 @@
 
     <!-- Student List -->
     <div class="mb-6">
-      <div
-        v-for="(student, index) in formData.students"
-        :key="index"
-        class="mb-8"
-      >
+      <div v-for="(student, index) in formData.students" :key="index" class="mb-8">
         <!-- Student Header -->
         <div class="bg-white border border-gray-200 rounded-xl p-6">
           <div class="flex items-start gap-3 mb-4">
@@ -45,71 +41,53 @@
           <div class="space-y-4">
             <!-- NIS/NISN -->
             <div>
-              <input
-                :id="`nisn_${index}`"
-                v-model="student.nisn"
-                type="text"
+              <input :id="`nisn_${index}`" v-model="student.nisn" type="text"
                 class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                placeholder="NIS / NISN"
-              />
+                placeholder="NIS / NISN" />
             </div>
 
             <!-- Nama Anak -->
             <div>
-              <input
-                :id="`student_name_${index}`"
-                v-model="student.student_name"
-                type="text"
-                required
+              <input :id="`student_name_${index}`" v-model="student.student_name" type="text" required
                 class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                placeholder="Nama Anak"
-              />
+                placeholder="Nama Anak" />
             </div>
 
             <!-- Unit -->
             <div>
-              <select
-                :id="`school_unit_${index}`"
-                v-model="student.school_unit"
-                required
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition appearance-none"
-              >
-                <option value="" disabled>Unit</option>
-                <option value="SD">SD (Sekolah Dasar)</option>
-                <option value="SMP">SMP (Sekolah Menengah Pertama)</option>
-                <option value="SMA">SMA (Sekolah Menengah Atas)</option>
-                <option value="SMK">SMK (Sekolah Menengah Kejuruan)</option>
+              <select :id="`school_unit_${index}`" v-model="student.school_unit" required
+                @change="handleSchoolUnitChange(index)" :disabled="isLoadingUnits"
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition appearance-none">
+                <option value="" disabled>{{ isLoadingUnits ? 'Memuat...' : 'Pilih Unit' }}</option>
+                <option v-for="unit in schoolUnits" :key="unit.name" :value="unit.name">
+                  {{ unit.unit_name || unit.name }}
+                </option>
               </select>
             </div>
 
             <!-- Kelas -->
             <div>
-              <input
-                :id="`grade_level_${index}`"
-                v-model="student.grade_level"
-                type="text"
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                placeholder="Kelas"
-              />
+              <select :id="`grade_level_${index}`" v-model="student.grade_level"
+                :disabled="!student.school_unit || isLoadingGrades"
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition appearance-none">
+                <option value="" disabled>
+                  {{ !student.school_unit ? 'Pilih Unit terlebih dahulu' : isLoadingGrades ? 'Memuat...' : 'Pilih Kelas'
+                  }}
+                </option>
+                <option v-for="grade in getGradesForStudent(index)" :key="grade.name" :value="grade.name">
+                  {{ grade.grade_name }}
+                </option>
+              </select>
             </div>
 
-            <!-- Date of Birth (hidden in Figma but keeping for data integrity) -->
-            <input
-              :id="`dob_${index}`"
-              v-model="student.date_of_birth"
-              type="date"
-              class="hidden"
-            />
           </div>
         </div>
       </div>
     </div>
 
     <!-- Tambah Anak Button -->
-    <button
-      @click="registrationStore.addStudent()"
-      class="w-full mb-8 flex items-center justify-center gap-2 py-4 px-6 border-2 border-dashed border-gray-300 rounded-xl text-primary font-medium hover:border-primary hover:bg-pink-50 transition-all"
-    >
+    <button @click="registrationStore.addStudent()"
+      class="w-full mb-8 flex items-center justify-center gap-2 py-4 px-6 border-2 border-dashed border-gray-300 rounded-xl text-primary font-medium hover:border-primary hover:bg-pink-50 transition-all">
       <div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -120,17 +98,12 @@
 
     <!-- Navigation Buttons -->
     <div class="flex gap-4">
-      <button
-        @click="registrationStore.prevStep()"
-        class="flex-1 border-2 border-primary text-primary font-bold py-4 px-6 rounded-xl hover:bg-pink-50 transition-colors"
-      >
+      <button @click="registrationStore.prevStep()"
+        class="flex-1 border-2 border-primary text-primary font-bold py-4 px-6 rounded-xl hover:bg-pink-50 transition-colors">
         Kembali
       </button>
-      <button
-        @click="handleNext"
-        :disabled="!isStep2Valid"
-        class="flex-1 bg-gray-700 text-white font-bold py-4 px-6 rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-      >
+      <button @click="handleNext" :disabled="!isStep2Valid"
+        class="flex-1 bg-gray-700 text-white font-bold py-4 px-6 rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
         Konfirmasi Data
       </button>
     </div>
@@ -138,17 +111,87 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRegistrationStore } from '@/stores/registration'
+import { frappeRequest } from 'frappe-ui'
 
 const registrationStore = useRegistrationStore()
 
 const formData = computed(() => registrationStore.formData)
 const isStep2Valid = computed(() => registrationStore.isStep2Valid)
 
+// State for school units and grades
+const schoolUnits = ref<{ name: string; unit_name: string; unit_code: string }[]>([])
+const allGrades = ref<{ name: string; grade_name: string; school_unit: string }[]>([])
+const isLoadingUnits = ref(false)
+const isLoadingGrades = ref(false)
+
+// Fetch school units from API
+const fetchSchoolUnits = async () => {
+  isLoadingUnits.value = true
+  try {
+    const response = await frappeRequest({
+      url: 'webshop.webshop.api.products.get_school_units',
+      method: 'GET'
+    })
+    schoolUnits.value = response || []
+  } catch (error) {
+    console.error('Error fetching school units:', error)
+  } finally {
+    isLoadingUnits.value = false
+  }
+}
+
+// Fetch all grades from API
+const fetchGrades = async () => {
+  isLoadingGrades.value = true
+  try {
+    const response = await frappeRequest({
+      url: 'webshop.webshop.api.products.get_grades',
+      method: 'GET'
+    })
+    allGrades.value = response || []
+  } catch (error) {
+    console.error('Error fetching grades:', error)
+  } finally {
+    isLoadingGrades.value = false
+  }
+}
+
+// Get filtered grades for a specific student based on their selected school unit
+const getGradesForStudent = (studentIndex: number) => {
+  const selectedUnit = formData.value.students[studentIndex]?.school_unit
+  if (!selectedUnit) {
+    return []
+  }
+  return allGrades.value.filter(grade => grade.school_unit === selectedUnit)
+}
+
+// Handle school unit change - clear grade if it doesn't belong to new unit
+const handleSchoolUnitChange = (studentIndex: number) => {
+  const student = formData.value.students[studentIndex]
+  if (!student) return
+
+  if (student.school_unit && student.grade_level) {
+    // Check if current grade belongs to the new school unit
+    const gradeExists = allGrades.value.find(
+      grade => grade.name === student.grade_level && grade.school_unit === student.school_unit
+    )
+    if (!gradeExists) {
+      student.grade_level = ''
+    }
+  }
+}
+
 const handleNext = () => {
   if (isStep2Valid.value) {
     registrationStore.nextStep()
   }
 }
+
+// Fetch data on component mount
+onMounted(() => {
+  fetchSchoolUnits()
+  fetchGrades()
+})
 </script>

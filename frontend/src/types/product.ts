@@ -54,6 +54,10 @@ export interface ProductFilters {
   categories: string[]
 
   priceRanges: PriceRange[]
+  
+  schoolUnits: string[]
+  
+  grades: string[]
 }
 
 export interface FilterOption {

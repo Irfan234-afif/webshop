@@ -2,6 +2,7 @@
 import type { ProductDetail, ProductVariant, VariantAttribute } from '@/types/productDetail'
 import ProductImageGallery from './ProductImageGallery.vue'
 import ProductInfo from './ProductInfo.vue'
+import NoProductIcon from '@/components/icons/NoProductIcon.vue'
 
 interface Props {
   product: ProductDetail
@@ -41,6 +42,7 @@ const emit = defineEmits<{
       <ProductImageGallery :images="product.images" :selected-index="selectedImageIndex"
         @select-image="emit('selectImage', $event)" />
     </div>
+    <NoProductIcon v-else />
 
     <!-- Service Icon Display (for services without image gallery) -->
     <!-- <div
