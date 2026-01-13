@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed, watch } from 'vue'
 import type { ProductDetail, ProductVariant, VariantAttribute } from '@/types/productDetail'
 import ProductImageGallery from './ProductImageGallery.vue'
 import ProductInfo from './ProductInfo.vue'
@@ -33,13 +34,30 @@ const emit = defineEmits<{
   'showLoginModal': []
   'selectDate': [date: string]
 }>()
+
+const displayImages = computed(() => {
+  if (props.selectedVariant && props.product.website_item_images && props.product.website_item_images.length > 0) {
+    const variantImages = props.product.website_item_images
+      .filter(img => img.for_variant === props.selectedVariant!.id)
+      .map(img => img.image)
+
+    if (variantImages.length > 0) {
+      return variantImages
+    }
+  }
+  return props.product.images || []
+})
+
+watch(displayImages, () => {
+  emit('selectImage', 0)
+})
 </script>
 
 <template>
   <div class="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
     <!-- Left: Image Gallery -->
-    <div v-if="product.images && product.images.length > 0">
-      <ProductImageGallery :images="product.images" :selected-index="selectedImageIndex"
+    <div v-if="displayImages && displayImages.length > 0">
+      <ProductImageGallery :images="displayImages" :selected-index="selectedImageIndex"
         @select-image="emit('selectImage', $event)" />
     </div>
     <NoProductIcon v-else />

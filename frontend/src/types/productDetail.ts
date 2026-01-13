@@ -22,6 +22,7 @@ export interface ProductDetail {
 
   // Product-specific fields
   images?: string[] // Array of image URLs for gallery
+  website_item_images?: WebsiteItemImage[] // Array of images with variant info
   price?: number
   originalPrice?: string // For displaying strikethrough price
   discountPercent?: number // Discount percentage (e.g., 15)
@@ -146,4 +147,9 @@ export interface InfoBadge {
 export interface Offer {
     offer_title:    string;
     offer_subtitle: string;
+}
+
+export interface WebsiteItemImage {
+    image: string
+    for_variant?: string | null
 }

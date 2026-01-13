@@ -181,16 +181,27 @@ def get_product_detail(route):
 
     # Get images - combine website_image with gallery images
     images = []
+    website_item_images = []
+
     if doc.website_image:
         images.append(doc.website_image)
+        website_item_images.append({
+            "image": doc.website_image,
+            "for_variant": None
+        })
 
     # Add gallery images
     if doc.get("website_item_images"):
         for img in doc.website_item_images:
             if img.image:
                 images.append(img.image)
+                website_item_images.append({
+                    "image": img.image,
+                    "for_variant": img.for_variant
+                })
 
     product_detail["images"] = images if images else None
+    product_detail["website_item_images"] = website_item_images if website_item_images else None
 
     # Get pricing info
     product_info = get_product_info_for_website(doc.item_code, skip_quotation_creation=True)

@@ -11,6 +11,8 @@ export const useProductsStore = defineStore('products', () => {
   const categories = ref<{name: string, item_group_name: string}[]>([])
   const schoolUnits = ref<{name: string}[]>([])
   const grades = ref<{name: string, grade_name: string, school_unit: string}[]>([])
+
+  const searchTerm = ref('')
   const isLoading = ref(false)
   const isLoadingMore = ref(false)
   const error = ref<Error | null>(null)
@@ -35,6 +37,10 @@ export const useProductsStore = defineStore('products', () => {
     },
     { deep: true }
   )
+
+  watch(searchTerm, () => {
+    fetchProducts()
+  })
 
   // Clear grade filters when school unit selection changes
   watch(
@@ -217,6 +223,10 @@ export const useProductsStore = defineStore('products', () => {
            page_length: pageLength.value
       }
 
+      if (searchTerm.value) {
+        params.search_term = searchTerm.value
+      }
+
       if (activeFilters.value.categories.length > 0) {
           params.item_group = JSON.stringify(activeFilters.value.categories)
       }
@@ -349,13 +359,19 @@ export const useProductsStore = defineStore('products', () => {
     }
   }
 
+  const setSearchTerm = (term: string) => {
+    searchTerm.value = term
+  }
+
   return {
     // State
     allProducts,
     isLoading,
     isLoadingMore,
+
     error,
     activeFilters,
+    searchTerm,
     // Getters
     filteredProducts,
     availableCategories,
@@ -373,6 +389,7 @@ export const useProductsStore = defineStore('products', () => {
     toggleSchoolUnit,
     toggleGrade,
     togglePriceRange,
-    clearFilters
+    clearFilters,
+    setSearchTerm
   }
 })

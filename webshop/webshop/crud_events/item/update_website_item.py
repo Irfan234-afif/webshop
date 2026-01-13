@@ -14,6 +14,7 @@ def execute(doc, method=None):
             "brand",
             "description",
             "disabled",
+            "image",
         ]
         doc_before_save = doc.get_doc_before_save()
 
@@ -25,7 +26,10 @@ def execute(doc, method=None):
                 if field == "disabled":
                     changed["published"] = not doc.get(field)
                 else:
-                    changed[field] = doc.get(field)
+                    if field == "image":
+                        changed["website_image"] = doc.get(field)
+                    else:
+                        changed[field] = doc.get(field)
 
                 if not changed:
                     return

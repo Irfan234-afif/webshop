@@ -60,6 +60,7 @@ class WebsiteItem(WebsiteGenerator):
 
 		self.validate_duplicate_website_item()
 		self.validate_website_image()
+		self.validate_variant_images()
 		self.make_thumbnail()
 		self.publish_unpublish_desk_item(publish=True)
 
@@ -158,6 +159,20 @@ class WebsiteItem(WebsiteGenerator):
 			frappe.msgprint(_("Website Image should be a public file or website URL"))
 
 			self.website_image = None
+
+	def validate_variant_images(self):
+		if not self.website_item_images:
+			return
+
+		for row in self.website_item_images:
+			if row.for_variant:
+				variant_of = frappe.db.get_value("Item", row.for_variant, "variant_of")
+				if variant_of != self.item_code:
+					frappe.throw(
+						_("Row {0}: Variant {1} does not belong to Item {2}").format(
+							row.idx, frappe.bold(row.for_variant), frappe.bold(self.item_code)
+						)
+					)
 
 	def make_thumbnail(self):
 		"""Make a thumbnail of `website_image`"""

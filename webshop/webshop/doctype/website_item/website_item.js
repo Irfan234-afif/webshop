@@ -26,6 +26,14 @@ frappe.ui.form.on('Website Item', {
 		frm.add_custom_button(__("Webshop Settings"), function() {
 			frappe.set_route("Form", "Webshop Settings");
 		}, __("View"));
+
+		frm.set_query('for_variant', 'website_item_images', function(doc, cdt, cdn) {
+			return {
+				filters: {
+					variant_of: doc.item_code
+				}
+			};
+		});
 	},
 
 	copy_from_item_group: (frm) => {

@@ -35,6 +35,11 @@ export function useFilterQuerySync() {
       filters.schoolUnits = query.schoolUnits.split(',').filter(Boolean)
     }
 
+    // Parse search
+    if (query.search && typeof query.search === 'string') {
+      productsStore.setSearchTerm(query.search)
+    }
+
     return filters
   }
 
@@ -54,6 +59,10 @@ export function useFilterQuerySync() {
 
     if (filters.schoolUnits.length > 0) {
       query.schoolUnits = filters.schoolUnits.join(',')
+    }
+
+    if (productsStore.searchTerm) {
+      query.search = productsStore.searchTerm
     }
 
     return query
@@ -85,6 +94,37 @@ export function useFilterQuerySync() {
       }
     },
     { deep: true }
+  )
+
+  // Watch search term
+  watch(
+    () => productsStore.searchTerm,
+    (newTerm) => {
+      const query = filtersToQuery(productsStore.activeFilters)
+      if (newTerm) {
+        query.search = newTerm
+      }
+
+      router.replace({
+        path: route.path,
+        query
+      })
+    }
+  )
+
+  // Watch route query to sync back to store (URL -> Store)
+  watch(
+    () => route.query.search,
+    (newSearch) => {
+      if (typeof newSearch === 'string') {
+        if (newSearch !== productsStore.searchTerm) {
+          productsStore.setSearchTerm(newSearch)
+        }
+      } else if (!newSearch && productsStore.searchTerm) {
+        // If search param removed, clear store
+        productsStore.setSearchTerm('')
+      }
+    }
   )
 
   return {

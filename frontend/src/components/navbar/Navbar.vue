@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import NavbarLogo from './NavbarLogo.vue'
 import MenuPopup from './MenuPopup.vue'
 import CartIcon from '@/components/icons/CartIcon.vue'
@@ -8,7 +8,7 @@ import SearchIcon from '@/components/icons/SearchIcon.vue'
 import HumbergerIcon from '@/components/icons/HumbergerIcon.vue'
 import Container from '@/components/layout/Container.vue'
 import Popup from '@/components/common/Popup.vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import type { NavLink } from '@/types/navigation'
 import { useAuthStore } from '@/stores/auth'
@@ -29,6 +29,7 @@ withDefaults(
 )
 
 const router = useRouter()
+const route = useRoute()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
 const wishlistStore = useWishlistStore()
@@ -54,8 +55,71 @@ onMounted(async () => {
   }
 })
 
+
+
+// Sync search query from URL
+watch(
+  () => route.query.search,
+  (newSearch) => {
+    if (typeof newSearch === 'string') {
+      searchQuery.value = newSearch
+    } else {
+      searchQuery.value = ''
+    }
+  },
+  { immediate: true }
+)
+
+// Debounce utility
+const debounce = (fn: Function, delay: number) => {
+  let timeoutId: ReturnType<typeof setTimeout>
+  return (...args: any[]) => {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => fn(...args), delay)
+  }
+}
+
+const executeSearch = () => {
+  if (searchQuery.value) {
+    // If not on products page, always push
+    // If on products page, only push if changed (though router handles this usually)
+    router.push({
+      path: '/products',
+      query: { ...route.query, search: searchQuery.value }
+    })
+  } else {
+    // If empty and on products page with search param, remove it
+    if (route.path === '/products' && route.query.search) {
+      const newQuery = { ...route.query }
+      delete newQuery.search
+      router.push({ path: '/products', query: newQuery })
+    } else if (!route.path.includes('/products')) {
+      // If not on products page and empty, do nothing/emit default
+      emit('openSearch')
+    }
+  }
+}
+
+const debouncedSearch = debounce(executeSearch, 500)
+
+// Watch input for auto-search
+watch(searchQuery, (newValue) => {
+  // Prevent loop if value matches URL already (synced from URL)
+  if (newValue === route.query.search) return
+
+  // If we are clearing (newValue is empty) and we have a search param, trigger
+  if (!newValue && route.query.search) {
+    debouncedSearch()
+    return
+  }
+
+  if (newValue) {
+    debouncedSearch()
+  }
+})
+
 const handleSearch = () => {
-  emit('openSearch')
+  executeSearch()
 }
 
 const handleOpenCart = () => {
