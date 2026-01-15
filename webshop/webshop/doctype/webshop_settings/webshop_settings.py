@@ -248,7 +248,7 @@ def _update_all_website_items_warehouse(warehouse):
 		for item in batch:
 			try:
 				# Use db.set_value for better performance (skips validation)
-				frappe.db.set_value("Website Item", item.name, "warehouse", warehouse, update_modified=True)
+				frappe.db.set_value("Website Item", item.name, "website_warehouse", warehouse, update_modified=True)
 				updated_count += 1
 				
 				# Publish progress
