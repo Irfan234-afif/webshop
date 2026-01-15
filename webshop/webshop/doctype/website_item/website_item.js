@@ -5,10 +5,12 @@ frappe.ui.form.on('Website Item', {
 	onload: (frm) => {
 		// should never check Private
 		frm.fields_dict["website_image"].df.is_private = 0;
-		frappe.db.get_single_value('Webshop Settings', 'default_warehouse')
+		if (frm.is_new()) {
+			frappe.db.get_single_value('Webshop Settings', 'default_warehouse')
 			.then(default_warehouse => {
 				frm.set_value('website_warehouse', default_warehouse);
 			})
+		}
 	},
 
 	refresh: (frm) => {
