@@ -26,11 +26,11 @@ update_website_context = [
 	"webshop.webshop.shopping_cart.utils.update_website_context"
 ]
 
-scheduler_events = {
-	"hourly": [
-		"webshop.webshop.api.scheduled_tasks.cancel_overdue_orders"
-	]
-}
+# scheduler_events = {
+# 	"hourly": [
+# 		"webshop.webshop.api.scheduled_tasks.cancel_overdue_orders"
+# 	]
+# }
 
 website_generators = ["Website Item", "Item Group"]
 
