@@ -18,6 +18,12 @@ frappe.ui.form.on("Webshop Settings", {
 			frm.refresh_field("quotation_series");
 		}
 
+		// Store the initial warehouse value for comparison
+		if (!frm.doc.__onload) {
+			frm.doc.__onload = {};
+		}
+		frm.doc.__onload.default_warehouse = frm.doc.default_warehouse;
+
 		frm.set_query('payment_gateway_account', function() {
 			return { 'filters': { 
 				'payment_channel': ['in', ["Email", "Phone"]] 
@@ -59,6 +65,42 @@ frappe.ui.form.on("Webshop Settings", {
 			frm.set_value('price_list', '');
 			frm.set_value('default_customer_group', '');
 			frm.set_value('quotation_series', '');
+		}
+	},
+	default_warehouse: function(frm) {
+		// Check if warehouse value actually changed from the saved value
+		if (!frm.doc.__islocal && frm.doc.default_warehouse && 
+			frm.doc.default_warehouse !== frm.doc.__onload?.default_warehouse) {
+			
+			frappe.confirm(
+				__('Do you want to update all Website Items with this warehouse?'),
+				function() {
+					// User confirmed - trigger background job
+					frappe.call({
+						method: 'webshop.webshop.doctype.webshop_settings.webshop_settings.update_website_items_warehouse',
+						args: {
+							warehouse: frm.doc.default_warehouse
+						},
+						freeze: true,
+						freeze_message: __('Queueing background job...'),
+						callback: function(r) {
+							if (!r.exc) {
+								frappe.show_alert({
+									message: __('Background job has been queued to update all Website Items'),
+									indicator: 'green'
+								}, 5);
+							}
+						}
+					});
+				},
+				function() {
+					// User cancelled - do nothing
+					frappe.show_alert({
+						message: __('Website Items will not be updated'),
+						indicator: 'blue'
+					}, 3);
+				}
+			);
 		}
 	}
 });

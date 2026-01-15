@@ -189,3 +189,82 @@ def get_return_eligibility_days():
 	"""Get configured return eligibility days from settings"""
 	settings = get_shopping_cart_settings()
 	return settings.get("return_eligibility_days") or 7
+
+
+@frappe.whitelist()
+def update_website_items_warehouse(warehouse):
+	"""
+	Enqueue a background job to update all Website Items with the specified warehouse.
+	
+	Args:
+		warehouse (str): The warehouse to set for all Website Items
+	
+	Returns:
+		dict: Success message
+	"""
+	if not warehouse:
+		frappe.throw(_("Warehouse is required"))
+	
+	# Enqueue the background job
+	frappe.enqueue(
+		_update_all_website_items_warehouse,
+		queue='long',
+		timeout=3000,
+		warehouse=warehouse,
+		now=frappe.flags.in_test
+	)
+	
+	return {
+		"message": _("Background job has been queued to update all Website Items with warehouse {0}").format(warehouse)
+	}
+
+
+def _update_all_website_items_warehouse(warehouse):
+	"""
+	Background job function to update all Website Items with the specified warehouse.
+	
+	Args:
+		warehouse (str): The warehouse to set for all Website Items
+	"""
+	frappe.logger().info(f"Starting background job to update Website Items with warehouse: {warehouse}")
+	
+	# Get all Website Item names
+	website_items = frappe.get_all("Website Item", fields=["name"])
+	total_items = len(website_items)
+	
+	if total_items == 0:
+		frappe.logger().info("No Website Items found to update")
+		return
+	
+	frappe.logger().info(f"Found {total_items} Website Items to update")
+	
+	# Update items in batches for better performance
+	batch_size = 100
+	updated_count = 0
+	
+	for i in range(0, total_items, batch_size):
+		batch = website_items[i:i + batch_size]
+		
+		for item in batch:
+			try:
+				# Use db.set_value for better performance (skips validation)
+				frappe.db.set_value("Website Item", item.name, "warehouse", warehouse, update_modified=True)
+				updated_count += 1
+				
+				# Publish progress
+				frappe.publish_progress(
+					percent=(updated_count / total_items * 100),
+					title=_("Updating Website Items"),
+					description=_("Updated {0} of {1} items").format(updated_count, total_items)
+				)
+			except Exception as e:
+				frappe.logger().error(f"Error updating Website Item {item.name}: {str(e)}")
+				continue
+		
+		# Commit after each batch to avoid long transactions
+		frappe.db.commit()
+	
+	frappe.logger().info(f"Completed updating {updated_count} out of {total_items} Website Items with warehouse: {warehouse}")
+	
+	# Clear cache for Website Item
+	frappe.cache().delete_key("website_item_*")
