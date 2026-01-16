@@ -139,9 +139,10 @@ const handleSelectStudent = (studentId: string) => {
   emit('selectStudent', studentId)
 }
 
-const handleLogout = () => {
-  emit('logout')
+const handleLogout = async () => {
+  await authStore.logout()
   isMenuOpen.value = false
+  router.push('/')
 }
 
 const handleLoginClick = () => {

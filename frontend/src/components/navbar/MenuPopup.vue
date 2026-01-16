@@ -107,11 +107,11 @@ const handleLogout = () => {
     <div class="bg-white flex flex-col p-8 pb-8">
       <div class="flex flex-col">
         <template v-for="(item, index) in menuItems">
-          <div v-if="!item.link" :class="[
-            'flex items-center justify-between p-6 h-[68px] border-[1.5px] border-[rgba(30,30,30,0.1)] bg-white hover:bg-[rgba(242,242,242,0.3)] transition-colors',
+          <button v-if="!item.link" :class="[
+            'flex items-center justify-between p-6 h-[68px] border-[1.5px] border-[rgba(30,30,30,0.1)] bg-white hover:bg-[rgba(242,242,242,0.3)] transition-colors cursor-pointer',
             index === 0 ? 'rounded-t-xl' : '',
             index === menuItems.length - 1 ? 'rounded-b-xl border-t-0' : 'border-t-0'
-          ]" @click="item.onClick ? (e: Event) => { e.preventDefault(); item.onClick!() } : undefined">
+          ]" @click="item.onClick?.()">
             <div class="flex gap-4 items-center">
               <BillIcon v-if="item.icon === 'bill'" class="w-6 h-6" />
               <CartLargeIcon v-else-if="item.icon === 'cart'" class="w-6 h-6" />
@@ -129,12 +129,12 @@ const handleLogout = () => {
               </div>
               <ArrowRightIcon class="w-4 h-4" />
             </div>
-          </div>
+          </button>
           <router-link v-else :to="item.link" :class="[
             'flex items-center justify-between p-6 h-[68px] border-[1.5px] border-[rgba(30,30,30,0.1)] bg-white hover:bg-[rgba(242,242,242,0.3)] transition-colors',
             index === 0 ? 'rounded-t-xl' : '',
             index === menuItems.length - 1 ? 'rounded-b-xl border-t-0' : 'border-t-0'
-          ]" @click="item.onClick ? (e: Event) => { e.preventDefault(); item.onClick!() } : undefined">
+          ]">
             <div class="flex gap-4 items-center">
               <BillIcon v-if="item.icon === 'bill'" class="w-6 h-6" />
               <CartLargeIcon v-else-if="item.icon === 'cart'" class="w-6 h-6" />
