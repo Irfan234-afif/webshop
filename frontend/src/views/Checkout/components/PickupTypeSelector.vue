@@ -50,7 +50,8 @@
           <div class="flex-1">
             <h3 class="font-semibold text-lg mb-2">Ambil Secara Online</h3>
             <p class="text-sm text-gray-600">
-              Bintaro Permai, Bintaro Jaya Sektor 11, Sektor 12 (Melati, Anggrek), dan sekitarnya
+              Pesanan akan diambil menggunakan layanan GoSend/GrabSend yang dipesan oleh wali murid. Biaya pengiriman
+              mengikuti tarif layanan masing-masing dan dibayar terpisah.
             </p>
           </div>
           <div class="ml-4">
