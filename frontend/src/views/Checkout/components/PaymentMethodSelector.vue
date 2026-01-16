@@ -100,7 +100,7 @@ import { useCheckoutStore } from '@/stores/checkout'
 import { storeToRefs } from 'pinia'
 
 const checkoutStore = useCheckoutStore()
-const { paymentMethods, paymentMethodType, paymentChannel, serviceCharges, serviceChargeTotal } = storeToRefs(checkoutStore)
+const { paymentMethods, paymentMethodType, paymentChannel } = storeToRefs(checkoutStore)
 
 const selectedMethod = ref<string>(paymentMethodType.value || '')
 const selectedChannel = ref<string>(paymentChannel.value || '')
