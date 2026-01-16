@@ -16,7 +16,13 @@ export const useCartStore = defineStore('cart', () => {
   const error = ref<Error | null>(null)
 
   // Getters
-  const itemCount = ref<number>(0)
+  const itemCount = computed(() => {
+    // Calculate total item count from all student carts
+    return studentCarts.value.reduce((total, cart) => {
+      const cartItemCount = cart.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
+      return total + cartItemCount
+    }, 0)
+  })
 
   const totalPrice = computed(() => {
     // Use total from backend if available, otherwise calculate
@@ -243,9 +249,6 @@ export const useCartStore = defineStore('cart', () => {
     }
     // Try to get active student from cookie first
     const storedActiveStudent = getCookie('active_student')
-    const cart_count = getCookie('cart_count')
-
-    itemCount.value = cart_count ? parseInt(cart_count) : 0
     activeStudent.value = storedActiveStudent
     
     // If no active student, select the primary student
