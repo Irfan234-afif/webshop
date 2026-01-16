@@ -40,11 +40,8 @@
     </div>
 
     <!-- Student Information -->
-    <div
-      v-for="(student, index) in formData.students"
-      :key="index"
-      class="mb-6 bg-white border border-gray-200 rounded-xl p-6"
-    >
+    <div v-for="(student, index) in formData.students" :key="index"
+      class="mb-6 bg-white border border-gray-200 rounded-xl p-6">
       <h3 class="font-bold text-gray-900 mb-4">Data Siswa {{ index + 1 }}</h3>
       <div class="space-y-3">
         <div class="flex justify-between items-center">
@@ -68,12 +65,9 @@
 
     <!-- Terms and Conditions Checkbox -->
     <div class="mb-8">
-      <label class="flex items-start gap-3 cursor-pointer">
-        <input
-          v-model="agreedToTerms"
-          type="checkbox"
-          class="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus:ring-2 focus:ring-primary"
-        />
+      <label class="flex items-center gap-3 cursor-pointer py-2">
+        <input v-model="agreedToTerms" type="checkbox"
+          class="w-5 h-5 text-primary border-gray-300 rounded focus:ring-2 focus:ring-primary" />
         <span class="text-sm text-gray-600">
           Saya telah menyetujui
           <a href="#" class="text-primary hover:underline font-medium">Syarat & Ketentuan</a>
@@ -91,38 +85,18 @@
 
     <!-- Navigation Buttons -->
     <div class="flex gap-4">
-      <button
-        @click="registrationStore.prevStep()"
-        :disabled="isRegistering"
-        class="flex-1 border-2 border-primary text-primary font-bold py-4 px-6 rounded-xl hover:bg-pink-50 transition-colors disabled:opacity-50"
-      >
+      <button @click="registrationStore.prevStep()" :disabled="isRegistering"
+        class="flex-1 border-2 border-primary text-primary font-bold py-4 px-6 rounded-xl hover:bg-pink-50 transition-colors disabled:opacity-50">
         Kembali
       </button>
-      <button
-        @click="handleSubmit"
-        :disabled="!agreedToTerms || isRegistering"
-        class="flex-1 bg-gray-700 text-white font-bold py-4 px-6 rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-      >
-        <svg
-          v-if="isRegistering"
-          class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            class="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            stroke-width="4"
-          ></circle>
-          <path
-            class="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          ></path>
+      <button @click="handleSubmit" :disabled="!agreedToTerms || isRegistering"
+        class="flex-1 bg-primary text-white font-bold py-4 px-6 rounded-xl hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+        <svg v-if="isRegistering" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
+          fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+          </path>
         </svg>
         <span v-if="isRegistering">Memproses...</span>
         <span v-else>Daftarkan Akun</span>

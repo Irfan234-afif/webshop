@@ -103,7 +103,7 @@
         Kembali
       </button>
       <button @click="handleNext" :disabled="!isStep2Valid"
-        class="flex-1 bg-gray-700 text-white font-bold py-4 px-6 rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+        class="flex-1 bg-primary text-white font-bold py-4 px-6 rounded-xl hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
         Konfirmasi Data
       </button>
     </div>
