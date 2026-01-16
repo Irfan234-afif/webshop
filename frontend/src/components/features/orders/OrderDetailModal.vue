@@ -124,26 +124,17 @@
                           </div>
                         </div>
                         <div>
-                          <p class="text-sm font-semibold text-text-secondary line-clamp-1">{{ formatIDR(item.amount ||
-                            0) }}
+                          <p class="text-sm font-semibold text-text-secondary line-clamp-1">
+                            {{ formatIDR(item.amount || 0) }}
                           </p>
                         </div>
                       </div>
-                      <!-- <div
-                        v-for="(item, index) in orderItems"
-                        :key="index"
-                        class="flex items-center justify-between text-sm font-semibold text-text-secondary"
-                      >
-                        <span>{{ item.name }}</span>
-                        <span class="text-right">{{ formatIDR(item.amount) }}</span>
-                      </div>
-                      <div v-if="order.voucher_amount" class="flex items-center justify-between text-sm font-semibold text-text-secondary">
-                        <span>Voucher</span>
-                        <span class="text-right">{{ order.voucher_amount ? formatIDR(order.voucher_amount) : '0' }}</span>
-                      </div> -->
-                      <div v-if="order.discount_amount" class="flex items-center justify-between text-sm font-semibold">
-                        <span class="text-text-secondary">Diskon Anggota Koperasi</span>
-                        <span class="text-red-500 text-right">- {{ formatIDR(order.discount_amount) }}</span>
+
+                      <!-- Coupon Discount (only if applied) -->
+                      <div v-if="order.coupon_code && order.discount_amount && order.discount_amount > 0"
+                        class="flex items-center justify-between text-sm font-semibold">
+                        <span class="text-text-secondary">Diskon Voucher ({{ order.coupon_code }})</span>
+                        <span class="text-red-600 text-right">- {{ formatIDR(order.discount_amount) }}</span>
                       </div>
                     </div>
                   </div>
@@ -168,6 +159,14 @@
                         <span>Payment Gateway</span>
                         <span class="text-right">{{ order.payment_gateway || 'Xendit' }}</span>
                       </div>
+
+                      <!-- Service Charges from Sales Taxes and Charges -->
+                      <div v-for="(charge, index) in order.taxes" :key="index"
+                        class="flex items-center justify-between text-sm font-semibold text-text-secondary">
+                        <span>{{ charge.description }}</span>
+                        <span class="text-right">{{ formatIDR(charge.tax_amount || 0) }}</span>
+                      </div>
+
                       <div class="flex items-center justify-between text-sm font-semibold text-text-secondary">
                         <span>Total Pesanan</span>
                         <span class="text-right">{{ formatIDR(order.grand_total) }}</span>

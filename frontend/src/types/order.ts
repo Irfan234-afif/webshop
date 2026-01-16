@@ -6,6 +6,12 @@ export interface OrderItem {
   amount?: number 
 }
 
+export interface OrderTax {
+  description: string
+  tax_amount: number
+  idx?: number
+}
+
 export interface Order {
   name: string
   grand_total: number
@@ -33,6 +39,8 @@ export interface Order {
   per_billed: number
   payment_method_type?: string
   delivery_image?: string
+  coupon_code?: string
+  taxes?: OrderTax[]
 }
 
 export interface SubscriptionRequest {

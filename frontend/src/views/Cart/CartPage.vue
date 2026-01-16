@@ -158,7 +158,7 @@ const goHome = () => {
                       </span>
                       <span> - </span>
                       <span class="font-bold text-primary">
-                        {{ formatCurrency(student.total) }}
+                        {{ formatCurrency(student.original_total || student.total) }}
                       </span>
                     </p>
                     <svg class="w-5 h-5 text-gray-400 transition-transform"
@@ -181,7 +181,10 @@ const goHome = () => {
             <!-- Right Column - Order Summary -->
             <div class="lg:col-span-1">
               <CartSummary :items="cartStore.selectedStudentCart ? cartStore.selectedStudentCart.items : []"
-                @checkout="handleCheckout" />
+                :quotation-name="cartStore.selectedStudentCart?.quotation_name"
+                :coupon-code="cartStore.selectedStudentCart?.coupon_code"
+                :discount-amount="cartStore.selectedStudentCart?.discount_amount"
+                :original-total="cartStore.selectedStudentCart?.original_total" @checkout="handleCheckout" />
             </div>
           </div>
         </div>

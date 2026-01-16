@@ -820,7 +820,7 @@ def show_terms(doc):
 
 
 @frappe.whitelist(allow_guest=True)
-def apply_coupon_code(applied_code, applied_referral_sales_partner):
+def apply_coupon_code(applied_code, quotation_name=None, applied_referral_sales_partner=None):
 	quotation = True
 
 	if not applied_code:
@@ -835,7 +835,7 @@ def apply_coupon_code(applied_code, applied_referral_sales_partner):
 	from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 
 	validate_coupon_code(coupon_name)
-	quotation = _get_cart_quotation()
+	quotation = _get_cart_quotation(quotation_name=quotation_name)
 	quotation.ignore_pricing_rule = 0
 	quotation.coupon_code = coupon_name
 	quotation.flags.ignore_permissions = True
@@ -855,8 +855,8 @@ def apply_coupon_code(applied_code, applied_referral_sales_partner):
 
  
 @frappe.whitelist(allow_guest=True)
-def remove_coupon_code():
-	quotation = _get_cart_quotation()
+def remove_coupon_code(quotation_name=None):
+	quotation = _get_cart_quotation(quotation_name=quotation_name)
 	quotation.coupon_code = ""
 	quotation.referral_sales_partner = ""
 	quotation.flags.ignore_permissions = True

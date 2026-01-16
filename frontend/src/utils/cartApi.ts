@@ -243,3 +243,65 @@ export function getVariantDisplayText(
     .map(attr => `${attr.attribute}: ${attr.value}`)
     .join(', ')
 }
+
+/**
+ * Apply coupon code to the cart
+ *
+ * @param appliedCode - Coupon code to apply
+ * @param appliedReferralSalesPartner - Optional referral sales partner code
+ * @returns Promise<any> Updated quotation data
+ * @throws Error if API request fails or coupon is invalid
+ *
+ * @example
+ * ```typescript
+ * const quotation = await applyCouponCode('SAVE10')
+ * ```
+ */
+export async function applyCouponCode(
+  appliedCode: string,
+  quotation_name: string,
+  appliedReferralSalesPartner?: string
+): Promise<any> {
+  try {
+    const params: { applied_code: string; quotation_name: string; applied_referral_sales_partner?: string } = {
+      applied_code: appliedCode,
+      quotation_name: quotation_name
+    }
+    
+    if (appliedReferralSalesPartner) {
+      params.applied_referral_sales_partner = appliedReferralSalesPartner
+    }
+
+    const response = await call('webshop.webshop.shopping_cart.cart.apply_coupon_code', params)
+    return response
+  } catch (error) {
+    console.error('Error applying coupon code:', error)
+    throw error
+  }
+}
+
+/**
+ * Remove coupon code from the cart
+ *
+ * @returns Promise<any> Updated quotation data
+ * @throws Error if API request fails
+ *
+ * @example
+ * ```typescript
+ * const quotation = await removeCouponCode(quotation_name)
+ * ```
+ */
+export async function removeCouponCode(
+  quotation_name: string
+): Promise<any> {
+  try {
+    const params = {
+      quotation_name: quotation_name
+    }
+    const response = await call('webshop.webshop.shopping_cart.cart.remove_coupon_code', params)
+    return response
+  } catch (error) {
+    console.error('Error removing coupon code:', error)
+    throw error
+  }
+}

@@ -6,14 +6,14 @@
         <h3 class="section-title">Informasi Produk & Layanan</h3>
         <div class="section-content">
           <div v-for="item in items" :key="item.item_code" class="flex justify-between py-2">
-            <span class="text-gray-700">{{ item.item_name }}</span>
+            <span class="text-gray-700">{{ item.item_name }} ({{ item.qty }}x)</span>
             <span class="font-medium">{{ formatIDR(item.amount) }}</span>
           </div>
 
-          <!-- Voucher -->
-          <div class="flex justify-between py-2">
-            <span class="text-gray-700">Voucher</span>
-            <span class="font-medium">{{ voucherDiscount > 0 ? '-' + formatIDR(voucherDiscount) : '0' }}</span>
+          <!-- Coupon Discount (only if applied) -->
+          <div v-if="voucherDiscount > 0" class="flex justify-between py-2 text-red-600">
+            <span>Diskon Voucher</span>
+            <span class="font-medium">- {{ formatIDR(voucherDiscount) }}</span>
           </div>
         </div>
       </div>

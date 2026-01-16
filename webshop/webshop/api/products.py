@@ -805,9 +805,9 @@ def get_all_student_cart_details():
                         "productId": item.get("route") or item.item_code,
                         "title": item.get("web_item_name") or item.item_name,
                         "image": image,
-                        "price": flt(item.rate),
+                        "price": flt(item.price_list_rate),  # Use price_list_rate (original price) instead of rate (after discount)
                         "quantity": flt(item.qty),
-                        "amount": flt(item.amount),
+                        "amount": flt(item.price_list_rate) * flt(item.qty),  # Calculate from original price
                         "description": item.get("description") or "",
                         "route": item.get("route") or "",
                         "warehouse": item.get("warehouse") or "",
@@ -836,6 +836,25 @@ def get_all_student_cart_details():
                 student_detail["total"] = flt(cart_summary.get("grand_total", 0))
                 student_detail["itemCount"] = int(cart_summary.get("total_qty", 0))
                 student_detail["quotation_name"] = cart_summary["name"]
+                
+                # Calculate original total from price_list_rate (before any discounts)
+                original_total = 0
+                for item in quotation.items:
+                    # Use price_list_rate (original price) instead of rate (discounted price)
+                    original_total += flt(item.price_list_rate) * flt(item.qty)
+                student_detail["original_total"] = flt(original_total)
+                
+                # Add coupon information
+                student_detail["coupon_code"] = quotation.get("coupon_code") or None
+                
+                # Calculate actual discount amount
+                # Frappe applies coupon discount through pricing rules which reduce item rates
+                # So we calculate discount as: original_total - grand_total
+                if quotation.get("coupon_code"):
+                    discount_from_pricing = flt(original_total) - flt(cart_summary.get("grand_total", 0))
+                    student_detail["discount_amount"] = discount_from_pricing
+                else:
+                    student_detail["discount_amount"] = 0
 
                 grand_total += student_detail["total"]
                 total_items += student_detail["itemCount"]

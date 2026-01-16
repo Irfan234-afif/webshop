@@ -78,7 +78,9 @@ def get_orders(search_text=None, status=None, student=None, tab="orders", start=
 				"order_type",
 				"customer",
 				"per_billed",
-				"payment_method_type"
+				"payment_method_type",
+				"coupon_code",
+				"discount_amount"
 			],
 			filters=filters,
 			order_by="transaction_date desc",
@@ -139,6 +141,30 @@ def get_orders(search_text=None, status=None, student=None, tab="orders", start=
 				
 			for order in orders:
 				order.items = items_map.get(order.name, [])
+			
+			# Fetch Sales Taxes and Charges (for service fees display)
+			all_taxes = frappe.db.sql("""
+				SELECT 
+					parent,
+					description,
+					tax_amount,
+					idx
+				FROM `tabSales Taxes and Charges`
+				WHERE parent IN ({order_names})
+				ORDER BY parent, idx ASC
+			""".format(
+				order_names=', '.join(['%s'] * len(order_names))
+			), order_names, as_dict=True)
+			
+			# Map taxes to orders
+			taxes_map = {}
+			for tax in all_taxes:
+				if tax.parent not in taxes_map:
+					taxes_map[tax.parent] = []
+				taxes_map[tax.parent].append(tax)
+			
+			for order in orders:
+				order.taxes = taxes_map.get(order.name, [])
 			
 			# Fetch Delivery Note Image for history orders (completed/shipped)
 			if tab == "history" or filters.get("status") == "Completed":

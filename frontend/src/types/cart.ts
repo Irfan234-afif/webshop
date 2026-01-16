@@ -28,6 +28,9 @@ export interface StudentCart {
   itemCount: number // Total cart amount for the student
   quotation_name: string // Quotation name for the student's cart
   items: CartItem[] // Items in the student's cart
+  coupon_code?: string // Applied coupon code
+  discount_amount?: number // Discount amount from coupon
+  original_total?: number // Total before discount
 }
 
 /**
