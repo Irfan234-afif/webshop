@@ -6,6 +6,15 @@ export interface StudentData {
   nisn: string
 }
 
+export interface AddressData {
+  address_line1: string
+  address_line2: string
+  city: string
+  state: string
+  country: string
+  postal_code: string
+}
+
 export interface RegistrationFormData {
   // Step 1: Account Information
   name: string
@@ -13,6 +22,9 @@ export interface RegistrationFormData {
   phoneNumber: string
   password: string
   confirmPassword: string
+  
+  // Step 1: Address Information
+  address: AddressData
 
   // Step 2: Student Information
   students: StudentData[]
@@ -23,6 +35,7 @@ export interface RegistrationPayload {
   email: string
   phone_number: string
   password: string
+  address: AddressData
   students: StudentData[]
 }
 

@@ -19,6 +19,14 @@ export const useRegistrationStore = defineStore('registration', () => {
     phoneNumber: '',
     password: '',
     confirmPassword: '',
+    address: {
+      address_line1: '',
+      address_line2: '',
+      city: '',
+      state: '',
+      country: 'Indonesia',
+      postal_code: ''
+    },
     students: [
       {
         student_name: '',
@@ -38,6 +46,9 @@ export const useRegistrationStore = defineStore('registration', () => {
       formData.value.phoneNumber.trim() !== '' &&
       formData.value.password.trim() !== '' &&
       formData.value.password === formData.value.confirmPassword &&
+      formData.value.address.address_line1.trim() !== '' &&
+      formData.value.address.city.trim() !== '' &&
+      formData.value.address.country.trim() !== '' &&
       !emailError.value
     )
   })
@@ -135,6 +146,7 @@ export const useRegistrationStore = defineStore('registration', () => {
         email: formData.value.email,
         phone_number: formData.value.phoneNumber,
         password: formData.value.password,
+        address: formData.value.address,
         students: formData.value.students
       }
 
@@ -176,6 +188,14 @@ export const useRegistrationStore = defineStore('registration', () => {
       phoneNumber: '',
       password: '',
       confirmPassword: '',
+      address: {
+        address_line1: '',
+        address_line2: '',
+        city: '',
+        state: '',
+        country: 'Indonesia',
+        postal_code: ''
+      },
       students: [
         {
           student_name: '',

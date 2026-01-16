@@ -130,6 +130,89 @@
         <div v-if="passwordError" class="mt-2 text-red-500 text-sm">{{ passwordError }}</div>
       </div>
 
+      <!-- Address Section -->
+      <div class="mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          Alamat
+        </h3>
+
+        <!-- Alamat Lengkap -->
+        <div class="mb-4">
+          <label for="address_line1" class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            Alamat Lengkap
+          </label>
+          <input id="address_line1" v-model="formData.address.address_line1" type="text" required
+            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+            placeholder="Jalan, No. Rumah, RT/RW" />
+        </div>
+
+        <!-- Detail Alamat (Optional) -->
+        <div class="mb-4">
+          <label for="address_line2" class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+            Detail Alamat (Opsional)
+          </label>
+          <input id="address_line2" v-model="formData.address.address_line2" type="text"
+            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+            placeholder="Apartemen, Komplek, Patokan" />
+        </div>
+
+        <!-- City and State -->
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <!-- Kota -->
+          <div>
+            <label for="city" class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              Kota
+            </label>
+            <input id="city" v-model="formData.address.city" type="text" required
+              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+              placeholder="Kota" />
+          </div>
+
+          <!-- Provinsi -->
+          <div>
+            <label for="state" class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              Provinsi (Opsional)
+            </label>
+            <input id="state" v-model="formData.address.state" type="text"
+              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+              placeholder="Provinsi" />
+          </div>
+        </div>
+
+        <!-- Postal Code and Country -->
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <!-- Kode Pos -->
+          <div>
+            <label for="postal_code" class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              Kode Pos (Opsional)
+            </label>
+            <input id="postal_code" v-model="formData.address.postal_code" type="text"
+              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+              placeholder="12345" />
+          </div>
+
+          <!-- Negara -->
+          <div>
+            <label for="country" class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              Negara
+            </label>
+            <input id="country" v-model="formData.address.country" type="text" required
+              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+              placeholder="Indonesia" />
+          </div>
+        </div>
+      </div>
+
       <!-- Submit Button -->
       <button type="submit" :disabled="!isStep1Valid"
         class="w-full bg-primary text-white font-bold py-4 px-6 rounded-xl hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">

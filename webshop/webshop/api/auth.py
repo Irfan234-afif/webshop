@@ -111,21 +111,28 @@ def login(email, password):
 
 
 @frappe.whitelist(allow_guest=True)
-def register(name, email, phone_number, password, students=None):
+def register(name, email, phone_number, password, address=None, students=None):
 	"""
 	Registration API endpoint
-	Creates Customer, Contact, User, and Students
+	Creates Customer, Contact, User, Address, and Students
 
 	Args:
 		name (str): Customer full name
 		email (str): Customer email
 		phone_number (str): Customer phone number
 		password (str): Account password
+		address (dict): Customer address with fields:
+			- address_line1 (str, required): Primary address line
+			- address_line2 (str, optional): Secondary address line
+			- city (str, required): City/town
+			- state (str, optional): State/province
+			- country (str, required): Country
+			- postal_code (str, optional): Postal/ZIP code
 		students (list): List of student objects to create (at least one required)
 			Each student object: {"student_name": str, "school_unit": str, "grade_level": str (optional)}
 
 	Returns:
-		dict: Registration status with customer and user info
+		dict: Registration status with customer, user, and address info
 	"""
 	try:
 		# Validate inputs
@@ -134,6 +141,18 @@ def register(name, email, phone_number, password, students=None):
 
 		if not phone_number:
 			frappe.throw(_("Phone number is required"))
+
+		# Parse address if provided as JSON string
+		if address and isinstance(address, str):
+			import json
+			address = json.loads(address)
+
+		# Validate address
+		if not address or not isinstance(address, dict):
+			frappe.throw(_("Address is required"))
+
+		if not address.get("address_line1") or not address.get("city") or not address.get("country"):
+			frappe.throw(_("Address must include address_line1, city, and country"))
 
 		# Validate email format
 		try:
@@ -241,6 +260,30 @@ def register(name, email, phone_number, password, students=None):
 
 		frappe.db.commit()
 
+		# Create Address for Customer
+		address_doc = frappe.get_doc({
+			"doctype": "Address",
+			"address_title": name,
+			"address_type": "Billing",
+			"address_line1": address.get("address_line1"),
+			"address_line2": address.get("address_line2", ""),
+			"city": address.get("city"),
+			"state": address.get("state", ""),
+			"country": address.get("country"),
+			"pincode": address.get("postal_code", ""),
+			"email_id": email,
+			"phone": phone_number,
+			"is_primary_address": 1,  # Set as default billing address
+			"is_shipping_address": 1,  # Set as default shipping address
+			"links": [{
+				"link_doctype": "Customer",
+				"link_name": customer.name
+			}]
+		})
+		address_doc.insert(ignore_permissions=True)
+
+		frappe.db.commit()
+
 		# Create standalone Student documents if provided
 		created_students = []
 		if validated_students:
@@ -272,6 +315,12 @@ def register(name, email, phone_number, password, students=None):
 			"customer": {
 				"name": customer.name,
 				"customer_name": customer.customer_name,
+			},
+			"address": {
+				"name": address_doc.name,
+				"address_title": address_doc.address_title,
+				"city": address_doc.city,
+				"country": address_doc.country,
 			},
 			"students": [
 				{
