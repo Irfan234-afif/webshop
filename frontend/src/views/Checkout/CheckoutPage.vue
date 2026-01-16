@@ -242,6 +242,16 @@ async function handleNext() {
         return
       }
 
+      // Validate channel selection if required
+      const hasChannels = paymentMethodSelectorRef.value?.hasChannels
+      const selectedChannel = paymentMethodSelectorRef.value?.selectedChannel
+      const isChannelRequired = paymentMethodSelectorRef.value?.isChannelRequired
+
+      if (isChannelRequired) {
+        console.warn('⚠️ Channel selection required but not selected')
+        return
+      }
+
       await checkoutStore.setPaymentMethod(selectedMethod)
       checkoutStore.nextStep()
     } else if (currentStep.value === 3) {

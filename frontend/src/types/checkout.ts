@@ -1,5 +1,3 @@
-import type { CartItem } from './cart'
-import type { Student } from './student'
 
 export interface CheckoutData {
   quotation_name: string
@@ -16,6 +14,7 @@ export interface CheckoutData {
   has_address: boolean
   shipping_address?: string
   billing_address?: string
+  taxes?: TaxCharge[]
 }
 
 export interface CreateAddressParams {
@@ -90,6 +89,7 @@ export interface CheckoutPaymentDetails {
     title: string
     payment_type: string
     need_admin_approval: boolean
+    additional_section: string
   }
   bank_account_details: BankAccountDetails | null
   payment_approval: {
@@ -116,4 +116,13 @@ export interface UpdatePickupTypeParams {
 
 export interface UpdatePaymentMethodParams {
   payment_method_type: string
+}
+
+export interface TaxCharge {
+  charge_type: string
+  description: string
+  rate?: number
+  tax_amount?: number
+  account_head?: string
+  cost_center?: string
 }

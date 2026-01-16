@@ -7,6 +7,38 @@ from frappe.model.document import Document
 
 
 class WebshopPaymentMethod(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+		from webshop.webshop.doctype.webshop_payment_channel.webshop_payment_channel import (
+			WebshopPaymentChannel,
+		)
+		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import (
+			SalesTaxesandCharges,
+		)
+
+		account_holder_name: DF.Data | None
+		allow_on_return: DF.Check
+		bank_account: DF.Link | None
+		description: DF.Text | None
+		enabled: DF.Check
+		icon: DF.Data | None
+		mode_of_payment: DF.Link | None
+		need_admin_approval: DF.Check
+		payment_channels: DF.Table[WebshopPaymentChannel]
+		payment_charges: DF.Table[SalesTaxesandCharges]
+		payment_duration: DF.Duration | None
+		payment_gateway_account: DF.Link | None
+		payment_method_name: DF.Data
+		payment_type: DF.Literal["", "Transfer Manual", "Payment Gateway", "Cash"]
+		sort_order: DF.Int
+		title: DF.Data
+	# end: auto-generated types
+
 	def validate(self):
 		# Validate that for Transfer Manual, bank account and account holder name are provided
 		if self.payment_type == "Transfer Manual":
@@ -27,3 +59,36 @@ class WebshopPaymentMethod(Document):
 				indicator="orange",
 				alert=True
 			)
+
+
+@frappe.whitelist()
+def get_payment_method_charges(payment_method_name):
+	"""
+	Get service charges configured for a payment method (READONLY)
+	
+	Args:
+		payment_method_name: Name of payment method
+		
+	Returns:
+		list: List of charge configurations (Sales Taxes and Charges structure)
+	"""
+	if not payment_method_name:
+		return []
+	
+	if not frappe.db.exists("Webshop Payment Method", payment_method_name):
+		return []
+	
+	payment_method = frappe.get_doc("Webshop Payment Method", payment_method_name)
+	
+	charges = []
+	for charge in payment_method.payment_charges:
+		charges.append({
+			"charge_type": charge.charge_type,
+			"description": charge.description,
+			"rate": charge.rate if charge.charge_type == "On Net Total" else 0,
+			"tax_amount": charge.tax_amount if charge.charge_type == "Actual" else 0,
+			"account_head": charge.account_head,
+			"cost_center": charge.cost_center
+		})
+	
+	return charges

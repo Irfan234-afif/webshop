@@ -79,6 +79,18 @@ def get_checkout_data(student_name=None):
 		# Check if customer has address
 		has_address = bool(quotation.shipping_address_name or quotation.customer_address)
 
+		# Get taxes/charges from quotation
+		taxes = []
+		for tax in quotation.taxes:
+			taxes.append({
+				"charge_type": tax.charge_type,
+				"description": tax.description,
+				"rate": tax.rate,
+				"tax_amount": tax.tax_amount,
+				"account_head": tax.account_head,
+				"cost_center": tax.cost_center
+			})
+
 		checkout_data = {
 			"quotation_name": quotation.name,
 			"items": items,
@@ -93,7 +105,8 @@ def get_checkout_data(student_name=None):
 			"delivery_time": quotation.delivery_time if hasattr(quotation, 'delivery_time') else None,
 			"has_address": has_address,
 			"shipping_address": quotation.shipping_address_name,
-			"billing_address": quotation.customer_address
+			"billing_address": quotation.customer_address,
+			"taxes": taxes
 		}
 
 		return checkout_data
@@ -221,9 +234,15 @@ def update_payment_method(quotation_name, payment_method_type):
 			"Checkout Debug"
 		)
 
-		# Update payment method using db_set to avoid validation errors
-		# db_set updates the database directly without triggering validation
-		quotation.db_set("payment_method_type", payment_method_type, update_modified=True)
+		# Update payment method type
+		quotation.payment_method_type = payment_method_type
+		
+		# Apply service charges to quotation if payment method has charges
+		# This ensures charges are added even when updated via API (client JS doesn't run)
+		_apply_service_charges_to_quotation(quotation, payment_method_type)
+		
+		# Save with recalculated totals
+		quotation.save(ignore_permissions=True)
 
 		frappe.db.commit()
 
@@ -236,6 +255,51 @@ def update_payment_method(quotation_name, payment_method_type):
 	except Exception as e:
 		frappe.log_error(frappe.get_traceback(), "Checkout: Update Payment Method Error")
 		frappe.throw(_("Failed to update payment method: {0}").format(str(e)))
+
+
+@frappe.whitelist()
+def calculate_service_charges(payment_method_name, subtotal):
+	"""
+	Calculate service charge amounts for display (READONLY)
+	Does NOT modify any documents - only for frontend display
+	
+	Args:
+		payment_method_name: Name of payment method
+		subtotal: Order subtotal (net_total) to calculate percentage-based charges
+		
+	Returns:
+		dict: {
+			charges: list of charge details with calculated amounts,
+			total: total service charge amount
+		}
+	"""
+	from webshop.webshop.doctype.webshop_payment_method.webshop_payment_method import get_payment_method_charges
+	
+	subtotal = float(subtotal)
+	charges_config = get_payment_method_charges(payment_method_name)
+	
+	calculated_charges = []
+	total = 0
+	
+	for charge in charges_config:
+		if charge["charge_type"] == "On Net Total":
+			# Percentage-based charge
+			charge_amount = (subtotal * charge["rate"]) / 100
+		else:  # Actual (Fixed Amount)
+			charge_amount = charge["tax_amount"]
+		
+		calculated_charges.append({
+			"charge_type": charge["charge_type"],
+			"description": charge["description"],
+			"rate": charge.get("rate", 0),
+			"charge_amount": charge_amount
+		})
+		total += charge_amount
+	
+	return {
+		"charges": calculated_charges,
+		"total": total
+	}
 
 
 @frappe.whitelist()
@@ -305,6 +369,73 @@ def get_payment_methods():
 		result.append(method_data)
 
 	return result
+
+
+def _apply_service_charges_to_quotation(quotation, payment_method_name):
+	"""
+	Apply service charges from payment method to Quotation.taxes
+	Clears existing service charges first to avoid duplicates.
+	
+	Args:
+		quotation: Quotation document
+		payment_method_name: Name of payment method
+	"""
+	if not payment_method_name:
+		return
+	
+	# Get service charges from payment method
+	from webshop.webshop.doctype.webshop_payment_method.webshop_payment_method import get_payment_method_charges
+	charges = get_payment_method_charges(payment_method_name)
+	
+	if not charges:
+		# No charges configured, clear any existing service charges
+		_clear_service_charges_from_quotation(quotation)
+		return
+	
+	# Clear existing service charges first
+	_clear_service_charges_from_quotation(quotation)
+	
+	# Add new service charges
+	for charge in charges:
+		quotation.append("taxes", {
+			"charge_type": charge.get("charge_type"),
+			"description": charge.get("description"),
+			"rate": charge.get("rate", 0),
+			"tax_amount": charge.get("tax_amount", 0),
+			"account_head": charge.get("account_head"),
+			"cost_center": charge.get("cost_center")
+		})
+	
+	# Recalculate taxes and totals
+	quotation.calculate_taxes_and_totals()
+
+
+def _clear_service_charges_from_quotation(quotation):
+	"""
+	Clear service charges from Quotation.taxes.
+	Identifies service charges by checking if they match payment method charges.
+	
+	Args:
+		quotation: Quotation document
+	"""
+	if not quotation.payment_method_type:
+		return
+	
+	# Get current payment method charges to identify which rows to remove
+	from webshop.webshop.doctype.webshop_payment_method.webshop_payment_method import get_payment_method_charges
+	current_charges = get_payment_method_charges(quotation.payment_method_type)
+	
+	if not current_charges:
+		return
+	
+	# Create set of charge descriptions to identify service charges
+	charge_descriptions = {charge.get("description") for charge in current_charges}
+	
+	# Remove matching rows from taxes table
+	quotation.taxes = [
+		tax for tax in quotation.taxes 
+		if tax.description not in charge_descriptions
+	]
 
 
 @frappe.whitelist()

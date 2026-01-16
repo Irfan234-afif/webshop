@@ -10,28 +10,10 @@
             <span class="font-medium">{{ formatIDR(item.amount) }}</span>
           </div>
 
-          <!-- Layanan Catering (if applicable) -->
-          <div class="flex justify-between py-2">
-            <span class="text-gray-700">Layanan Catering</span>
-            <span class="font-medium">0</span>
-          </div>
-
-          <!-- Layanan Antar Jemput (if applicable) -->
-          <div class="flex justify-between py-2">
-            <span class="text-gray-700">Layanan Antar Jemput</span>
-            <span class="font-medium">{{ formatIDR(0) }}</span>
-          </div>
-
           <!-- Voucher -->
           <div class="flex justify-between py-2">
             <span class="text-gray-700">Voucher</span>
             <span class="font-medium">{{ voucherDiscount > 0 ? '-' + formatIDR(voucherDiscount) : '0' }}</span>
-          </div>
-
-          <!-- Diskon Anggota Koperasi -->
-          <div class="flex justify-between py-2">
-            <span class="text-gray-700">Diskon Anggota Koperasi</span>
-            <span class="font-medium text-red-600">{{ memberDiscount > 0 ? '- ' + formatIDR(memberDiscount) : '0' }}</span>
           </div>
         </div>
       </div>
@@ -44,9 +26,11 @@
             <span class="text-gray-700">Metode</span>
             <span class="font-medium">{{ paymentMethodType || '-' }}</span>
           </div>
-          <div class="flex justify-between py-2">
-            <span class="text-gray-700">Total Pesanan</span>
-            <span class="font-medium">{{ formatIDR(total) }}</span>
+
+          <!-- Service Charges -->
+          <div v-for="(charge, index) in serviceCharges" :key="index" class="flex justify-between py-2">
+            <span class="text-gray-700">{{ charge.description }}</span>
+            <span class="font-medium">{{ formatIDR(charge.tax_amount || 0) }}</span>
           </div>
         </div>
       </div>
@@ -90,7 +74,8 @@ const {
   memberDiscount,
   pickupType,
   paymentMethodType,
-  deliveryDate
+  deliveryDate,
+  serviceCharges
 } = storeToRefs(checkoutStore)
 
 function formatIDR(amount: number): string {

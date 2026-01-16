@@ -12,6 +12,7 @@ import {
   getPaymentMethods,
   placeOrderWithPayment
 } from '@/utils/checkoutApi'
+import { extractErrorMessage } from '@/utils/errorHandler'
 
 export const useCheckoutStore = defineStore('checkout', () => {
   // State
@@ -33,6 +34,9 @@ export const useCheckoutStore = defineStore('checkout', () => {
   const total = computed(() => checkoutData.value?.total || 0)
   const items = computed(() => checkoutData.value?.items || [])
   const quotationName = computed(() => checkoutData.value?.quotation_name || '')
+  
+  // Service charges from quotation taxes
+  const serviceCharges = computed(() => checkoutData.value?.taxes || [])
 
   const canProceedToStep2 = computed(() => {
     if (!pickupType.value) return false
@@ -43,16 +47,13 @@ export const useCheckoutStore = defineStore('checkout', () => {
   })
 
   const canProceedToStep3 = computed(() => {
-    // If method has channels, one must be selected? 
-    // Logic: If there are channels available for the selected method, enforce channel selection.
-    // For now, simple check: just need paymentMethodType. 
-    // Ideally we check if channel is required based on method details.
-    
     if (!paymentMethodType.value) return false
     
-    // Optional: Add channel validation if needed
-    // const method = paymentMethods.value.find(m => m.name === paymentMethodType.value)
-    // if (method?.payment_channels?.length && !paymentChannel.value) return false
+    // Validate channel selection if the payment method has channels
+    const method = paymentMethods.value.find(m => m.name === paymentMethodType.value)
+    if (method?.payment_channels?.length && !paymentChannel.value) {
+      return false
+    }
     
     return true
   })
@@ -67,7 +68,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     error.value = null
 
     try {
-      console.log('🔍 initializeCheckout: Starting with student:', studentName)
+    
 
       // CRITICAL: Pass student_name directly to get_checkout_data
       // Backend will set active student and fetch quotation for that student
@@ -90,9 +91,10 @@ export const useCheckoutStore = defineStore('checkout', () => {
         deliveryTime.value = data.delivery_time
       }
     } catch (err) {
-      error.value = err as Error
+      const errorMessage = extractErrorMessage(err)
+      error.value = new Error(errorMessage)
       console.error('❌ initializeCheckout: Failed:', err)
-      throw err
+      throw error.value
     } finally {
       isLoading.value = false
     }
@@ -120,7 +122,8 @@ export const useCheckoutStore = defineStore('checkout', () => {
         deliveryTime.value = data.delivery_time
       }
     } catch (err) {
-      error.value = err as Error
+      const errorMessage = extractErrorMessage(err)
+      error.value = new Error(errorMessage)
       console.error('Failed to fetch checkout data:', err)
     } finally {
       isLoading.value = false
@@ -159,9 +162,10 @@ export const useCheckoutStore = defineStore('checkout', () => {
 
       console.log('✅ setPickupType: Updated successfully')
     } catch (err) {
-      error.value = err as Error
+      const errorMessage = extractErrorMessage(err)
+      error.value = new Error(errorMessage)
       console.error('❌ setPickupType: Failed:', err)
-      throw err
+      throw error.value
     } finally {
       isLoading.value = false
     }
@@ -193,9 +197,10 @@ export const useCheckoutStore = defineStore('checkout', () => {
 
       console.log('✅ setPaymentMethod: Updated successfully')
     } catch (err) {
-      error.value = err as Error
+      const errorMessage = extractErrorMessage(err)
+      error.value = new Error(errorMessage)
       console.error('❌ setPaymentMethod: Failed:', err)
-      throw err
+      throw error.value
     } finally {
       isLoading.value = false
     }
@@ -209,7 +214,8 @@ export const useCheckoutStore = defineStore('checkout', () => {
       const methods = await getPaymentMethods()
       paymentMethods.value = methods
     } catch (err) {
-      error.value = err as Error
+      const errorMessage = extractErrorMessage(err)
+      error.value = new Error(errorMessage)
       console.error('Failed to fetch payment methods:', err)
     } finally {
       isLoading.value = false
@@ -236,17 +242,24 @@ export const useCheckoutStore = defineStore('checkout', () => {
 
       return response
     } catch (err) {
-      error.value = err as Error
+      const errorMessage = extractErrorMessage(err)
+      error.value = new Error(errorMessage)
       console.error('❌ placeOrder: Failed:', err)
-      throw err
+      throw error.value
     } finally {
       isLoading.value = false
     }
   }
 
-  function nextStep() {
+  async function nextStep() {
     if (currentStep.value < 3) {
       currentStep.value++
+      
+      // Refresh checkout data when moving to order confirmation
+      // This ensures the latest totals including service charges are displayed
+      if (currentStep.value === 3) {
+        await fetchCheckoutData()
+      }
     }
   }
 
@@ -295,6 +308,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     total,
     items,
     quotationName,
+    serviceCharges,
     canProceedToStep2,
     canProceedToStep3,
     canPlaceOrder,

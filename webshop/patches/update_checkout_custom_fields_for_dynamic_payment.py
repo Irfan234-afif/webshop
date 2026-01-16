@@ -98,14 +98,12 @@ def execute():
 				"label": "Metode Pembayaran",
 				"options": "Webshop Payment Method",
 				"insert_after": "column_break_checkout",
-				"read_only": 1,
 			},
 			{
 				"fieldname": "pickup_date",
 				"fieldtype": "Date",
 				"label": "Hari Pengambilan",
 				"insert_after": "payment_method_type",
-				"read_only": 1,
 			},
 			{
 				"fieldname": "pickup_time_slot",

@@ -3,7 +3,8 @@
     <!-- Success Header -->
     <div class="text-center mb-8">
       <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
         </svg>
       </div>
@@ -33,13 +34,12 @@
             <span class="text-2xl font-mono font-bold text-gray-900 tracking-wide">
               {{ paymentDetails.virtual_account?.number }}
             </span>
-            <button 
-              @click="copyToClipboard(paymentDetails.virtual_account?.number || '')"
-              class="ml-auto p-2 text-primary hover:bg-white rounded-md transition-colors"
-              title="Salin Nomor VA"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            <button @click="copyToClipboard(paymentDetails.virtual_account?.number || '')"
+              class="ml-auto p-2 text-primary hover:bg-white rounded-md transition-colors" title="Salin Nomor VA">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
               </svg>
             </button>
           </div>
@@ -61,25 +61,22 @@
           </div>
         </div>
       </div>
-      
+
       <!-- Footer Actions -->
       <div class="bg-gray-50 px-6 py-4 flex gap-3">
-        <button 
-          @click="$emit('view-order')"
-          class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium"
-        >
+        <button @click="$emit('view-order')"
+          class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium">
           Lihat Pesanan
         </button>
-        <button 
-          @click="$emit('continue-shopping')"
-          class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark font-medium"
-        >
+        <button @click="$emit('continue-shopping')"
+          class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark font-medium">
           Lanjut Belanja
         </button>
       </div>
     </div>
 
     <!-- Instructions -->
+    <!-- <div v-html="paymentDetails.payment_method.additional_section"></div> -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       <h3 class="font-bold text-lg mb-4">Cara Pembayaran</h3>
       <div class="space-y-4">
@@ -87,34 +84,41 @@
           <summary class="flex justify-between items-center font-medium cursor-pointer list-none">
             <span>ATM {{ paymentDetails.virtual_account?.bank }}</span>
             <span class="transition group-open:rotate-180">
-              <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+              <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor"
+                stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24">
+                <path d="M6 9l6 6 6-6"></path>
+              </svg>
             </span>
           </summary>
           <div class="text-gray-600 mt-3 group-open:animate-fadeIn text-sm pl-4 border-l-2 border-gray-100">
             <ol class="list-decimal pl-4 space-y-2">
               <li>Masukkan kartu ATM dan PIN Anda using.</li>
               <li>Pilih menu Transaksi Lainnya > Transfer > Ke Rekening Virtual Account.</li>
-              <li>Masukkan nomor Virtual Account: <span class="font-mono font-bold">{{ paymentDetails.virtual_account?.number }}</span></li>
+              <li>Masukkan nomor Virtual Account: <span class="font-mono font-bold">{{
+                paymentDetails.virtual_account?.number }}</span></li>
               <li>Pastikan detail pembayaran sudah benar.</li>
               <li>Ikuti instruksi selanjutnya untuk menyelesaikan pembayaran.</li>
             </ol>
           </div>
         </details>
-        
+
         <details class="group">
           <summary class="flex justify-between items-center font-medium cursor-pointer list-none">
             <span>Mobile Banking</span>
             <span class="transition group-open:rotate-180">
-              <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+              <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor"
+                stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24">
+                <path d="M6 9l6 6 6-6"></path>
+              </svg>
             </span>
           </summary>
           <div class="text-gray-600 mt-3 group-open:animate-fadeIn text-sm pl-4 border-l-2 border-gray-100">
             <ol class="list-decimal pl-4 space-y-2">
               <li>Login ke aplikasi Mobile Banking Anda.</li>
-              <li>Pilih menu m-Transfer > BCA Virtual Account.</li>
-              <li>Masukkan nomor Virtual Account: <span class="font-mono font-bold">{{ paymentDetails.virtual_account?.number }}</span></li>
+              <li>Pilih menu m-Transfer > {{ paymentDetails.virtual_account?.bank }} Virtual Account.</li>
+              <li>Masukkan nomor Virtual Account: <span class="font-mono font-bold">{{
+                paymentDetails.virtual_account?.number }}</span></li>
               <li>Pastikan detail pembayaran sudah benar.</li>
-              <li>Masukkan PIN m-BCA Anda.</li>
             </ol>
           </div>
         </details>
@@ -163,10 +167,11 @@ async function copyToClipboard(text: string) {
 </script>
 
 <style scoped>
-  details > summary {
-    list-style: none;
-  }
-  details > summary::-webkit-details-marker {
-    display: none;
-  }
+details>summary {
+  list-style: none;
+}
+
+details>summary::-webkit-details-marker {
+  display: none;
+}
 </style>

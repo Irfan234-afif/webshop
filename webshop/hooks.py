@@ -45,6 +45,8 @@ doctype_js = {
     "Item": "public/js/override/item.js",
     "Homepage": "public/js/override/homepage.js",
     "Payment Request": "webshop/doctype/override_doctype/payment_request.js",
+    "Quotation": "public/js/quotation.js",
+    "Sales Order": "public/js/sales_order.js",
 }
 
 doctype_list_js = {

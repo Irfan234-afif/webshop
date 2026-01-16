@@ -22,7 +22,9 @@
         "allow_on_return",
         "icon",
         "sort_order",
-        "payment_channels"
+        "payment_channels",
+        "section_break_charges",
+        "payment_charges"
     ],
     "fields": [
         {
@@ -135,6 +137,18 @@
             "label": "Payment Channels",
             "options": "Webshop Payment Channel",
             "depends_on": "eval:doc.payment_type == 'Payment Gateway'"
+        },
+        {
+            "fieldname": "section_break_charges",
+            "fieldtype": "Section Break",
+            "label": "Service Charges"
+        },
+        {
+            "fieldname": "payment_charges",
+            "fieldtype": "Table",
+            "label": "Payment Charges",
+            "options": "Sales Taxes and Charges",
+            "description": "Configure service fees/charges that will be added to orders using this payment method"
         }
     ],
     "links": [],

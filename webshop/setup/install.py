@@ -204,7 +204,6 @@ def add_custom_fields():
 				"label": "Metode Pembayaran",
 				"options": "Webshop Payment Method",
 				"insert_after": "column_break_checkout",
-				"read_only": 1
 			},
 			{
 				"fieldname": "school_unit",
