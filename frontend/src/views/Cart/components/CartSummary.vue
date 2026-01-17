@@ -116,7 +116,7 @@ const toggleDetails = () => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 sticky top-6">
+  <div class="flex flex-col gap-4 sticky top-20 sm:top-24 lg:top-28">
     <div class="">
       <!-- Voucher Section -->
       <div class="bg-mute border-t-[1.5px] border-x-[1.5px] border-border rounded-t-xl p-4 sm:p-6 lg:p-8">
