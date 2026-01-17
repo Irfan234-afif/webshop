@@ -42,7 +42,7 @@ const handleClearFilters = () => {
 
 <template>
   <aside :class="[
-    'w-full shrink-0 self-start',
+    'w-full shrink-0 self-start sticky top-20 sm:top-24 lg:top-28',
     variant === 'default'
       ? 'rounded-xl bg-mute p-6 lg:w-72 lg:p-8'
       : 'p-0'
