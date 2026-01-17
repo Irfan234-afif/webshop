@@ -5,8 +5,18 @@ app_title = "Webshop"
 app_publisher = "Frappe Technologies Pvt. Ltd."
 app_description = "Open Source eCommerce Platform"
 app_email = "contact@frappe.io"
+app_icon = "fa fa-shopping-basket"
 app_license = "GNU General Public License (v3)"
 app_version = _version
+
+add_to_apps_screen = [
+	{
+		"name": app_name,
+		"title": app_title,
+		"route": "/desk",
+	}
+]
+
 
 required_apps = ["payments", "erpnext"]
 

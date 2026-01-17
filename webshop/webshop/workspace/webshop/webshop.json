@@ -1,0 +1,46 @@
+{
+ "app": "webshop",
+ "charts": [
+  {
+   "chart_name": "Webshop Sales Order",
+   "label": "Webshop Sales"
+  }
+ ],
+ "content": "[{\"id\":\"XSSo6_PvRE\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Webshop</span>\",\"col\":12}},{\"id\":\"u_LJXCgMCh\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Webshop Sales\",\"col\":12}},{\"id\":\"HjGtkueFVk\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Orders\",\"col\":4}},{\"id\":\"eFV0m-KOhp\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Sales Amount\",\"col\":4}}]",
+ "creation": "2026-01-18 00:38:07.397266",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "shopping-basket",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Webshop",
+ "link_type": "DocType",
+ "links": [],
+ "modified": "2026-01-18 00:58:52.224348",
+ "modified_by": "Administrator",
+ "module": "Webshop",
+ "name": "Webshop",
+ "number_cards": [
+  {
+   "label": "Orders",
+   "number_card_name": "Webshop Orders Count"
+  },
+  {
+   "label": "Sales Amount",
+   "number_card_name": "Webshop Total Sales Amount"
+  }
+ ],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 23.0,
+ "shortcuts": [],
+ "title": "Webshop",
+ "type": "Workspace"
+}

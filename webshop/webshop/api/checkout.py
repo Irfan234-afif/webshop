@@ -546,30 +546,34 @@ def get_checkout_payment_details(sales_order_name):
 			}
 		}
 
-		# Get general payment status from Payment Request
-		# specific logic for identifying if "Paid"
-		pr_general = frappe.get_all(
-			"Payment Request",
-			filters={
-				"reference_doctype": "Sales Order",
-				"reference_name": sales_order_name,
-				"docstatus": ["!=", 2] # Not cancelled
-			},
-			fields=["status"],
-			order_by="creation desc",
-			limit=1
-		)
-		if pr_general:
-			res["payment_status"] = pr_general[0].status
-		else:
-			res["payment_status"] = "Pending"
+		# # Get general payment status from Payment Request
+		# # specific logic for identifying if "Paid"
+		# pr_general = frappe.get_all(
+		# 	"Payment Request",
+		# 	filters={
+		# 		"reference_doctype": "Sales Order",
+		# 		"reference_name": sales_order_name,
+		# 		"docstatus": ["!=", 2] # Not cancelled
+		# 	},
+		# 	fields=["status"],
+		# 	order_by="creation desc",
+		# 	limit=1
+		# )
+		# if pr_general:
+		# 	res["payment_status"] = pr_general[0].status
+		# else:
+		# 	res["payment_status"] = "Pending"
+		# if not frappe.db.exists("Payment Request", {
+		# 	"reference_doctype": "Sales Order",
+		# 	"reference_name": sales_order_name
+		# }):
+			
 
 		# Check for Payment Request VA details (Primary Source)
 		pr_va = frappe.db.get_value("Payment Request", {
 			"reference_doctype": "Sales Order",
-			"reference_name": sales_order_name,
-			"status": ["in", ["Requested", "Pending", "Initiated"]]
-		}, ["virtual_account_number", "virtual_account_bank", "payment_due_date"], as_dict=1)
+			"reference_name": sales_order_name
+		}, ["virtual_account_number", "virtual_account_bank", "payment_due_date", "status"], as_dict=1)
 
 		if pr_va:
 			res["virtual_account"] = {
@@ -577,6 +581,7 @@ def get_checkout_payment_details(sales_order_name):
 				"bank": pr_va.virtual_account_bank,
 				"expiry": pr_va.payment_due_date
 			}
+			res['payment_status'] = pr_va.status
 
 		return res
 
@@ -656,19 +661,9 @@ def place_order_with_payment(quotation_name, payment_channel=None):
 		quotation.payment_schedule = []
 		quotation.save(ignore_permissions=True)
 
-		frappe.log_error(
-			f"Quotation totals recalculated: {quotation.name}, Grand Total: {quotation.grand_total}, Net Total: {quotation.net_total}",
-			"Checkout Debug"
-		)
-
 		# Reload quotation from database to ensure we have saved values
 		# Use force=True to reload from DB, bypassing cache
 		quotation.reload()
-
-		frappe.log_error(
-			f"Quotation reloaded from DB: {quotation.name}, Grand Total: {quotation.grand_total}, Net Total: {quotation.net_total}",
-			"Checkout Debug"
-		)
 
 		# CRITICAL: Set active student so place_order() gets the right quotation
 		# place_order() internally calls _get_cart_quotation() which needs active student
@@ -696,6 +691,10 @@ def place_order_with_payment(quotation_name, payment_channel=None):
 		# Copy custom fields from Quotation to Sales Order
 		sales_order.pickup_type = pickup_type
 		sales_order.payment_method_type = payment_method_type
+		
+		# Save payment channel to Sales Order
+		if payment_channel:
+			sales_order.payment_channel = payment_channel
 
 		# Set the delivery date using the default field in Sales Order
 		if delivery_date:
@@ -733,6 +732,10 @@ def get_payment_gateway_url(sales_order_name, payment_method_type, payment_chann
 	"""
 	try:
 		sales_order = frappe.get_doc("Sales Order", sales_order_name)
+
+		# Fallback to stored payment channel if not provided
+		if not payment_channel:
+			payment_channel = getattr(sales_order, "payment_channel", None)
 
 		# Get the payment method from the new doctype
 		payment_method = frappe.get_doc("Webshop Payment Method", payment_method_type)
