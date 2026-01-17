@@ -305,3 +305,23 @@ export async function removeCouponCode(
     throw error
   }
 }
+
+/**
+ * Validate stock for items in the cart
+ *
+ * @param quotation_name - Quotation name to validate
+ * @returns Promise<boolean> True if valid
+ * @throws Error if stock insufficient
+ */
+export async function validateCartStock(
+  quotation_name: string
+): Promise<boolean> {
+  try {
+    const response = await call('webshop.webshop.shopping_cart.cart.validate_cart_stock', {
+      quotation_name: quotation_name
+    })
+    return response as boolean
+  } catch (error) {
+    throw error
+  }
+}

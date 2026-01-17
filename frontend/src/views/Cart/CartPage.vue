@@ -3,6 +3,8 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useAlertStore } from '@/stores/alert'
+import { validateCartStock } from '@/utils/cartApi'
+import { extractErrorMessage } from '@/utils/errorHandler'
 import CartItem from './components/CartItem.vue'
 import CartSummary from './components/CartSummary.vue'
 import DefaultLayout from '@/components/layout/DefaultLayout.vue'
@@ -21,6 +23,7 @@ const cartStore = useCartStore()
 const alertStore = useAlertStore()
 
 // Checkout modal state
+const isCheckoutProcessing = ref(false)
 
 
 onMounted(async () => {
@@ -74,7 +77,7 @@ const handleRemoveItem = (itemCode: string, quotationName: string) => {
   cartStore.removeItem(itemCode, quotationName)
 }
 
-const handleCheckout = () => {
+const handleCheckout = async () => {
   // CRITICAL: Only allow checkout for exactly ONE student at a time
   // One student = one quotation = one checkout
   if (cartStore.selectedStudentCart === null) {
@@ -82,11 +85,21 @@ const handleCheckout = () => {
     return
   }
 
-  // Navigate to checkout page with selected student
-  router.push({
-    name: 'checkout',
-    query: { student: cartStore.selectedStudentCart.student_name }
-  })
+  isCheckoutProcessing.value = true
+  try {
+    await validateCartStock(cartStore.selectedStudentCart.quotation_name)
+
+    // Navigate to checkout page with selected student
+    router.push({
+      name: 'checkout',
+      query: { student: cartStore.selectedStudentCart.student_name }
+    })
+  } catch (error: any) {
+    const errorMessage = extractErrorMessage(error)
+    alertStore.error(errorMessage, 'Gagal')
+  } finally {
+    isCheckoutProcessing.value = false
+  }
 }
 
 const goHome = () => {
@@ -184,7 +197,8 @@ const goHome = () => {
                 :quotation-name="cartStore.selectedStudentCart?.quotation_name"
                 :coupon-code="cartStore.selectedStudentCart?.coupon_code"
                 :discount-amount="cartStore.selectedStudentCart?.discount_amount"
-                :original-total="cartStore.selectedStudentCart?.original_total" @checkout="handleCheckout" />
+                :original-total="cartStore.selectedStudentCart?.original_total"
+                :is-checkout-loading="isCheckoutProcessing" @checkout="handleCheckout" />
             </div>
           </div>
         </div>

@@ -140,11 +140,11 @@ def place_order(quotation_name=None):
 					item.item_code, "website_warehouse", warehouse=item.warehouse
 				)
 				if not cint(item_stock.in_stock):
-					throw(_("{0} Not in Stock").format(item.item_code))
+					throw(_("{0} Not in Stock").format(item.item_name))
 				if item.qty > item_stock.stock_qty:
 					throw(
 						_("Only {0} in Stock for item {1}").format(
-							item_stock.stock_qty, item.item_code
+							item_stock.stock_qty, item.item_name
 						)
 					)
 
@@ -156,6 +156,46 @@ def place_order(quotation_name=None):
 		frappe.local.cookie_manager.delete_cookie("cart_count")
 
 	return sales_order.name
+
+
+@frappe.whitelist()
+def validate_cart_stock(quotation_name):
+	quotation = _get_cart_quotation(quotation_name=quotation_name)
+	cart_settings = frappe.get_cached_doc("Webshop Settings")
+
+	if not cint(cart_settings.allow_items_not_in_stock):
+		for item in quotation.get("items"):
+			# Ensure warehouse is set
+			if not item.warehouse:
+				item.warehouse = frappe.db.get_value(
+					"Website Item", {"item_code": item.item_code}, "website_warehouse"
+				)
+				if not item.warehouse:
+					variant_of = frappe.get_cached_value("Item", item.item_code, "variant_of")
+					if variant_of:
+						item.warehouse = frappe.db.get_value(
+							"Website Item", {"item_code": variant_of}, "website_warehouse"
+						)
+
+			if not item.warehouse:
+				item.warehouse = frappe.get_cached_value("Item", item.item_code, "default_warehouse")
+
+			is_stock_item = frappe.db.get_value("Item", item.item_code, "is_stock_item")
+
+			if is_stock_item:
+				item_stock = get_web_item_qty_in_stock(
+					item.item_code, "website_warehouse", warehouse=item.warehouse
+				)
+				if not cint(item_stock.in_stock):
+					throw(_("{0} Not in Stock").format(item.item_name))
+				if item.qty > item_stock.stock_qty:
+					throw(
+						_("Only {0} in Stock for item {1}").format(
+							item_stock.stock_qty, item.item_name
+						)
+					)
+
+	return True
 
 
 @frappe.whitelist()
