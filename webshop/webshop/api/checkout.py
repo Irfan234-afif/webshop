@@ -43,38 +43,45 @@ def get_checkout_data(student_name=None):
 		if not quotation.items:
 			frappe.throw(_("Your cart is empty. Please add items to cart first."))
 
-		# Get quotation details
+		# Get quotation details with original prices and discounted prices
 		items = []
+		original_total = 0  # Calculate original total before discount
+
 		for item in quotation.items:
+			# Get original price (price_list_rate) before any discounts
+			price_list_rate = item.price_list_rate if hasattr(item, 'price_list_rate') else item.rate
+			original_total += price_list_rate * item.qty
+
 			items.append({
 				"item_code": item.item_code,
 				"item_name": item.item_name,
 				"qty": item.qty,
-				"rate": item.rate,
-				"amount": item.amount,
+				"rate": item.rate,  # Discounted rate
+				"price_list_rate": price_list_rate,  # Original price before discount
+				"amount": item.amount,  # Discounted total for this item
 				"image": frappe.db.get_value("Website Item", {"item_code": item.item_code}, "website_image") or ""
 			})
 
 		# Calculate discounts from quotation
-		# Quotation already has total discount applied, we can use those fields
+		# Calculate actual discount amount by comparing original_total with grand_total
 		voucher_discount = 0
 		member_discount = 0
 
 		# Use quotation's discount fields
-		# If there's a coupon code, attribute discount to voucher
-		if quotation.coupon_code and quotation.discount_amount:
-			voucher_discount = abs(quotation.discount_amount or 0)
+		# If there's a coupon code, calculate discount from the difference
+		if quotation.coupon_code:
+			# Calculate discount as: original_total - grand_total
+			# This captures the actual discount applied through pricing rules
+			discount_from_pricing = original_total - quotation.grand_total
+			voucher_discount = abs(discount_from_pricing)
 		elif quotation.discount_amount:
-			# If no coupon code, consider it member discount
+			# If no coupon code but there's a discount, consider it member discount
 			member_discount = abs(quotation.discount_amount or 0)
 
 		# Alternative: If additional_discount_percentage is used
-		if quotation.additional_discount_percentage and not quotation.discount_amount:
+		if quotation.additional_discount_percentage and not quotation.coupon_code:
 			discount_value = (quotation.net_total * quotation.additional_discount_percentage) / 100
-			if quotation.coupon_code:
-				voucher_discount = abs(discount_value)
-			else:
-				member_discount = abs(discount_value)
+			member_discount = abs(discount_value)
 
 		# Check if customer has address
 		has_address = bool(quotation.shipping_address_name or quotation.customer_address)
@@ -95,6 +102,8 @@ def get_checkout_data(student_name=None):
 			"quotation_name": quotation.name,
 			"items": items,
 			"subtotal": quotation.net_total,
+			"original_total": original_total,  # Total before discount
+			"coupon_code": quotation.coupon_code if hasattr(quotation, 'coupon_code') else None,  # Applied coupon code
 			"voucher_discount": voucher_discount,
 			"member_discount": member_discount,
 			"total": quotation.grand_total,

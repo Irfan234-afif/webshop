@@ -6,14 +6,15 @@
         <h3 class="section-title">Informasi Produk & Layanan</h3>
         <div class="section-content">
           <div v-for="item in items" :key="item.item_code" class="flex justify-between py-2">
-            <span class="text-gray-700">{{ item.item_name }} ({{ item.qty }}x)</span>
-            <span class="font-medium">{{ formatIDR(item.amount) }}</span>
+            <span class="font-semibold text-sm text-text-secondary">{{ item.item_name }} ({{ item.qty }}x)</span>
+            <span class="font-semibold text-sm text-text-secondary">{{ formatIDR(item.price_list_rate * item.qty)
+              }}</span>
           </div>
 
           <!-- Coupon Discount (only if applied) -->
           <div v-if="voucherDiscount > 0" class="flex justify-between py-2 text-red-600">
-            <span>Diskon Voucher</span>
-            <span class="font-medium">- {{ formatIDR(voucherDiscount) }}</span>
+            <span class="font-semibold text-sm">Diskon Voucher</span>
+            <span class="font-semibold text-sm">- {{ formatIDR(voucherDiscount) }}</span>
           </div>
         </div>
       </div>
@@ -23,14 +24,14 @@
         <h3 class="section-title">Metode Pembayaran</h3>
         <div class="section-content">
           <div class="flex justify-between py-2">
-            <span class="text-gray-700">Metode</span>
-            <span class="font-medium">{{ paymentMethodType || '-' }}</span>
+            <span class="font-semibold text-sm text-text-secondary">Metode</span>
+            <span class="font-semibold text-sm text-text-secondary">{{ paymentMethodType || '-' }}</span>
           </div>
 
           <!-- Service Charges -->
           <div v-for="(charge, index) in serviceCharges" :key="index" class="flex justify-between py-2">
-            <span class="text-gray-700">{{ charge.description }}</span>
-            <span class="font-medium">{{ formatIDR(charge.tax_amount || 0) }}</span>
+            <span class="font-semibold text-sm text-text-secondary">{{ charge.description }}</span>
+            <span class="font-semibold text-sm text-text-secondary">{{ formatIDR(charge.tax_amount || 0) }}</span>
           </div>
         </div>
       </div>
@@ -40,12 +41,12 @@
         <h3 class="section-title">Informasi Pengambilan</h3>
         <div class="section-content">
           <div class="flex justify-between py-2">
-            <span class="text-gray-700">Jenis Pengambilan</span>
-            <span class="font-medium">{{ pickupType || '-' }}</span>
+            <span class="font-semibold text-sm text-text-secondary">Jenis Pengambilan</span>
+            <span class="font-semibold text-sm text-text-secondary">{{ pickupType || '-' }}</span>
           </div>
           <div v-if="deliveryDate" class="flex justify-between py-2">
-            <span class="text-gray-700">Tanggal Pengiriman</span>
-            <span class="font-medium">{{ formatDate(deliveryDate) }}</span>
+            <span class="font-semibold text-sm text-text-secondary">Tanggal Pengiriman</span>
+            <span class="font-semibold text-sm text-text-secondary">{{ formatDate(deliveryDate) }}</span>
           </div>
         </div>
       </div>
@@ -106,15 +107,15 @@ function formatDate(dateString: string): string {
 
 <style scoped>
 .section {
-  @apply bg-white border border-gray-200 rounded-lg overflow-hidden;
+  @apply flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden gap-4 py-4;
 }
 
 .section-title {
-  @apply font-semibold text-lg px-6 py-4 bg-gray-50 border-b border-gray-200;
+  @apply font-bold text-lg px-6;
 }
 
 .section-content {
-  @apply px-6 py-2;
+  @apply px-6;
 }
 
 .total-section {

@@ -3,6 +3,8 @@ export interface CheckoutData {
   quotation_name: string
   items: CheckoutItem[]
   subtotal: number
+  original_total: number  // Total before discount
+  coupon_code?: string  // Applied coupon code
   voucher_discount: number
   member_discount: number
   total: number
@@ -30,7 +32,8 @@ export interface CheckoutItem {
   item_code: string
   item_name: string
   qty: number
-  rate: number
+  rate: number  // Discounted rate
+  price_list_rate: number  // Original price before discount
   amount: number
   image?: string
 }

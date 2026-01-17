@@ -243,8 +243,6 @@ async function handleNext() {
       }
 
       // Validate channel selection if required
-      const hasChannels = paymentMethodSelectorRef.value?.hasChannels
-      const selectedChannel = paymentMethodSelectorRef.value?.selectedChannel
       const isChannelRequired = paymentMethodSelectorRef.value?.isChannelRequired
 
       if (isChannelRequired) {
@@ -282,7 +280,7 @@ function formatIDR(amount: number): string {
 
 <style scoped>
 .btn-primary {
-  @apply px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-opacity-90 transition-all duration-200;
+  @apply px-6 py-3 bg-primary text-white rounded-lg font-bold hover:bg-opacity-90 transition-all duration-200;
 }
 
 .btn-primary:disabled {
@@ -290,7 +288,7 @@ function formatIDR(amount: number): string {
 }
 
 .btn-secondary {
-  @apply px-6 py-3 border-2 border-primary text-primary rounded-lg font-medium hover:bg-purple-50 transition-all duration-200;
+  @apply px-6 py-3 border-2 border-primary text-primary rounded-lg font-bold hover:bg-purple-50 transition-all duration-200;
 }
 
 .btn-secondary:disabled {
