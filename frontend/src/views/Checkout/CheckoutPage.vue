@@ -109,7 +109,6 @@ const {
 
 const needsAddress = computed(() => !checkoutData.value?.has_address)
 
-const pickupTypeSelectorRef = ref<InstanceType<typeof PickupTypeSelector> | null>(null)
 const paymentMethodSelectorRef = ref<InstanceType<typeof PaymentMethodSelector> | null>(null)
 
 // Initialize checkout
@@ -238,6 +237,7 @@ async function handleNext() {
     } else if (currentStep.value === 2) {
       // Save payment method
       const selectedMethod = paymentMethodSelectorRef.value?.selectedMethod
+      const selectedChannel = paymentMethodSelectorRef.value?.selectedChannel
       if (!selectedMethod) {
         return
       }
@@ -250,7 +250,7 @@ async function handleNext() {
         return
       }
 
-      await checkoutStore.setPaymentMethod(selectedMethod)
+      await checkoutStore.setPaymentMethod(selectedMethod, selectedChannel)
       checkoutStore.nextStep()
     } else if (currentStep.value === 3) {
       // Place order and redirect to payment
@@ -268,14 +268,6 @@ async function handleNext() {
   }
 }
 
-function formatIDR(amount: number): string {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(amount)
-}
 </script>
 
 <style scoped>

@@ -46,15 +46,15 @@
                   <div class="flex items-center justify-between">
                     <p class="text-sm font-semibold text-text-secondary">Status</p>
                     <div class="flex items-center gap-2">
-                      <div :class="['w-[11px] h-[11px] rounded-full', getStatusDotClass(order.status)]" />
-                      <p :class="['text-sm font-bold capitalize', getStatusTextClass(order.status)]">
-                        {{ getStatusLabel(order.status) }}
+                      <div :class="['w-[11px] h-[11px] rounded-full', getStatusDotClass(getDisplayStatus(order))]" />
+                      <p :class="['text-sm font-bold capitalize', getStatusTextClass(getDisplayStatus(order))]">
+                        {{ getStatusLabel(getDisplayStatus(order)) }}
                       </p>
                     </div>
                   </div>
 
                   <!-- Payment Deadline Warning -->
-                  <div v-if="order.status === 'Draft' || order.status === 'Pending Payment'"
+                  <div v-if="getDisplayStatus(order) === 'Draft' || getDisplayStatus(order) === 'Pending Payment'"
                     class="bg-white rounded-lg p-4 flex items-start gap-3">
                     <InfoCircleIcon :size="16" color="#FFBC4F" class="flex-shrink-0 mt-0.5" />
                     <p class="text-sm font-semibold text-text-secondary flex-1">
@@ -219,6 +219,9 @@ import InfoCircleIcon from '@/components/icons/InfoCircleIcon.vue'
 import ReturnRequestModal from '@/components/features/returns/ReturnRequestModal.vue'
 import type { Order } from '@/types/order'
 
+// Helper function to get display status
+const getDisplayStatus: (order: Order) => string = (order: Order) => order.status != "Completed" ? order.status : order.ecommerce_delivery_status
+
 interface Props {
   isOpen: boolean
   order: Order
@@ -238,6 +241,29 @@ const isReturnModalOpen = ref(false)
 const isEligibleForReturn = ref<boolean | null>(null) // null = not checked yet, true/false = eligibility status
 
 console.log('OrderDetailModal component loaded')
+
+// Status Logic - same as OrderCard.vue
+const isWaitingPayment = computed(() => {
+  return props.order.status.includes("Bill") || props.order.status.includes("To Pay");
+})
+
+const isWaitingApproval = computed(() => {
+  // Logic: "Waiting Payment Approval"
+  // User uploaded proof (Payment Request Created/Draft)
+  if (['Transfer Manual', 'Cash Webshop'].includes(props.order.payment_method_type || '')) {
+    return props.order.payment_request_status === 'Draft' || props.order.payment_request_status === 'Requested'
+  }
+  return false
+})
+
+const isApproved = computed(() => {
+  // Logic: Payment Approved / Processing
+  if (['Transfer Manual', 'Cash Webshop'].includes(props.order.payment_method_type || '')) {
+    return props.order.payment_request_status === 'Submitted' || ['To Deliver', 'Processing', 'Shipped', 'Completed'].includes(getDisplayStatus(props.order))
+  }
+  // Payment Gateway: Auto approved if status is Processing/To Deliver
+  return ['To Deliver', 'Processing', 'Shipped', 'Completed'].includes(getDisplayStatus(props.order))
+})
 
 // Check eligibility when component mounts (if modal is open)
 onMounted(() => {
@@ -277,7 +303,7 @@ const canRequestReturn = computed(() => {
 
   // Check if order is completed/delivered
   const eligibleStatuses = ['Completed', 'Delivered', 'To Bill', 'To Deliver']
-  const hasEligibleStatus = eligibleStatuses.includes(props.order.status)
+  const hasEligibleStatus = eligibleStatuses.includes(getDisplayStatus(props.order))
 
   // Must have eligible status AND be confirmed eligible by API
   return hasEligibleStatus && isEligibleForReturn.value === true
@@ -305,61 +331,83 @@ const formatPaymentDeadline = (dateString: string) => {
   })
 }
 
-// Get status label in Indonesian
+// Get status label in Indonesian - same as OrderCard.vue
 const getStatusLabel = (status: string) => {
+  if (isWaitingApproval.value) {
+    return 'Menunggu Verifikasi'
+  }
+  if (isWaitingPayment.value) {
+    return 'Menunggu Pembayaran'
+  }
+
+  // Standard mapping
   const statusMap: Record<string, string> = {
     'To Deliver and Bill': 'Menunggu Pembayaran',
+    'To Pay': 'Menunggu Pembayaran',
     'Pending Payment': 'Menunggu Pembayaran',
     'To Deliver': 'Pesanan Diproses',
     'Processing': 'Pesanan Diproses',
     'Shipped': 'Pesanan Dikirim',
     'Completed': 'Selesai',
     'Cancelled': 'Dibatalkan',
-    'Canceled': 'Dibatalkan'
+    'Canceled': 'Dibatalkan',
+    'Overdue': 'Menunggu Pembayaran'
   }
   return statusMap[status] || status
 }
 
-// Get status dot color class
-const getStatusDotClass = (status: string) => {
-  switch (status) {
-    case 'Completed':
-      return 'bg-green-500'
-    case 'Shipped':
-      return 'bg-green-500'
-    case 'To Deliver':
-    case 'Processing':
-      return 'bg-blue-500'
-    case 'Cancelled':
-    case 'Canceled':
-      return 'bg-red-500'
-    case 'Draft':
-    case 'To Deliver and Bill':
-      return 'bg-orange-500'
-    default:
-      return 'bg-gray-500'
+// Status badge class - same as OrderCard.vue
+const statusBadgeClass = computed(() => {
+  if (isWaitingApproval.value) {
+    return 'bg-[#e6f7ff] text-[#1890ff]' // Figma Blue
   }
+  if (isWaitingPayment.value) {
+    return 'bg-[#fff7e6] text-[#faad14]' // Figma Orange
+  }
+  if (getDisplayStatus(props.order) === 'Completed' || getDisplayStatus(props.order) === 'Shipped') {
+    return 'bg-[#e6fffa] text-[#007f62]' // Figma Green
+  }
+  if (getDisplayStatus(props.order) === 'Cancelled' || getDisplayStatus(props.order) === 'Canceled') {
+    return 'bg-red-50 text-red-600'
+  }
+  // Default / Processing
+  return 'bg-blue-50 text-blue-600'
+})
+
+// Get status dot color class - updated to match statusBadgeClass
+const getStatusDotClass = (status: string) => {
+  if (isWaitingApproval.value) {
+    return 'bg-[#1890ff]' // Figma Blue
+  }
+  if (isWaitingPayment.value) {
+    return 'bg-[#faad14]' // Figma Orange
+  }
+  if (status === 'Completed' || status === 'Shipped') {
+    return 'bg-[#007f62]' // Figma Green
+  }
+  if (status === 'Cancelled' || status === 'Canceled') {
+    return 'bg-red-600'
+  }
+  // Default / Processing
+  return 'bg-blue-600'
 }
 
-// Get status text color class
+// Get status text color class - updated to match statusBadgeClass
 const getStatusTextClass = (status: string) => {
-  switch (status) {
-    case 'Completed':
-      return 'text-green-700'
-    case 'Shipped':
-      return 'text-green-700'
-    case 'To Deliver':
-    case 'Processing':
-      return 'text-blue-700'
-    case 'Cancelled':
-    case 'Canceled':
-      return 'text-red-700'
-    case 'Draft':
-    case 'To Deliver and Bill':
-      return 'text-orange-700'
-    default:
-      return 'text-gray-700'
+  if (isWaitingApproval.value) {
+    return 'text-[#1890ff]' // Figma Blue
   }
+  if (isWaitingPayment.value) {
+    return 'text-[#faad14]' // Figma Orange
+  }
+  if (status === 'Completed' || status === 'Shipped') {
+    return 'text-[#007f62]' // Figma Green
+  }
+  if (status === 'Cancelled' || status === 'Canceled') {
+    return 'text-red-600'
+  }
+  // Default / Processing
+  return 'text-blue-600'
 }
 
 // // Calculate installment amount (example: 1/3 of total)

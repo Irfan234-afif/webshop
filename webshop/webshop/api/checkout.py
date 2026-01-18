@@ -28,7 +28,7 @@ def get_checkout_data(student_name=None):
 		if student_name:
 			from webshop.webshop.shopping_cart.student_utils import set_active_student
 			set_active_student(student_name)
-			frappe.log_error(f"Set active student to: {student_name}", "Checkout Debug")
+			# frappe.log_error(f"Set active student to: {student_name}", "Checkout Debug")
 
 		quotation = _get_cart_quotation()
 
@@ -199,7 +199,7 @@ def update_pickup_type(quotation_name, pickup_type, delivery_date=None, delivery
 
 
 @frappe.whitelist()
-def update_payment_method(quotation_name, payment_method_type):
+def update_payment_method(quotation_name, payment_method_type, payment_channel=None):
 	"""
 	Update payment method on cart quotation
 
@@ -238,13 +238,10 @@ def update_payment_method(quotation_name, payment_method_type):
 		if quotation.contact_email != frappe.session.user:
 			frappe.throw(_("You don't have permission to update this quotation"))
 
-		frappe.log_error(
-			f"Updating payment method for quotation: {quotation.name}, Method: {payment_method_type}",
-			"Checkout Debug"
-		)
 
 		# Update payment method type
 		quotation.payment_method_type = payment_method_type
+		quotation.payment_channel = payment_channel
 		
 		# Apply service charges to quotation if payment method has charges
 		# This ensures charges are added even when updated via API (client JS doesn't run)
@@ -665,12 +662,13 @@ def place_order_with_payment(quotation_name, payment_channel=None):
 		# Use force=True to reload from DB, bypassing cache
 		quotation.reload()
 
-		# CRITICAL: Set active student so place_order() gets the right quotation
-		# place_order() internally calls _get_cart_quotation() which needs active student
-		if quotation.student:
-			from webshop.webshop.shopping_cart.student_utils import set_active_student
-			set_active_student(quotation.student)
-			frappe.log_error(f"Set active student for place_order: {quotation.student}", "Checkout Debug")
+		# Deprecate
+		# # CRITICAL: Set active student so place_order() gets the right quotation
+		# # place_order() internally calls _get_cart_quotation() which needs active student
+		# if quotation.student:
+		# 	from webshop.webshop.shopping_cart.student_utils import set_active_student
+		# 	set_active_student(quotation.student)
+		# 	frappe.log_error(f"Set active student for place_order: {quotation.student}", "Checkout Debug")
 
 		# CRITICAL: Prevent auto-commit from submit() calls in place_order
 		# This ensures the entire transaction (quotation submit + SO creation + payment setup) is atomic
@@ -688,19 +686,19 @@ def place_order_with_payment(quotation_name, payment_channel=None):
 		# Get the created Sales Order
 		sales_order = frappe.get_doc("Sales Order", sales_order_name)
 
-		# Copy custom fields from Quotation to Sales Order
-		sales_order.pickup_type = pickup_type
-		sales_order.payment_method_type = payment_method_type
+		# # Copy custom fields from Quotation to Sales Order
+		# sales_order.pickup_type = pickup_type
+		# sales_order.payment_method_type = payment_method_type
 		
-		# Save payment channel to Sales Order
-		if payment_channel:
-			sales_order.payment_channel = payment_channel
+		# # Save payment channel to Sales Order
+		# if payment_channel:
+		# 	sales_order.payment_channel = payment_channel
 
-		# Set the delivery date using the default field in Sales Order
-		if delivery_date:
-			sales_order.delivery_date = delivery_date
-		if delivery_time:
-			sales_order.delivery_time = delivery_time
+		# # Set the delivery date using the default field in Sales Order
+		# if delivery_date:
+		# 	sales_order.delivery_date = delivery_date
+		# if delivery_time:
+		# 	sales_order.delivery_time = delivery_time
 
 		sales_order.save(ignore_permissions=True)
 		payment_data = get_payment_gateway_url(sales_order_name, payment_method_type, payment_channel)
@@ -762,15 +760,18 @@ def get_payment_gateway_url(sales_order_name, payment_method_type, payment_chann
 				payment_request.grand_total = sales_order.grand_total
 				payment_request.reference_doctype = "Sales Order"
 				payment_request.reference_name = sales_order_name
+				payment_request.make_sales_invoice = 1
 				payment_request.mute_email = 1
+				payment_request.company = sales_order.company
 
 				# Calculate payment due date based on duration
 				payment_duration_seconds = payment_method.payment_duration or 86400  # Default 24h if 0 or None
 				payment_request.payment_due_date = now_datetime() + timedelta(seconds=payment_duration_seconds)
+
+				if not payment_channel:
+					frappe.throw(_("Payment channel is required"))
 				
-				# Xendit Integration: Set Payment Channel
-				if payment_channel:
-					payment_request.payment_channel_code = payment_channel
+				payment_request.payment_channel_code = payment_channel
 
 				payment_request.insert(ignore_permissions=True)
 				

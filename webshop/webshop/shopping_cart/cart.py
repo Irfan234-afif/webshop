@@ -108,9 +108,13 @@ def place_order(quotation_name=None):
 		)
 	)
 
-	# Copy student information from quotation to sales order
-	if quotation.get("student"):
-		sales_order.student = quotation.student
+	# Copy additional information from quotation to sales order
+	sales_order.student = quotation.student
+	sales_order.payment_method_type = quotation.payment_method_type
+	sales_order.payment_channel = quotation.payment_channel
+	sales_order.pickup_type = quotation.pickup_type
+	sales_order.delivery_date = quotation.delivery_date
+	sales_order.delivery_time = quotation.delivery_time
 
 	sales_order.payment_schedule = []
 
@@ -463,6 +467,8 @@ def _get_cart_quotation(party=None, quotation_name=None):
 			filters["student"] = ["in", [None, ""]]
 	else:
 		filters = {"name": quotation_name}
+	
+	# frappe.throw(str(filters))
 
 	quotation = frappe.get_all(
 		"Quotation",
@@ -492,9 +498,9 @@ def _get_cart_quotation(party=None, quotation_name=None):
 		)
 
 		qdoc.contact_person = frappe.db.get_value(
-			"Contact", {"email_id": frappe.session.user}
+			"Contact", {"user": frappe.session.user}
 		)
-		qdoc.contact_email = frappe.session.user
+		qdoc.contact_email = frappe.db.get_value("User", frappe.session.user, "email")
 
 		# Link student if active
 		if active_student:

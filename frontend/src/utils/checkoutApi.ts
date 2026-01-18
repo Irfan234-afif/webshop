@@ -28,7 +28,8 @@ export async function updatePickupType(params: UpdatePickupTypeParams & { quotat
 export async function updatePaymentMethod(params: UpdatePaymentMethodParams & { quotation_name: string }): Promise<{ success: boolean; message: string; quotation_name: string }> {
   const response = await call('webshop.webshop.api.checkout.update_payment_method', {
     quotation_name: params.quotation_name,
-    payment_method_type: params.payment_method_type
+    payment_method_type: params.payment_method_type,
+    payment_channel: params.payment_channel
   })
   return response as { success: boolean; message: string; quotation_name: string }
 }

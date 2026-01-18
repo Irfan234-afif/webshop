@@ -410,12 +410,14 @@ class TestCheckoutFlow(unittest.TestCase):
         # Update payment method
         update_payment_method(
             quotation_name=quotation.name,
-            payment_method_type="Test Payment Method"
+            payment_method_type="Test Payment Method",
+            payment_channel="Test Payment Channel"
         )
 
         # Verify the update
         updated_quotation = frappe.get_doc("Quotation", quotation.name)
         self.assertEqual(updated_quotation.payment_method_type, "Test Payment Method")
+        self.assertEqual(updated_quotation.payment_channel, "Test Payment Channel")
 
 
 def run_tests():

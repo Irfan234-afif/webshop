@@ -56,6 +56,7 @@
       </div>
 
       <!-- Divider -->
+      <div class="flex-1"></div>
       <div class="h-px bg-gray-100 w-full mb-4"></div>
 
       <!-- Footer: Total and Status/Action -->
@@ -80,6 +81,9 @@ import { computed } from 'vue'
 import type { Order } from '@/types/order'
 import { formatIDR } from '@/utils/formatters'
 import ReceiptIcon from '@/components/icons/ReceiptIcon.vue'
+
+// Helper function to get display status
+const getDisplayStatus = (order: any) => order.status != "Completed" ? order.status : order.ecommerce_delivery_status
 
 const props = defineProps<{
   order: Order
@@ -119,16 +123,7 @@ const remainingItems = computed(() => {
 
 // Status Logic
 const isWaitingPayment = computed(() => {
-  // Logic: "Waiting Payment"
-  // If payment method is Transfer Manual or Cash Webshop check for payment request
-  // But strictly: "Waiting Payment" means you haven't paid yet.
-
-  if (['Transfer Manual', 'Cash Webshop'].includes(props.order.payment_method_type || '')) {
-    // If no payment request exists (or no status), it means waiting for payment/upload proof
-    // If Status is "Pending Payment" or "To Deliver and Bill"
-    return !props.order.payment_request_status && ['To Deliver and Bill', 'Pending Payment', 'Overdue'].includes(props.order.status)
-  }
-  return false
+  return props.order.status.includes("Bill") || props.order.status.includes("To Pay");
 })
 
 const isWaitingApproval = computed(() => {
@@ -143,10 +138,10 @@ const isWaitingApproval = computed(() => {
 const isApproved = computed(() => {
   // Logic: Payment Approved / Processing
   if (['Transfer Manual', 'Cash Webshop'].includes(props.order.payment_method_type || '')) {
-    return props.order.payment_request_status === 'Submitted' || ['To Deliver', 'Processing', 'Shipped', 'Completed'].includes(props.order.status)
+    return props.order.payment_request_status === 'Submitted' || ['To Deliver', 'Processing', 'Shipped', 'Completed'].includes(getDisplayStatus(props.order))
   }
   // Payment Gateway: Auto approved if status is Processing/To Deliver
-  return ['To Deliver', 'Processing', 'Shipped', 'Completed'].includes(props.order.status)
+  return ['To Deliver', 'Processing', 'Shipped', 'Completed'].includes(getDisplayStatus(props.order))
 })
 
 
@@ -163,7 +158,7 @@ const buttonText = computed(() => {
   if (isApproved.value) {
     return 'Lihat Detail'
   }
-  if (props.order.status === 'Cancelled') {
+  if (getDisplayStatus(props.order) === 'Cancelled') {
     return 'Lihat Detail'
   }
   return 'Lihat Detail'
@@ -189,6 +184,7 @@ const statusLabel = computed(() => {
   // Standard mapping
   const statusMap: Record<string, string> = {
     'To Deliver and Bill': 'Menunggu Pembayaran',
+    'To Pay': 'Menunggu Pembayaran',
     'Pending Payment': 'Menunggu Pembayaran',
     'To Deliver': 'Pesanan Diproses',
     'Processing': 'Pesanan Diproses',
@@ -198,7 +194,8 @@ const statusLabel = computed(() => {
     'Canceled': 'Dibatalkan',
     'Overdue': 'Menunggu Pembayaran'
   }
-  return statusMap[props.order.status] || props.order.status
+  console.log("order : ", props.order)
+  return statusMap[getDisplayStatus(props.order)] || getDisplayStatus(props.order)
 })
 
 const statusBadgeClass = computed(() => {
@@ -208,10 +205,10 @@ const statusBadgeClass = computed(() => {
   if (isWaitingPayment.value) {
     return 'bg-[#fff7e6] text-[#faad14]' // Figma Orange
   }
-  if (props.order.status === 'Completed' || props.order.status === 'Shipped') {
+  if (getDisplayStatus(props.order) === 'Completed' || getDisplayStatus(props.order) === 'Shipped') {
     return 'bg-[#e6fffa] text-[#007f62]' // Figma Green
   }
-  if (props.order.status === 'Cancelled' || props.order.status === 'Canceled') {
+  if (getDisplayStatus(props.order) === 'Cancelled' || getDisplayStatus(props.order) === 'Canceled') {
     return 'bg-red-50 text-red-600'
   }
   // Default / Processing

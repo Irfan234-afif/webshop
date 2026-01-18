@@ -146,13 +146,11 @@ function selectPaymentMethod(methodName: string) {
   selectedMethod.value = methodName
   checkoutStore.paymentMethodType = methodName
 
-  console.log('✅ Payment method selected:', methodName)
 }
 
 function selectChannel(channelCode: string) {
   selectedChannel.value = channelCode
   checkoutStore.paymentChannel = channelCode
-  console.log('✅ Payment channel selected:', channelCode)
 }
 
 // Icon components as simple SVG elements

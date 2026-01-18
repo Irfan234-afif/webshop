@@ -80,7 +80,10 @@ def get_orders(search_text=None, status=None, student=None, tab="orders", start=
 				"per_billed",
 				"payment_method_type",
 				"coupon_code",
-				"discount_amount"
+				"discount_amount",
+				"ecommerce_delivery_status",
+				"shipped_date",
+				"delivered_date",
 			],
 			filters=filters,
 			order_by="transaction_date desc",
@@ -339,3 +342,48 @@ def get_order_details(order_name):
 	except Exception as e:
 		frappe.log_error(f"Error fetching order details: {str(e)}")
 		frappe.throw(_("Error fetching order details"), title=_("Error"))
+
+
+@frappe.whitelist()
+def confirm_order_delivery(order_name):
+	"""
+	Customer confirms they have received the order
+	
+	Args:
+		order_name (str): Name of the Sales Order to confirm
+	
+	Returns:
+		dict: Success status and message
+	"""
+	party = get_party()
+	if not party:
+		frappe.throw(_("No customer account found"), title=_("Authentication Required"))
+	
+	try:
+		# Get and verify order ownership
+		order = frappe.get_doc("Sales Order", order_name)
+		
+		if order.customer != party.name:
+			frappe.throw(_("You don't have permission to update this order"), title=_("Access Denied"))
+		
+		# Check if order can be confirmed (should be in Shipped status)
+		if order.ecommerce_delivery_status != "Shipped":
+			frappe.throw(
+				_("Order cannot be confirmed. Current status: {0}").format(order.ecommerce_delivery_status),
+				title=_("Invalid Status")
+			)
+		
+		# Update status to Delivered
+		from webshop.webshop.crud_events.delivery_note_events import update_sales_order_delivery_status
+		update_sales_order_delivery_status(order_name, "Delivered")
+		
+		return {
+			"success": True,
+			"message": _("Order marked as delivered successfully")
+		}
+		
+	except frappe.DoesNotExistError:
+		frappe.throw(_("Order not found"), title=_("Error"))
+	except Exception as e:
+		frappe.log_error(f"Error confirming order delivery: {str(e)}")
+		frappe.throw(_("Error confirming order delivery"), title=_("Error"))

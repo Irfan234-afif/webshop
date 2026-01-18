@@ -133,7 +133,10 @@ doc_events = {
         ],
     },
     "Delivery Note": {
-        "on_submit": "webshop.webshop.doctype.return_request.return_request.update_return_request_on_dn_submit"
+        "on_submit": [
+            "webshop.webshop.doctype.return_request.return_request.update_return_request_on_dn_submit",
+            "webshop.webshop.crud_events.delivery_note_events.on_delivery_note_submit"
+        ]
     },
     "Sales Invoice": {
         "on_submit": "webshop.webshop.doctype.return_request.return_request.update_return_request_on_si_submit"

@@ -11,6 +11,7 @@ export interface CheckoutData {
   student?: string
   pickup_type?: string
   payment_method_type?: string
+  payment_channel?: string
   delivery_date?: string
   delivery_time?: string
   has_address: boolean
@@ -119,6 +120,7 @@ export interface UpdatePickupTypeParams {
 
 export interface UpdatePaymentMethodParams {
   payment_method_type: string
+  payment_channel?: string
 }
 
 export interface TaxCharge {

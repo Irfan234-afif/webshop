@@ -214,6 +214,43 @@ def add_custom_fields():
 				"depends_on": "eval:doc.order_type=='Shopping Cart'",
     			"fetch_from": "student.school_unit",
     			"read_only": 1
+			},
+			{
+				"fieldname": "ecommerce_delivery_section",
+				"fieldtype": "Section Break",
+				"label": "E-commerce Delivery Status",
+				"insert_after": "status",
+				"collapsible": 1
+			},
+			{
+				"fieldname": "ecommerce_delivery_status",
+				"fieldtype": "Select",
+				"label": "E-commerce Delivery Status",
+				"options": "\nPending\nProcessing\nShipped\nDelivered\nCompleted",
+				"default": "Pending",
+				"insert_after": "ecommerce_delivery_section",
+				"description": "Customer-facing delivery status for e-commerce orders"
+			},
+			{
+				"fieldname": "column_break_ecommerce_delivery",
+				"fieldtype": "Column Break",
+				"insert_after": "ecommerce_delivery_status"
+			},
+			{
+				"fieldname": "shipped_date",
+				"fieldtype": "Datetime",
+				"label": "Shipped Date",
+				"insert_after": "column_break_ecommerce_delivery",
+				"read_only": 1,
+				"description": "Timestamp when order was marked as Shipped"
+			},
+			{
+				"fieldname": "delivered_date",
+				"fieldtype": "Datetime",
+				"label": "Delivered Date",
+				"insert_after": "shipped_date",
+				"read_only": 1,
+				"description": "Timestamp when customer confirmed delivery"
 			}
 		],
 		"Item": [

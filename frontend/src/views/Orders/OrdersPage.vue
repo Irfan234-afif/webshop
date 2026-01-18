@@ -81,19 +81,17 @@
           <div v-if="['orders', 'returns'].includes(activeTab)"
             class="relative min-w-[200px] bg-white border border-gray-200 rounded-lg px-3 py-2 flex items-center gap-3">
             <span class="text-xs text-gray-500 font-medium">Status {{ activeTab === 'returns' ? 'Pengajuan' : 'Pesanan'
-              }} :</span>
+            }} :</span>
             <select v-model="filters.status"
               class="appearance-none bg-transparent font-bold text-gray-900 text-sm focus:outline-none w-full pr-6 cursor-pointer">
               <option value="">Semua</option>
 
               <!-- Order Statuses -->
               <template v-if="activeTab === 'orders'">
-                <option value="To Deliver and Bill">Menunggu Pembayaran</option>
-                <option value="To Deliver">Pesanan Diproses</option>
+                <option value="Pending">Menunggu Pembayaran</option>
                 <option value="Processing">Pesanan Diproses</option>
                 <option value="Shipped">Pesanan Dikirim</option>
-                <option value="Completed">Selesai</option>
-                <option value="Cancelled">Dibatalkan</option>
+                <option value="Delivered">Sudah Diterima</option>
               </template>
 
               <!-- Return Statuses -->
@@ -441,12 +439,16 @@ const formatDate = (dateString: string) => {
 // Get status label in Indonesian
 const getStatusLabel = (status: string) => {
   const statusMap: Record<string, string> = {
+    // New ecommerce_delivery_status values
+    'Pending': 'Menunggu Pembayaran',
+    'Processing': 'Pesanan Diproses',
+    'Shipped': 'Pesanan Dikirim',
+    'Delivered': 'Sudah Diterima',
+    'Completed': 'Selesai',
+    // Backward compatibility with old Sales Order status
     'To Deliver and Bill': 'Menunggu Pembayaran',
     'Pending Payment': 'Menunggu Pembayaran',
     'To Deliver': 'Pesanan Diproses',
-    'Processing': 'Pesanan Diproses',
-    'Shipped': 'Pesanan Dikirim',
-    'Completed': 'Selesai',
     'Cancelled': 'Dibatalkan',
     'Canceled': 'Dibatalkan'
   }
@@ -456,14 +458,17 @@ const getStatusLabel = (status: string) => {
 const getStatusBadgeClass = (status: string) => {
   switch (status) {
     case 'Completed':
+      return 'bg-green-100 text-green-700'
+    case 'Delivered':
     case 'Shipped':
       return 'bg-green-100 text-green-700'
-    case 'To Deliver':
     case 'Processing':
+    case 'To Deliver':
       return 'bg-blue-100 text-blue-700'
     case 'Cancelled':
     case 'Canceled':
       return 'bg-red-100 text-red-700'
+    case 'Pending':
     case 'Draft':
     case 'To Deliver and Bill':
     case 'Pending Payment':

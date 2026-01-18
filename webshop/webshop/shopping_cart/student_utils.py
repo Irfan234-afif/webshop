@@ -21,8 +21,13 @@ def get_active_student():
 	"""
 	# Try to get from session first, then fallback to cookie
 	student_name = frappe.session.get("active_student")
-	if not student_name and hasattr(frappe, "request"):
-		student_name = frappe.request.cookies.get("active_student")
+	if not student_name:
+		try:
+			# Try to get from cookie (may fail in test context)
+			student_name = frappe.request.cookies.get("active_student")
+		except (RuntimeError, AttributeError):
+			# frappe.request is not bound (test context) or cookies not available
+			student_name = None
 
 	if not student_name:
 		return None
@@ -193,14 +198,14 @@ def restore_active_student_from_cookie():
 
 		if student_name and not frappe.session.get("active_student"):
 			# Validate student still exists and is valid
-			party = get_party()
-			if party:
-				try:
+			try:
+				party = get_party()
+				if party:
 					students = get_students_for_customer(party.name)
 					for student in students:
 						if student.get("name") == student_name and student.get("is_active"):
 							frappe.session.active_student = student_name
 							break
-				except Exception:
-					# Silently fail - cookie might be stale
-					pass
+			except Exception:
+				# Silently fail - cookie might be stale
+				pass

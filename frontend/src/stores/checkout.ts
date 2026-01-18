@@ -171,7 +171,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     }
   }
 
-  async function setPaymentMethod(type: string) {
+  async function setPaymentMethod(type: string, channel?: string) {
     isLoading.value = true
     error.value = null
 
@@ -185,14 +185,17 @@ export const useCheckoutStore = defineStore('checkout', () => {
 
       await updatePaymentMethod({
         quotation_name: quotationName.value,
-        payment_method_type: type
+        payment_method_type: type,
+        payment_channel: channel
       })
 
       paymentMethodType.value = type
+      paymentChannel.value = channel ?? ''
 
       // Update checkout data
       if (checkoutData.value) {
         checkoutData.value.payment_method_type = type
+        checkoutData.value.payment_channel = channel ?? ''
       }
 
       console.log('✅ setPaymentMethod: Updated successfully')

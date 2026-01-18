@@ -41,6 +41,10 @@ export interface Order {
   delivery_image?: string
   coupon_code?: string
   taxes?: OrderTax[]
+  payment_request_status?: string
+  ecommerce_delivery_status?: string
+  shipped_date?: string
+  delivered_date?: string
 }
 
 export interface SubscriptionRequest {
