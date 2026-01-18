@@ -500,7 +500,7 @@ def _get_cart_quotation(party=None, quotation_name=None):
 		qdoc.contact_person = frappe.db.get_value(
 			"Contact", {"user": frappe.session.user}
 		)
-		qdoc.contact_email = frappe.db.get_value("User", frappe.session.user, "email")
+		qdoc.contact_email = frappe.session.user
 
 		# Link student if active
 		if active_student:
