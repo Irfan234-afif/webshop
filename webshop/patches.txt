@@ -32,3 +32,4 @@ webshop.patches.create_return_reason_master_data
 webshop.patches.add_return_request_custom_fields
 webshop.patches.add_school_unit_item
 webshop.patches.add_payment_channel_to_so
+webshop.patches.add_ecommerce_delivery_status
