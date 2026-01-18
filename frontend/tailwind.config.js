@@ -11,6 +11,9 @@ export default {
 	],
 	theme: {
 		extend: {
+			fontFamily: {
+				sans: ['Inter', 'sans-serif'],
+			},
 			screens: {
 				standalone: {
 					raw: "(display-mode: standalone)",
