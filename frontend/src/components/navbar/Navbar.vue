@@ -180,7 +180,7 @@ const handleLoginClick = () => {
         <div class="flex items-center gap-2 sm:gap-6 lg:gap-8 flex-1 justify-end min-w-0">
           <!-- Search Bar - Hidden on mobile, visible from sm up -->
           <div
-            class="hidden sm:flex bg-background-soft items-center gap-3 lg:gap-6 h-10 lg:h-12 px-3 lg:px-4 rounded-full flex-shrink min-w-0 max-w-md">
+            class="flex bg-background-soft items-center gap-3 lg:gap-6 h-10 lg:h-12 px-3 lg:px-4 rounded-full flex-shrink min-w-0 max-w-md">
             <SearchIcon class="flex-shrink-0" />
             <input v-model="searchQuery" type="text" placeholder="Search Produk..."
               class="bg-transparent border-none outline-none focus:ring-0 focus:outline-none text-xs lg:text-sm font-semibold text-text/50 placeholder:text-text/50 uppercase flex-1 min-w-0 w-full"
