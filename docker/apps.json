@@ -6,5 +6,9 @@
     {
         "url": "https://github.com/frappe/payments.git",
         "branch": "version-15"
+    },
+    {
+        "url": "https://github.com/Irfan234-afif/frappe-whatsapp.git",
+        "branch": "version-16"
     }
 ]
