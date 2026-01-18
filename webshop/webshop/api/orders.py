@@ -42,26 +42,35 @@ def get_orders(search_text=None, status=None, student=None, tab="orders", start=
 			filters["student"] = student
 
 		# Tab scoping logic
-		history_statuses = ["Completed", "Cancelled", "Canceled"]
+		or_filters = None
 		
 		if tab == "history":
-			# History tab: Only show Completed/Cancelled
+			# History tab: Completed (ecommerce) or Cancelled (standard)
 			if status:
-				# If specific status requested, ensure it belongs to history
-				if status not in history_statuses:
-					return {"orders": []} # Invalid status for this tab
-				filters["status"] = status
+				if status in ["Cancelled", "Canceled"]:
+					filters["status"] = status
+				elif status == "Completed":
+					filters["ecommerce_delivery_status"] = "Completed"
+				else:
+					return {"orders": []}
 			else:
-				filters["status"] = ["in", history_statuses]
+				# Show Completed OR Cancelled
+				filters = {"customer": party.name} # Reset filters to avoid conflict
+				if search_text: filters["name"] = ["like", f"%{search_text}%"]
+				if student: filters["student"] = student
+				
+				or_filters = {
+					"ecommerce_delivery_status": "Completed",
+					"status": ["in", ["Cancelled", "Canceled"]]
+				}
 		else:
-			# Orders tab: Show everything ELSE
+			# Orders tab: Show everything NOT Completed and NOT Cancelled
 			if status:
-				# If specific status requested, ensure it belongs to active orders
-				if status in history_statuses:
-					return {"orders": []} # Invalid status for this tab
-				filters["status"] = status
+				# Status from frontend: Pending, Processing, Shipped, Delivered, To Pay
+				filters["ecommerce_delivery_status"] = status
 			else:
-				filters["status"] = ["not in", history_statuses]
+				filters["ecommerce_delivery_status"] = ["!=", "Completed"]
+				filters["status"] = ["not in", ["Cancelled", "Canceled"]]
 
 		# Get sales orders for the customer
 		orders = frappe.get_all(
@@ -86,6 +95,7 @@ def get_orders(search_text=None, status=None, student=None, tab="orders", start=
 				"delivered_date",
 			],
 			filters=filters,
+			or_filters=or_filters,
 			order_by="transaction_date desc",
 			start=start,
 			page_length=page_length
