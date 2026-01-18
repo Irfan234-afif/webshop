@@ -30,6 +30,8 @@ def execute():
 				"label": "E-commerce Delivery Status",
 				"options": "\nPending\nProcessing\nShipped\nDelivered\nCompleted",
 				"default": "Pending",
+				"depends_on": "eval:doc.order_type=='Shopping Cart'",
+				"allow_on_submit": 1,
 				"insert_after": "ecommerce_delivery_section",
 				"description": "Customer-facing delivery status for e-commerce orders"
 			},
