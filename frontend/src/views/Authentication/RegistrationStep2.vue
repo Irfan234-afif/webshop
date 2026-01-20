@@ -1,197 +1,125 @@
 <template>
-  <div>
-    <!-- Header -->
-    <div class="mb-8">
-      <div class="flex items-center gap-3 mb-4">
-        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-          <span class="text-xl font-bold text-white">2</span>
+    <div>
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                    <span class="text-xl font-bold text-white">2</span>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900">Alamat Lengkap</h2>
+            </div>
+            <p class="text-gray-600">
+                Lengkapi detail alamat Anda untuk keperluan pengiriman dan data administrasi.
+            </p>
         </div>
-        <h2 class="text-2xl font-bold text-gray-900">Data Siswa</h2>
-      </div>
-      <p class="text-gray-600">
-        Masukkan data siswa untuk menghubungkan layanan sekolah seperti seminar, buku, catering, dan antar jemput.
-      </p>
-    </div>
 
-    <!-- Progress Bar for Step 2 -->
-    <div class="mb-8">
-      <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-        <div class="h-full bg-primary transition-all duration-300" style="width: 66.66%"></div>
-      </div>
-    </div>
-
-    <!-- Student List -->
-    <div class="mb-6">
-      <div v-for="(student, index) in formData.students" :key="index" class="mb-8">
-        <!-- Student Header -->
-        <div class="bg-white border border-gray-200 rounded-xl p-6">
-          <div class="flex items-start gap-3 mb-4">
-            <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-              <span class="text-lg font-bold text-white">{{ index + 1 }}</span>
+        <!-- Progress Bar for Step 2 -->
+        <div class="mb-8">
+            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full bg-primary transition-all duration-300" style="width: 50%"></div>
             </div>
-            <div class="flex-1">
-              <h3 class="font-bold text-gray-900 text-lg mb-1">Data Siswa {{ index + 1 }}</h3>
-              <p class="text-sm text-gray-600">
-                Isi identitas siswa pertama yang akan terhubung dengan akun wali dan dipantau dalam layanan sekolah.
-              </p>
-            </div>
-          </div>
-
-          <!-- Student Fields -->
-          <div class="space-y-4">
-            <!-- NIS/NISN -->
-            <div>
-              <input :id="`nisn_${index}`" v-model="student.nisn" type="text"
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                placeholder="NIS / NISN" />
-            </div>
-
-            <!-- Nama Anak -->
-            <div>
-              <input :id="`student_name_${index}`" v-model="student.student_name" type="text" required
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                placeholder="Nama Anak" />
-            </div>
-
-            <!-- Unit -->
-            <div>
-              <select :id="`school_unit_${index}`" v-model="student.school_unit" required
-                @change="handleSchoolUnitChange(index)" :disabled="isLoadingUnits"
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition appearance-none">
-                <option value="" disabled>{{ isLoadingUnits ? 'Memuat...' : 'Pilih Unit' }}</option>
-                <option v-for="unit in schoolUnits" :key="unit.name" :value="unit.name">
-                  {{ unit.unit_name || unit.name }}
-                </option>
-              </select>
-            </div>
-
-            <!-- Kelas -->
-            <div>
-              <select :id="`grade_level_${index}`" v-model="student.grade_level"
-                :disabled="!student.school_unit || isLoadingGrades"
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition appearance-none">
-                <option value="" disabled>
-                  {{ !student.school_unit ? 'Pilih Unit terlebih dahulu' : isLoadingGrades ? 'Memuat...' : 'Pilih Kelas'
-                  }}
-                </option>
-                <option v-for="grade in getGradesForStudent(index)" :key="grade.name" :value="grade.name">
-                  {{ grade.grade_name }}
-                </option>
-              </select>
-            </div>
-
-          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Tambah Anak Button -->
-    <button @click="registrationStore.addStudent()"
-      class="w-full mb-8 flex items-center justify-center gap-2 py-4 px-6 border-2 border-dashed border-gray-300 rounded-xl text-primary font-medium hover:border-primary hover:bg-pink-50 transition-all">
-      <div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
-      </div>
-      Tambah Anak
-    </button>
+        <!-- Address Form -->
+        <div class="mb-6">
 
-    <!-- Navigation Buttons -->
-    <div class="flex gap-4">
-      <button @click="registrationStore.prevStep()"
-        class="flex-1 border-2 border-primary text-primary font-bold py-4 px-6 rounded-xl hover:bg-pink-50 transition-colors">
-        Kembali
-      </button>
-      <button @click="handleNext" :disabled="!isStep2Valid"
-        class="flex-1 bg-primary text-white font-bold py-4 px-6 rounded-xl hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-        Konfirmasi Data
-      </button>
+            <!-- Alamat Lengkap -->
+            <div class="mb-4">
+                <label for="address_line1" class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    Alamat Lengkap
+                </label>
+                <input id="address_line1" v-model="formData.address.address_line1" type="text" required
+                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+                    placeholder="Jalan, No. Rumah, RT/RW" />
+            </div>
+
+            <!-- Detail Alamat (Optional) -->
+            <div class="mb-4">
+                <label for="address_line2" class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                    Detail Alamat (Opsional)
+                </label>
+                <input id="address_line2" v-model="formData.address.address_line2" type="text"
+                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+                    placeholder="Apartemen, Komplek, Patokan" />
+            </div>
+
+            <!-- City and State -->
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <!-- Kota -->
+                <div>
+                    <label for="city" class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                        Kota
+                    </label>
+                    <input id="city" v-model="formData.address.city" type="text" required
+                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+                        placeholder="Kota" />
+                </div>
+
+                <!-- Provinsi -->
+                <div>
+                    <label for="state" class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                        Provinsi (Opsional)
+                    </label>
+                    <input id="state" v-model="formData.address.state" type="text"
+                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+                        placeholder="Provinsi" />
+                </div>
+            </div>
+
+            <!-- Postal Code and Country -->
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <!-- Kode Pos -->
+                <div>
+                    <label for="postal_code" class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                        Kode Pos (Opsional)
+                    </label>
+                    <input id="postal_code" v-model="formData.address.postal_code" type="text"
+                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+                        placeholder="12345" />
+                </div>
+
+                <!-- Negara -->
+                <div>
+                    <label for="country" class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                        Negara
+                    </label>
+                    <input id="country" v-model="formData.address.country" type="text" required
+                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+                        placeholder="Indonesia" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex gap-4">
+            <button @click="registrationStore.prevStep()"
+                class="flex-1 border-2 border-primary text-primary font-bold py-4 px-6 rounded-xl hover:bg-pink-50 transition-colors">
+                Kembali
+            </button>
+            <button @click="handleNext" :disabled="!isStep2Valid"
+                class="flex-1 bg-primary text-white font-bold py-4 px-6 rounded-xl hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                Lanjut
+            </button>
+        </div>
     </div>
-  </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed } from 'vue'
 import { useRegistrationStore } from '@/stores/registration'
-import { frappeRequest } from 'frappe-ui'
 
 const registrationStore = useRegistrationStore()
 
 const formData = computed(() => registrationStore.formData)
 const isStep2Valid = computed(() => registrationStore.isStep2Valid)
 
-// State for school units and grades
-const schoolUnits = ref<{ name: string; unit_name: string; unit_code: string }[]>([])
-const allGrades = ref<{ name: string; grade_name: string; school_unit: string }[]>([])
-const isLoadingUnits = ref(false)
-const isLoadingGrades = ref(false)
-
-// Fetch school units from API
-const fetchSchoolUnits = async () => {
-  isLoadingUnits.value = true
-  try {
-    const response = await frappeRequest({
-      url: 'webshop.webshop.api.products.get_school_units',
-      method: 'GET'
-    })
-    schoolUnits.value = response || []
-  } catch (error) {
-    console.error('Error fetching school units:', error)
-  } finally {
-    isLoadingUnits.value = false
-  }
-}
-
-// Fetch all grades from API
-const fetchGrades = async () => {
-  isLoadingGrades.value = true
-  try {
-    const response = await frappeRequest({
-      url: 'webshop.webshop.api.products.get_grades',
-      method: 'GET'
-    })
-    allGrades.value = response || []
-  } catch (error) {
-    console.error('Error fetching grades:', error)
-  } finally {
-    isLoadingGrades.value = false
-  }
-}
-
-// Get filtered grades for a specific student based on their selected school unit
-const getGradesForStudent = (studentIndex: number) => {
-  const selectedUnit = formData.value.students[studentIndex]?.school_unit
-  if (!selectedUnit) {
-    return []
-  }
-  return allGrades.value.filter(grade => grade.school_unit === selectedUnit)
-}
-
-// Handle school unit change - clear grade if it doesn't belong to new unit
-const handleSchoolUnitChange = (studentIndex: number) => {
-  const student = formData.value.students[studentIndex]
-  if (!student) return
-
-  if (student.school_unit && student.grade_level) {
-    // Check if current grade belongs to the new school unit
-    const gradeExists = allGrades.value.find(
-      grade => grade.name === student.grade_level && grade.school_unit === student.school_unit
-    )
-    if (!gradeExists) {
-      student.grade_level = ''
-    }
-  }
-}
-
 const handleNext = () => {
-  if (isStep2Valid.value) {
-    registrationStore.nextStep()
-  }
+    if (isStep2Valid.value) {
+        registrationStore.nextStep()
+    }
 }
-
-// Fetch data on component mount
-onMounted(() => {
-  fetchSchoolUnits()
-  fetchGrades()
-})
 </script>

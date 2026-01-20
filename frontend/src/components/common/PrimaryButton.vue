@@ -15,12 +15,12 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const buttonClasses = computed(() => {
-  const base = 'inline-flex items-center justify-center gap-3 font-bold rounded-xl transition-all duration-300 cursor-pointer'
+  const base = 'inline-flex items-center justify-center gap-3 font-bold rounded-md transition-all duration-300 cursor-pointer'
 
   const variants = {
     primary: 'bg-secondary-alt text-white hover:opacity-90',
     secondary: 'bg-primary text-white hover:opacity-90',
-    outline: 'border-2 border-white text-white hover:bg-white hover:text-primary',
+    outline: 'border-2 border-primary text-primary hover:bg-white hover:text-primary',
     success: 'bg-success text-white hover:opacity-90',
   }
 
@@ -37,27 +37,13 @@ const buttonClasses = computed(() => {
 </script>
 
 <template>
-  <button
-    :class="buttonClasses"
-    :disabled="disabled"
-  >
+  <button :class="buttonClasses" :disabled="disabled">
     <slot />
     <span v-if="icon" class="w-5 h-5">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M14.43 5.93L20.5 12L14.43 18.07"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-        <path
-          d="M4 12H20"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
+        <path d="M14.43 5.93L20.5 12L14.43 18.07" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round" />
+        <path d="M4 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
     </span>
   </button>

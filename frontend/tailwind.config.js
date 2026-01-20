@@ -65,6 +65,7 @@ export default {
 				border: {
 					DEFAULT: "var(--color-border)",
 					hover: "var(--color-border-hover)",
+					solid: "var(--color-border-solid)",
 				},
 				divider: "var(--color-divider)",
 

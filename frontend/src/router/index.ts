@@ -63,7 +63,7 @@ const router = createRouter({
     {
       path: '/checkout',
       name: 'checkout',
-      component: CheckoutPage,
+      component: () => import('../views/Checkout/CheckoutPage.vue'),
       meta: {
         title: 'Checkout',
         requiresAuth: true
@@ -72,7 +72,7 @@ const router = createRouter({
     {
       path: '/cart',
       name: 'cart',
-      component: CartPage,
+      component: () => import('../views/Cart/CartPage.vue'),
       meta: {
         title: 'Keranjang Belanja',
         requiresAuth: true,
@@ -82,7 +82,7 @@ const router = createRouter({
     {
       path: '/wishlist',
       name: 'wishlist',
-      component: WishlistPage,
+      component: () => import('../views/Wishlist/WishlistPage.vue'),
       meta: {
         title: 'Wishlist Saya',
         requiresAuth: true
@@ -91,7 +91,7 @@ const router = createRouter({
     {
       path: '/orders',
       name: 'orders',
-      component: OrdersPage,
+      component: () => import('../views/Orders/OrdersPage.vue'),
       meta: {
         title: 'Riwayat Pesanan',
         requiresAuth: true
@@ -100,7 +100,7 @@ const router = createRouter({
     {
       path: '/bills',
       name: 'bills',
-      component: BillsPage,
+      component: () => import('../views/Bills/BillsPage.vue'),
       meta: {
         title: 'Tagihan Berjalan',
         requiresAuth: true
@@ -109,7 +109,7 @@ const router = createRouter({
     {
       path: '/order/:id/checkout',
       name: 'checkout-payment',
-      component: CheckoutPaymentPage,
+      component: () => import('../views/Checkout/CheckoutPaymentPage.vue'),
       meta: {
         title: 'Konfirmasi Pembayaran',
         requiresAuth: true
@@ -126,7 +126,7 @@ const router = createRouter({
     {
       path: '/register',
       name: 'register',
-      component: RegistrationPage,
+      component: () => import('../views/Authentication/RegistrationPage.vue'),
       meta: {
         title: 'Daftar Akun'
       }
@@ -157,6 +157,41 @@ const router = createRouter({
         title: 'Pengembalian Saya',
         requiresAuth: true
       }
+    },
+    {
+      path: '/profile',
+      component: () => import('../views/Profile/ProfileLayout.vue'),
+      meta: {
+        requiresAuth: true
+      },
+      children: [
+        {
+          path: '',
+          name: 'profile-me',
+          component: () => import('../views/Profile/ProfilePage.vue'),
+          meta: {
+            title: 'Profile Saya'
+          }
+        },
+        {
+          path: 'address',
+          name: 'profile-address',
+          component: () => import('../views/Profile/AddressPage.vue'),
+          meta: { title: 'Alamat Rumah' }
+        },
+        {
+            path: 'students',
+            name: 'profile-students',
+            component: () => import('../views/Profile/StudentPage.vue'),
+            meta: { title: 'Data Siswa' }
+        },
+        {
+            path: 'security',
+            name: 'profile-security',
+            component: () => import('../views/Profile/ProfilePage.vue'), // Reusing for now
+            meta: { title: 'Keamanan Akun' }
+        }
+      ]
     },
   ],
   scrollBehavior(to, from, savedPosition) {

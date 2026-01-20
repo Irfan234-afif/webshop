@@ -166,11 +166,11 @@ const handleLoginClick = () => {
           <!-- Navigation Links - Hidden on mobile and tablet -->
           <nav class="hidden lg:flex items-center gap-4 ml-2">
             <router-link to="/products"
-              class="flex items-center h-12 px-3 text-sm font-semibold text-text uppercase hover:bg-background-soft rounded-lg transition-colors">
+              class="flex items-center h-12 px-3 text-sm font-semibold text-text hover:bg-background-soft rounded-lg transition-colors">
               Produk
             </router-link>
             <router-link to="#"
-              class="h-12 flex items-center px-3 text-sm font-semibold text-text uppercase hover:bg-background-soft rounded-lg transition-colors">
+              class="h-12 flex items-center px-3 text-sm font-semibold text-text hover:bg-background-soft rounded-lg transition-colors">
               Kontak
             </router-link>
           </nav>
@@ -183,7 +183,7 @@ const handleLoginClick = () => {
             class="flex bg-background-soft items-center gap-3 lg:gap-6 h-10 lg:h-12 px-3 lg:px-4 rounded-full flex-shrink min-w-0 max-w-md">
             <SearchIcon class="flex-shrink-0" />
             <input v-model="searchQuery" type="text" placeholder="Search Produk..."
-              class="bg-transparent border-none outline-none focus:ring-0 focus:outline-none text-xs lg:text-sm font-semibold text-text/50 placeholder:text-text/50 uppercase flex-1 min-w-0 w-full"
+              class="bg-transparent border-none outline-none focus:ring-0 focus:outline-none text-xs lg:text-sm !font-semibold text-text-secondary placeholder:text-text-secondary placeholder:font-semibold flex-1 min-w-0 w-full"
               @keyup.enter="handleSearch" />
           </div>
 
@@ -196,15 +196,15 @@ const handleLoginClick = () => {
           <!-- Wishlist Icon - Hidden on mobile -->
           <button class="hidden md:block w-6 h-6 lg:w-7 lg:h-7 hover:opacity-70 transition-opacity"
             aria-label="Wishlist" @click="router.push('/wishlist')">
-            <WishlistIcon />
+            <WishlistIcon class="text-primary" />
           </button>
 
           <!-- Cart Icon with Badge -->
           <button class="hidden sm:inline-block relative w-6 h-6 lg:w-7 lg:h-7 hover:opacity-70 transition-opacity"
             aria-label="Shopping Cart" @click="handleOpenCart">
-            <CartIcon />
+            <CartIcon class="text-primary" />
             <span v-if="cartItemCount > 0"
-              class="absolute -top-2 -right-2 bg-secondary-alt text-white text-xs font-bold rounded-full w-5 h-5 lg:w-6 lg:h-6 flex items-center justify-center">
+              class="absolute -top-3 -right-3 bg-success text-white text-xs font-bold rounded-full w-5 h-5 lg:w-6 lg:h-6 flex items-center justify-center">
               {{ cartItemCount }}
             </span>
           </button>
@@ -214,7 +214,7 @@ const handleLoginClick = () => {
             <button ref="menuButtonRef"
               class="bg-primary text-white font-bold text-xs sm:text-sm uppercase px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 rounded-xl flex items-center gap-2 sm:gap-4 lg:gap-6 hover:opacity-90 transition-opacity"
               @click.stop="handleToggleMenu">
-              <span class="truncate max-w-[100px] lg:max-w-none">
+              <span class="truncate max-w-[100px] lg:max-w-none font-semibold">
                 {{
                   cartStore.activeStudent
                 }}

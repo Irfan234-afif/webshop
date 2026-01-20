@@ -48,17 +48,25 @@ const handleEscape = (event: KeyboardEvent) => {
 
 watch(() => props.isOpen, (isOpen) => {
   if (isOpen) {
+    // Prevent body scroll
+    document.body.style.overflow = 'hidden'
+
     setTimeout(() => {
       document.addEventListener('click', handleClickOutside)
       document.addEventListener('keydown', handleEscape)
     }, 0)
   } else {
+    // Restore body scroll
+    document.body.style.overflow = ''
+
     document.removeEventListener('click', handleClickOutside)
     document.removeEventListener('keydown', handleEscape)
   }
 })
 
 onUnmounted(() => {
+  // Cleanup: restore body scroll and remove event listeners
+  document.body.style.overflow = ''
   document.removeEventListener('click', handleClickOutside)
   document.removeEventListener('keydown', handleEscape)
 })
@@ -66,19 +74,13 @@ onUnmounted(() => {
 
 <template>
   <Transition name="popup">
-    <div
-      v-if="isOpen"
-      ref="popupRef"
-      :class="[
-        'absolute z-50 bg-white rounded-xl shadow-2xl overflow-y-auto',
-        positionClasses
-      ]"
-      :style="{
-        width: width,
-        maxHeight: maxHeight
-      }"
-      @click.stop
-    >
+    <div v-if="isOpen" ref="popupRef" :class="[
+      'absolute z-50 bg-white rounded-xl shadow-2xl overflow-y-auto',
+      positionClasses
+    ]" :style="{
+      width: width,
+      maxHeight: maxHeight
+    }" @click.stop>
       <slot />
     </div>
   </Transition>
@@ -100,5 +102,30 @@ onUnmounted(() => {
 .popup-leave-from {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Custom scrollbar styles */
+div[class*="overflow-y-auto"]::-webkit-scrollbar {
+  width: 6px;
+}
+
+div[class*="overflow-y-auto"]::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 0.5rem 0;
+}
+
+div[class*="overflow-y-auto"]::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 3px;
+}
+
+div[class*="overflow-y-auto"]::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}
+
+/* Firefox scrollbar */
+div[class*="overflow-y-auto"] {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
 }
 </style>

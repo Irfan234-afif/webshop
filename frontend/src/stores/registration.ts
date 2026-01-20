@@ -5,7 +5,7 @@ import type { RegistrationFormData, StudentData, RegistrationPayload } from '@/t
 export const useRegistrationStore = defineStore('registration', () => {
   // Current step (1-3)
   const currentStep = ref(1)
-  const totalSteps = 3
+  const totalSteps = 4
 
   // Loading and error states
   const isRegistering = ref(false)
@@ -46,14 +46,19 @@ export const useRegistrationStore = defineStore('registration', () => {
       formData.value.phoneNumber.trim() !== '' &&
       formData.value.password.trim() !== '' &&
       formData.value.password === formData.value.confirmPassword &&
-      formData.value.address.address_line1.trim() !== '' &&
-      formData.value.address.city.trim() !== '' &&
-      formData.value.address.country.trim() !== '' &&
       !emailError.value
     )
   })
 
   const isStep2Valid = computed(() => {
+    return (
+      formData.value.address.address_line1.trim() !== '' &&
+      formData.value.address.city.trim() !== '' &&
+      formData.value.address.country.trim() !== ''
+    )
+  })
+
+  const isStep3Valid = computed(() => {
     return formData.value.students.every(student =>
       student.student_name.trim() !== '' &&
       student.school_unit.trim() !== ''
@@ -222,6 +227,7 @@ export const useRegistrationStore = defineStore('registration', () => {
     // Getters
     isStep1Valid,
     isStep2Valid,
+    isStep3Valid,
 
     // Actions
     nextStep,

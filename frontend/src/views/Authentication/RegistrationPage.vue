@@ -26,6 +26,7 @@ import { useRegistrationStore } from '@/stores/registration'
 import RegistrationStep1 from './RegistrationStep1.vue'
 import RegistrationStep2 from './RegistrationStep2.vue'
 import RegistrationStep3 from './RegistrationStep3.vue'
+import RegistrationStep4 from './RegistrationStep4.vue'
 
 const registrationStore = useRegistrationStore()
 
@@ -40,6 +41,8 @@ const currentStepComponent = computed(() => {
       return RegistrationStep2
     case 3:
       return RegistrationStep3
+    case 4:
+      return RegistrationStep4
     default:
       return RegistrationStep1
   }

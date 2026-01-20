@@ -7,6 +7,7 @@ interface User {
   email: string
   full_name: string
   user_type: string
+  phone?: string
 }
 
 interface Customer {
@@ -102,6 +103,30 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+    // Update Profile function
+  const updateProfile = async (fullName: string, phone: string): Promise<{ success: boolean; message?: string }> => {
+    try {
+      const response = await call('webshop.webshop.api.auth.update_profile', {
+        full_name: fullName,
+        phone: phone
+      })
+
+      if (response.success) {
+        // Update local state
+        if (user.value) {
+            user.value.full_name = fullName
+            user.value.phone = phone
+        }
+        return { success: true, message: response.message }
+      } else {
+        return { success: false, message: response.message }
+      }
+    } catch (error) {
+      console.error('Update profile error:', error)
+      return { success: false, message: 'Update profile failed' }
+    }
+  }
+
   // Check if user is a guest (not authenticated)
   const isGuest = computed(() => {
     return !isAuthenticated.value
@@ -121,6 +146,7 @@ export const useAuthStore = defineStore('auth', () => {
     // Actions
     fetchCurrentUser,
     login,
-    logout
+    logout,
+    updateProfile
   }
 })

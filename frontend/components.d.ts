@@ -8,6 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AddressIcon: typeof import('./src/components/icons/AddressIcon.vue')['default']
     AddToCartSection: typeof import('./src/components/features/product-detail/AddToCartSection.vue')['default']
     ArrowIcon: typeof import('./src/components/icons/ArrowIcon.vue')['default']
     ArrowRightIcon: typeof import('./src/components/icons/ArrowRightIcon.vue')['default']
@@ -28,6 +29,8 @@ declare module 'vue' {
     FilterGroup: typeof import('./src/components/features/products/FilterGroup.vue')['default']
     FilterSidebar: typeof import('./src/components/features/products/FilterSidebar.vue')['default']
     Footer: typeof import('./src/components/footer/Footer.vue')['default']
+    FormInput: typeof import('./src/components/common/FormInput.vue')['default']
+    FormLabel: typeof import('./src/components/common/FormLabel.vue')['default']
     GlobalAlert: typeof import('./src/components/common/GlobalAlert.vue')['default']
     HistoryTab: typeof import('./src/components/features/orders/HistoryTab.vue')['default']
     HumbergerIcon: typeof import('./src/components/icons/HumbergerIcon.vue')['default']
@@ -60,6 +63,7 @@ declare module 'vue' {
     ProductRating: typeof import('./src/components/common/ProductRating.vue')['default']
     ProductServiceCard: typeof import('./src/components/common/ProductServiceCard.vue')['default']
     ProductTabs: typeof import('./src/components/features/product-detail/ProductTabs.vue')['default']
+    ProfileIcon: typeof import('./src/components/icons/ProfileIcon.vue')['default']
     PromotionalBanner: typeof import('./src/components/features/product-detail/PromotionalBanner.vue')['default']
     QuantitySelector: typeof import('./src/components/common/QuantitySelector.vue')['default']
     ReceiptIcon: typeof import('./src/components/icons/ReceiptIcon.vue')['default']
@@ -73,6 +77,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SearchIcon: typeof import('./src/components/icons/SearchIcon.vue')['default']
+    SecurityIcon: typeof import('./src/components/icons/SecurityIcon.vue')['default']
     ServiceCard: typeof import('./src/components/common/ServiceCard.vue')['default']
     ServiceField: typeof import('./src/components/features/product-detail/ServiceField.vue')['default']
     SizeChartTab: typeof import('./src/components/features/product-detail/SizeChartTab.vue')['default']
@@ -82,6 +87,8 @@ declare module 'vue' {
     StepPaymentMethod: typeof import('./src/components/features/returns/StepPaymentMethod.vue')['default']
     StepSelectReason: typeof import('./src/components/features/returns/StepSelectReason.vue')['default']
     StepUploadProof: typeof import('./src/components/features/returns/StepUploadProof.vue')['default']
+    StudentDataIcon: typeof import('./src/components/icons/StudentDataIcon.vue')['default']
+    StudentModal: typeof import('./src/components/features/profile/StudentModal.vue')['default']
     StudentSelector: typeof import('./src/components/features/StudentSelector.vue')['default']
     SubscriptionCard: typeof import('./src/components/features/orders/SubscriptionCard.vue')['default']
     SubscriptionDetailModal: typeof import('./src/components/features/orders/SubscriptionDetailModal.vue')['default']

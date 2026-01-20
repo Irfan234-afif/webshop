@@ -14,6 +14,7 @@ import LogoutIcon from '@/components/icons/LogoutIcon.vue'
 import ArrowRightIcon from '@/components/icons/ArrowRightIcon.vue'
 import UniformIcon from '@/components/icons/UniformIcon.vue'
 import WishlistIcon from '@/components/icons/WishlistIcon.vue'
+import CartIcon from '../icons/CartIcon.vue'
 
 interface MenuItem {
   id: string
@@ -37,7 +38,7 @@ const menuItems = computed<MenuItem[]>(() => {
     { id: 'cart', label: 'Keranjang', icon: 'cart', badge: 10, link: '/cart', requiresAuth: true },
     { id: 'bills', label: 'Tagihan', icon: 'bill-list', badge: 2, link: '/bills', requiresAuth: true },
     { id: 'help', label: 'Bantuan', icon: 'info', link: '/help' },
-    { id: 'account', label: 'Pengaturan Akun & Data Siswa', icon: 'user-circle', link: '/account', requiresAuth: true },
+    { id: 'account', label: 'Pengaturan Akun & Data Siswa', icon: 'user-circle', link: '/profile', requiresAuth: true },
     { id: 'logout', label: 'Log Out', icon: 'logout', onClick: () => handleLogout(), requiresAuth: true },
     { id: 'login', label: 'Log In', icon: 'user-circle', link: '/login', requiresAuth: false }
   ]
@@ -114,13 +115,13 @@ const handleLogout = () => {
           ]" @click="item.onClick?.()">
             <div class="flex gap-4 items-center">
               <BillIcon v-if="item.icon === 'bill'" class="w-6 h-6" />
-              <CartLargeIcon v-else-if="item.icon === 'cart'" class="w-6 h-6" />
+              <CartIcon v-else-if="item.icon === 'cart'" class="w-6 h-6 text-primary" />
               <BillListIcon v-else-if="item.icon === 'bill-list'" class="w-6 h-6" />
               <InfoCircleIcon v-else-if="item.icon === 'info'" class="w-6 h-6" />
               <UserCircleIcon v-else-if="item.icon === 'user-circle'" class="w-6 h-6" />
               <LogoutIcon v-else-if="item.icon === 'logout'" class="w-6 h-6" />
               <UniformIcon v-else-if="item.icon === 'uniform'" class="w-6 h-6" />
-              <WishlistIcon v-else-if="item.icon === 'wishlist'" class="w-6 h-6" />
+              <WishlistIcon v-else-if="item.icon === 'wishlist'" class="w-6 h-6 text-primary" />
               <p class="font-bold text-sm text-[#1e1e1e] capitalize">{{ item.label }}</p>
             </div>
             <div class="flex gap-6 items-center">
@@ -137,13 +138,13 @@ const handleLogout = () => {
           ]">
             <div class="flex gap-4 items-center">
               <BillIcon v-if="item.icon === 'bill'" class="w-6 h-6" />
-              <CartLargeIcon v-else-if="item.icon === 'cart'" class="w-6 h-6" />
+              <CartIcon v-else-if="item.icon === 'cart'" class="w-6 h-6 text-primary" />
               <BillListIcon v-else-if="item.icon === 'bill-list'" class="w-6 h-6" />
               <InfoCircleIcon v-else-if="item.icon === 'info'" class="w-6 h-6" />
               <UserCircleIcon v-else-if="item.icon === 'user-circle'" class="w-6 h-6" />
               <LogoutIcon v-else-if="item.icon === 'logout'" class="w-6 h-6" />
               <UniformIcon v-else-if="item.icon === 'uniform'" class="w-6 h-6" />
-              <WishlistIcon v-else-if="item.icon === 'wishlist'" class="w-6 h-6" />
+              <WishlistIcon v-else-if="item.icon === 'wishlist'" class="w-6 h-6 text-primary" />
               <p class="font-bold text-sm text-[#1e1e1e] capitalize">{{ item.label }}</p>
             </div>
             <div class="flex gap-6 items-center">
