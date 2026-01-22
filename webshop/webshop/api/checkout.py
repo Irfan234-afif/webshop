@@ -763,6 +763,7 @@ def get_payment_gateway_url(sales_order_name, payment_method_type, payment_chann
 				payment_request.make_sales_invoice = 1
 				payment_request.mute_email = 1
 				payment_request.company = sales_order.company
+				payment_request.payment_method_type = payment_method_type
 
 				# Calculate payment due date based on duration
 				payment_duration_seconds = payment_method.payment_duration or 86400  # Default 24h if 0 or None
