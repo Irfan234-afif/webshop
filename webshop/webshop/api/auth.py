@@ -203,143 +203,133 @@ def register(name, email, phone_number, password, address=None, students=None):
 				})
 
 		# Start transaction
-		frappe.flags.ignore_permissions = True
-
-		# Create User first
-		user = frappe.get_doc({
-			"doctype": "User",
-			"email": email,
-			"first_name": name.split()[0] if name else email.split("@")[0],
-			"last_name": " ".join(name.split()[1:]) if len(name.split()) > 1 else "",
-			"full_name": name,
-			"user_type": "Website User",
-			"send_welcome_email": 0,
-			"enabled": 1,
-		})
-		user.insert(ignore_permissions=True)
-
-		# Set password
-		update_password(user.name, password)
-
-		# Create Contact
-		contact = frappe.get_doc({
-			"doctype": "Contact",
-			"first_name": name.split()[0] if name else email.split("@")[0],
-			"last_name": " ".join(name.split()[1:]) if len(name.split()) > 1 else "",
-			"email_ids": [{"email_id": email, "is_primary": 1}],
-			"phone_nos": [{"phone": phone_number, "is_primary_phone": 1, "is_primary_mobile_no": 1}],
-			"user": user.name,
-		})
-		contact.insert(ignore_permissions=True)
-
-		# Create Customer
-		customer = frappe.get_doc({
-			"doctype": "Customer",
-			"customer_name": name,
-			"customer_type": "Individual",
-			"customer_group": frappe.db.get_single_value("Selling Settings", "customer_group") or "Individual",
-			"territory": frappe.db.get_single_value("Selling Settings", "territory") or "All Territories",
-		})
-
-
-		customer.insert(ignore_permissions=True)
-
-		# Link Contact to Customer
-		contact.append("links", {
-			"link_doctype": "Customer",
-			"link_name": customer.name
-		})
-		contact.save(ignore_permissions=True)
-
-		# Add user to Customer's portal users
-		if not any(u.user == user.name for u in customer.portal_users if hasattr(customer, 'portal_users')):
-			customer.append("portal_users", {
-				"user": user.name
+		# Switch to Administrator to bypass permission checks for creating Contacts/Addresses via ERPNext hooks
+		current_user = frappe.session.user
+		frappe.set_user("Administrator")
+		
+		try:
+			# Create User first
+			user = frappe.get_doc({
+				"doctype": "User",
+				"email": email,
+				"first_name": name.split()[0] if name else email.split("@")[0],
+				"last_name": " ".join(name.split()[1:]) if len(name.split()) > 1 else "",
+				"full_name": name,
+				"user_type": "Website User",
+				"send_welcome_email": 0,
+				"enabled": 1,
 			})
-			customer.save(ignore_permissions=True)
+			user.insert(ignore_permissions=True)
 
-		frappe.db.commit()
+			# Set password
+			update_password(user.name, password)
 
-		# Update customer_primary_contact
-		# frappe.db.set_value("Customer", customer.name, "customer_primary_contact", contact.name)
-		customer.customer_primary_contact = contact.name
-		customer.save(ignore_permissions=True)
+			# Create Customer using standard ERPNext method (auto create contact and address)
+			customer = frappe.get_doc({
+				"doctype": "Customer",
+				"customer_name": name,
+				"customer_type": "Individual",
+				"customer_group": frappe.db.get_single_value("Webshop Settings", "default_customer_group") or "Individual",
+				"territory": frappe.db.get_single_value("Selling Settings", "territory") or "All Territories",
+				
+				# Fields for auto-creation of Contact
+				"email_id": email,
+				"mobile_no": phone_number,
+				
+				# Fields for auto-creation of Address
+				"address_line1": address.get("address_line1"),
+				"address_line2": address.get("address_line2", ""),
+				"city": address.get("city"),
+				"state": address.get("state", ""),
+				"country": address.get("country"),
+				"pincode": address.get("postal_code", ""),
+				
+				# Directly add portal user
+				"portal_users": [{
+					"user": user.name
+				}]
+			})
 
-		# Create Address for Customer
-		address_doc = frappe.get_doc({
-			"doctype": "Address",
-			"address_title": name,
-			"address_type": "Billing",
-			"address_line1": address.get("address_line1"),
-			"address_line2": address.get("address_line2", ""),
-			"city": address.get("city"),
-			"state": address.get("state", ""),
-			"country": address.get("country"),
-			"pincode": address.get("postal_code", ""),
-			"email_id": email,
-			"phone": phone_number,
-			"is_primary_address": 1,  # Set as default billing address
-			"is_shipping_address": 1,  # Set as default shipping address
-			"links": [{
-				"link_doctype": "Customer",
-				"link_name": customer.name
-			}]
-		})
-		address_doc.insert(ignore_permissions=True)
+			customer.insert(ignore_permissions=True)
 
-		frappe.db.commit()
-		customer.customer_primary_address = address_doc.name
-		customer.save(ignore_permissions=True)
+			# Post-creation steps: Link User to Contact and Setup Address details
+			
+			# 1. Update the automatically created Contact to link to User
+			if customer.customer_primary_contact:
+				contact = frappe.get_doc("Contact", customer.customer_primary_contact)
+				contact.user = user.name
+				contact.save(ignore_permissions=True)
+			else:
+				# Fallback if no contact created (should not happen if fields are provided)
+				contact = None
 
-		# Create standalone Student documents if provided
-		created_students = []
-		if validated_students:
-			for idx, student_data in enumerate(validated_students):
-				student = frappe.get_doc({
-					"doctype": "Student",
-					"student_name": student_data["student_name"],
-					"customer": customer.name,
-					"school_unit": student_data["school_unit"],
-					"grade_level": student_data.get("grade_level", ""),
-					"date_of_birth": student_data.get("date_of_birth"),
-					"isn": student_data.get("nisn", ""),
-					"is_active": 1,
-					"is_primary": 1 if idx == 0 else 0  # First student is primary
-				})
-				student.insert(ignore_permissions=True)
-				created_students.append(student)
+			# 2. Update the automatically created Address
+			address_doc = None
+			if customer.customer_primary_address:
+				address_doc = frappe.get_doc("Address", customer.customer_primary_address)
+				address_doc.address_type = "Billing"
+				address_doc.is_shipping_address = 1
+				# Address title is set to customer name by default in make_address
+				address_doc.save(ignore_permissions=True)
 
-			frappe.db.commit()
+			# frappe.db.commit()
 
-		# Return success response with created entities
-		return {
-			"success": True,
-			"message": "Registration successful",
-			"user": {
-				"email": user.email,
-				"full_name": user.full_name,
-			},
-			"customer": {
-				"name": customer.name,
-				"customer_name": customer.customer_name,
-			},
-			"address": {
-				"name": address_doc.name,
-				"address_title": address_doc.address_title,
-				"city": address_doc.city,
-				"country": address_doc.country,
-			},
-			"students": [
-				{
-					"student_id": s.name,
-					"student_name": s.student_name,
-					"school_unit": s.school_unit,
-					"grade_level": s.grade_level,
-					"is_active": s.is_active
-				}
-				for s in created_students
-			] if created_students else []
-		}
+			# Create standalone Student documents if provided
+			created_students = []
+			if validated_students:
+				for idx, student_data in enumerate(validated_students):
+					student = frappe.get_doc({
+						"doctype": "Student",
+						"student_name": student_data["student_name"],
+						"customer": customer.name,
+						"school_unit": student_data["school_unit"],
+						"grade_level": student_data.get("grade_level", ""),
+						"date_of_birth": student_data.get("date_of_birth"),
+						"isn": student_data.get("nisn", ""),
+						"is_active": 1,
+						"is_primary": 1 if idx == 0 else 0  # First student is primary
+					})
+					student.insert(ignore_permissions=True)
+					created_students.append(student)
+
+				frappe.db.commit()
+
+			# Return success response with created entities
+			return {
+				"success": True,
+				"message": "Registration successful",
+				"user": {
+					"email": user.email,
+					"full_name": user.full_name,
+				},
+				"customer": {
+					"name": customer.name,
+					"customer_name": customer.customer_name,
+				},
+				"address": {
+					"name": address_doc.name if address_doc else None,
+					"address_title": address_doc.address_title if address_doc else None,
+					"city": address_doc.city if address_doc else None,
+					"country": address_doc.country if address_doc else None,
+				},
+				"students": [
+					{
+						"student_id": s.name,
+						"student_name": s.student_name,
+						"school_unit": s.school_unit,
+						"grade_level": s.grade_level,
+						"is_active": s.is_active
+					}
+					for s in created_students
+				] if created_students else []
+			}
+		
+		except Exception:
+			raise
+		finally:
+			# Revert to original user
+			frappe.set_user(current_user)
+
 
 	except frappe.exceptions.DuplicateEntryError:
 		frappe.local.response["http_status_code"] = 409
