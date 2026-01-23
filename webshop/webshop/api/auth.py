@@ -357,7 +357,23 @@ def logout():
 		dict: Logout status
 	"""
 	try:
+		# Perform standard Frappe logout
 		frappe.local.login_manager.logout()
+		
+		# Clear all custom webshop cookies
+		if hasattr(frappe.local, "cookie_manager"):
+			# Clear active student cookie
+			frappe.local.cookie_manager.delete_cookie("active_student")
+			
+			# Clear wishlist count cookie
+			frappe.local.cookie_manager.delete_cookie("wish_count")
+			
+			# Clear cart count cookie
+			frappe.local.cookie_manager.delete_cookie("cart_count")
+		
+		# Clear active student from session
+		frappe.session.active_student = None
+		
 		frappe.db.commit()
 
 		return {
