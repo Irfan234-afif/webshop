@@ -32,9 +32,7 @@
                     </svg>
                     Alamat Lengkap
                 </label>
-                <input id="address_line1" v-model="formData.address.address_line1" type="text" required
-                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                    placeholder="Jalan, No. Rumah, RT/RW" />
+                <FormInput v-model="formData.address.address_line1" type="text" placeholder="Jalan, No. Rumah, RT/RW" />
             </div>
 
             <!-- Detail Alamat (Optional) -->
@@ -42,8 +40,7 @@
                 <label for="address_line2" class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                     Detail Alamat (Opsional)
                 </label>
-                <input id="address_line2" v-model="formData.address.address_line2" type="text"
-                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+                <FormInput v-model="formData.address.address_line2" type="text"
                     placeholder="Apartemen, Komplek, Patokan" />
             </div>
 
@@ -54,9 +51,7 @@
                     <label for="city" class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                         Kota
                     </label>
-                    <input id="city" v-model="formData.address.city" type="text" required
-                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                        placeholder="Kota" />
+                    <FormInput v-model="formData.address.city" type="text" placeholder="Kota" />
                 </div>
 
                 <!-- Provinsi -->
@@ -64,9 +59,7 @@
                     <label for="state" class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                         Provinsi (Opsional)
                     </label>
-                    <input id="state" v-model="formData.address.state" type="text"
-                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                        placeholder="Provinsi" />
+                    <FormInput v-model="formData.address.state" type="text" placeholder="Provinsi" />
                 </div>
             </div>
 
@@ -77,9 +70,7 @@
                     <label for="postal_code" class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                         Kode Pos (Opsional)
                     </label>
-                    <input id="postal_code" v-model="formData.address.postal_code" type="text"
-                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                        placeholder="12345" />
+                    <FormInput v-model="formData.address.postal_code" type="text" placeholder="12345" />
                 </div>
 
                 <!-- Negara -->
@@ -87,9 +78,7 @@
                     <label for="country" class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                         Negara
                     </label>
-                    <input id="country" v-model="formData.address.country" type="text" required
-                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                        placeholder="Indonesia" />
+                    <FormInput v-model="formData.address.country" type="text" placeholder="Indonesia" />
                 </div>
             </div>
         </div>
@@ -111,6 +100,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRegistrationStore } from '@/stores/registration'
+import FormInput from '@/components/common/FormInput.vue'
 
 const registrationStore = useRegistrationStore()
 

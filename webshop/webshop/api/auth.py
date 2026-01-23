@@ -142,6 +142,18 @@ def register(name, email, phone_number, password, address=None, students=None):
 		if not phone_number:
 			frappe.throw(_("Phone number is required"))
 
+		# Validate phone number format - must start with international code
+		if not phone_number.startswith('+'):
+			frappe.throw(_("Phone number must start with international country code (e.g., +62 for Indonesia)"))
+		
+		# Validate phone number format using Frappe's utility
+		try:
+			from frappe.utils import validate_phone_number
+			if not validate_phone_number(phone_number):
+				frappe.throw(_("Invalid phone number format"))
+		except Exception:
+			frappe.throw(_("Invalid phone number format. Please use international format (e.g., +628123456789)"))
+
 		# Parse address if provided as JSON string
 		if address and isinstance(address, str):
 			import json
@@ -208,6 +220,7 @@ def register(name, email, phone_number, password, address=None, students=None):
 		frappe.set_user("Administrator")
 		
 		try:
+			phone_number = phone_number.replace(" ", "")
 			# Create User first
 			user = frappe.get_doc({
 				"doctype": "User",
@@ -407,15 +420,11 @@ def get_current_user():
 
 		user = frappe.get_doc("User", frappe.session.user)
 
-		# Get phone from Contact
-		phone = ""
-		contact_name = frappe.db.get_value("Contact", {"email_id": user.email}, "name")
-		if contact_name:
-			contact = frappe.get_doc("Contact", contact_name)
-			phone = contact.phone_nos[0].phone if contact.phone_nos else ""
-
 		# Get associated customer
 		customer = get_party()
+
+		# Get phone from Contact
+		phone = frappe.db.get_value("Contact", customer.customer_primary_contact, "mobile_no")
 
 		# Get students if customer exists
 		students = []
@@ -471,6 +480,7 @@ def update_profile(full_name, phone):
 			frappe.throw(_("Phone number is required"))
 
 		user = frappe.get_doc("User", frappe.session.user)
+		phone = phone.replace(" ", "")
 		
 		# Update User
 		name_parts = full_name.split()
@@ -478,48 +488,21 @@ def update_profile(full_name, phone):
 		user.last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
 		user.full_name = full_name
 		user.save(ignore_permissions=True)
-		
-		# Update Contact
-		contact_name = frappe.db.get_value("Contact", {"email_id": user.email}, "name")
-		if contact_name:
-			contact = frappe.get_doc("Contact", contact_name)
-			
-			# Check for uniqueness if phone changed
-			current_phone = contact.phone_nos[0].phone if contact.phone_nos else ""
-			
-			# Normalize phone numbers for comparison (remove spaces, etc) if needed, 
-			# but for now we'll do exact string match check against DB
-			
-			if phone != current_phone:
-				# Check if phone exists in any other contact
-				existing_phone = frappe.db.sql("""
-					SELECT c.name FROM `tabContact Phone` p 
-					LEFT JOIN `tabContact` c ON p.parent = c.name 
-					WHERE p.phone = %s AND c.name != %s
-				""", (phone, contact.name))
-				
-				if existing_phone:
-					frappe.throw(_("Phone number {0} is already in use by another account").format(phone))
-
-			contact.first_name = user.first_name
-			contact.last_name = user.last_name
-			
-			if contact.phone_nos:
-				contact.phone_nos[0].phone = phone
-			else:
-				contact.append("phone_nos", {
-					"phone": phone,
-					"is_primary_phone": 1,
-					"is_primary_mobile_no": 1
-				})
-			contact.save(ignore_permissions=True)
 
 		# Update Customer if exists
 		from webshop.webshop.shopping_cart.cart import get_party
 		customer = get_party()
-		if customer:
-			customer.customer_name = full_name
-			customer.save(ignore_permissions=True)
+		customer.customer_name = full_name
+		customer.mobile_no = phone
+		customer.save(ignore_permissions=True)
+
+		# Update Contact
+		contact = frappe.get_doc("Contact", customer.customer_primary_contact)
+		contact.first_name = user.first_name
+		contact.last_name = user.last_name
+		contact.phone_nos[0].phone = phone
+		contact.save(ignore_permissions=True)
+
 
 		return {
 			"success": True,

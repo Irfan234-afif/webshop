@@ -51,7 +51,18 @@
                         </svg>
                         Nomor HP (WhatsApp Aktif)
                     </FormLabel>
-                    <FormInput v-model="formData.phone" type="tel" placeholder="0812 3456 7891" />
+                    <!-- <FormInput v-model="formData.phone" type="tel" placeholder="0812 3456 7891" /> -->
+                    <vue-tel-input v-model="formData.phone" mode="international" :default-country="'ID'"
+                        :preferred-countries="['ID', 'MY', 'SG']" :input-options="{
+                            placeholder: 'Masukkan nomor HP',
+                            required: true
+                        }" :dropdown-options="{
+                            showDialCodeInList: true,
+                            showDialCodeInSelection: true,
+                            showFlags: true,
+                            showSearchBox: true
+                        }" @validate="onPhoneValidate" />
+                    <div v-if="phoneError" class="mt-2 text-red-500 text-sm">{{ phoneError }}</div>
                 </div>
 
                 <!-- Email (Read-only) -->
@@ -81,16 +92,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive } from 'vue'
+import { ref, onMounted, reactive, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAlertStore } from '@/stores/alert'
 import PrimaryButton from '@/components/common/PrimaryButton.vue'
 import FormInput from '@/components/common/FormInput.vue'
 import FormLabel from '@/components/common/FormLabel.vue'
+import { VueTelInput } from 'vue-tel-input'
+import 'vue-tel-input/vue-tel-input.css'
 
 const authStore = useAuthStore()
 const alertStore = useAlertStore()
 const loading = ref(false)
+const phoneError = ref('')
+const isPhoneValid = ref(true) // Default true for existing valid numbers
 
 const formData = reactive({
     fullName: '',
@@ -116,6 +131,22 @@ const syncData = () => {
     if (authStore.user) {
         formData.fullName = authStore.user?.full_name || ''
         formData.phone = authStore.user?.phone || ''
+        console.log("phone :", authStore.user.phone)
+
+        // If phone exists, assume it's valid (already validated on server)
+        if (formData.phone && formData.phone.startsWith('+')) {
+            isPhoneValid.value = true
+            phoneError.value = ''
+        }
+    }
+}
+
+const onPhoneValidate = (payload: any) => {
+    isPhoneValid.value = payload.valid
+    if (!payload.valid && formData.phone) {
+        phoneError.value = 'Format nomor HP tidak valid. Gunakan format internasional (contoh: +628123456789)'
+    } else {
+        phoneError.value = ''
     }
 }
 
@@ -126,6 +157,10 @@ const saveProfile = async () => {
     }
     if (!formData.phone.trim()) {
         alertStore.error('Nomor Handphone wajib diisi')
+        return
+    }
+    if (!isPhoneValid.value) {
+        alertStore.error('Format nomor HP tidak valid. Gunakan format internasional (contoh: +628123456789)')
         return
     }
 

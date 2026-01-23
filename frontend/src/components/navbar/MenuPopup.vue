@@ -142,7 +142,7 @@ const handleLogout = () => {
               <BillListIcon v-else-if="item.icon === 'bill-list'" class="w-6 h-6" />
               <InfoCircleIcon v-else-if="item.icon === 'info'" class="w-6 h-6" />
               <UserCircleIcon v-else-if="item.icon === 'user-circle'" class="w-6 h-6" />
-              <LogoutIcon v-else-if="item.icon === 'logout'" class="w-6 h-6" />
+              <LogoutIcon v-else-if="item.icon === 'logout'" class="w-6 h-6 text-primary" />
               <UniformIcon v-else-if="item.icon === 'uniform'" class="w-6 h-6" />
               <WishlistIcon v-else-if="item.icon === 'wishlist'" class="w-6 h-6 text-primary" />
               <p class="font-bold text-sm text-[#1e1e1e] capitalize">{{ item.label }}</p>

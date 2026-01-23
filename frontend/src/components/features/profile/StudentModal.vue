@@ -62,13 +62,12 @@
                                     </template>
                                     Unit Sekolah
                                 </FormLabel>
-                                <select v-model="formData.schoolUnit" required
-                                    class="w-full px-4 py-3 border rounded-lg text-sm text-gray-900 transition-all bg-gray-50 border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition disabled:opacity-50 disabled:cursor-not-allowed">
+                                <FormSelect v-model="formData.schoolUnit" placeholder="Pilih unit sekolah" required>
                                     <option value="" disabled>Pilih unit sekolah</option>
                                     <option v-for="unit in schoolUnits" :key="unit.value" :value="unit.value">
                                         {{ unit.label }}
                                     </option>
-                                </select>
+                                </FormSelect>
                             </div>
 
                             <!-- Grade Level -->
@@ -83,13 +82,13 @@
                                     </template>
                                     Kelas
                                 </FormLabel>
-                                <select v-model="formData.gradeLevel" :disabled="!formData.schoolUnit"
-                                    class="w-full px-4 py-3 border rounded-lg text-sm text-gray-900 transition-all bg-gray-50 border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <option value="">{{ gradePlaceholder }}</option>
+                                <FormSelect v-model="formData.gradeLevel" placeholder="Pilih kelas"
+                                    :disabled="!formData.schoolUnit">
+                                    <option value="" disabled>Pilih kelas</option>
                                     <option v-for="grade in grades" :key="grade.value" :value="grade.value">
                                         {{ grade.label }}
                                     </option>
-                                </select>
+                                </FormSelect>
                             </div>
 
                             <!-- Date of Birth -->
@@ -139,6 +138,7 @@ import { ref, computed, watch, onUnmounted } from 'vue'
 import { useAlertStore } from '@/stores/alert'
 import FormLabel from '@/components/common/FormLabel.vue'
 import FormInput from '@/components/common/FormInput.vue'
+import FormSelect from '@/components/common/FormSelect.vue'
 import { call } from 'frappe-ui'
 import { extractErrorMessage } from '@/utils/errorHandler'
 import PrimaryButton from '@/components/common/PrimaryButton.vue'

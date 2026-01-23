@@ -34,9 +34,10 @@
           </svg>
           Nama Lengkap
         </label>
-        <input id="name" v-model="formData.name" type="text" required
+        <FormInput v-model="formData.name" type="text" placeholder="Nama Lengkap" />
+        <!-- <input id="name" v-model="formData.name" type="text" required
           class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-          placeholder="Nama Lengkap" />
+          placeholder="Nama Lengkap" /> -->
       </div>
 
       <!-- Email Sekolah -->
@@ -48,9 +49,7 @@
           </svg>
           Email Sekolah
         </label>
-        <input id="email" v-model="formData.email" type="email" required @blur="registrationStore.validateEmail()"
-          class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-          placeholder="Email Sekolah" />
+        <FormInput v-model="formData.email" type="email" placeholder="Email Sekolah" />
         <div v-if="emailError" class="mt-2 text-red-500 text-sm">{{ emailError }}</div>
       </div>
 
@@ -63,9 +62,18 @@
           </svg>
           No. HP
         </label>
-        <input id="phone" v-model="formData.phoneNumber" type="tel" required
-          class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-          placeholder="No. HP" />
+        <vue-tel-input v-model="formData.phoneNumber" mode="international" :default-country="'ID'"
+          :preferred-countries="['ID', 'MY', 'SG']" :input-options="{
+            placeholder: 'Masukkan nomor HP',
+            required: true,
+            styleClasses: 'phone-input'
+          }" :dropdown-options="{
+            showDialCodeInList: true,
+            showDialCodeInSelection: true,
+            showFlags: true,
+            showSearchBox: true
+          }" @validate="onPhoneValidate" />
+        <div v-if="phoneError" class="mt-2 text-red-500 text-sm">{{ phoneError }}</div>
       </div>
 
       <!-- Password -->
@@ -78,10 +86,8 @@
           Password
         </label>
         <div class="relative">
-          <input id="password" v-model="formData.password" :type="showPassword ? 'text' : 'password'" required
-            @input="registrationStore.validatePasswordMatch()"
-            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition pr-12"
-            placeholder="Password" />
+          <FormInput id="password" v-model="formData.password" :type="showPassword ? 'text' : 'password'" required
+            @input="registrationStore.validatePasswordMatch()" placeholder="Password" />
           <button type="button" @click="showPassword = !showPassword"
             class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
             <svg v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,11 +114,9 @@
           Konfirmasi Password
         </label>
         <div class="relative">
-          <input id="confirmPassword" v-model="formData.confirmPassword"
+          <FormInput id="confirmPassword" v-model="formData.confirmPassword"
             :type="showConfirmPassword ? 'text' : 'password'" required
-            @input="registrationStore.validatePasswordMatch()"
-            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition pr-12"
-            placeholder="Konfirmasi Password" />
+            @input="registrationStore.validatePasswordMatch()" placeholder="Konfirmasi Password" />
           <button type="button" @click="showConfirmPassword = !showConfirmPassword"
             class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
             <svg v-if="!showConfirmPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,6 +146,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRegistrationStore } from '@/stores/registration'
+import { VueTelInput } from 'vue-tel-input'
+import 'vue-tel-input/vue-tel-input.css'
+import FormInput from '@/components/common/FormInput.vue'
 
 const registrationStore = useRegistrationStore()
 
@@ -152,10 +159,23 @@ const isStep1Valid = computed(() => registrationStore.isStep1Valid)
 
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
+const phoneError = ref('')
+const isPhoneValid = ref(false)
+
+const onPhoneValidate = (payload: any) => {
+  isPhoneValid.value = payload.valid
+  if (!payload.valid && formData.value.phoneNumber) {
+    phoneError.value = 'Format nomor HP tidak valid. Gunakan format internasional (contoh: +628123456789)'
+  } else {
+    phoneError.value = ''
+  }
+}
 
 const handleNext = () => {
-  if (isStep1Valid.value) {
+  if (isStep1Valid.value && isPhoneValid.value) {
     registrationStore.nextStep()
+  } else if (!isPhoneValid.value) {
+    phoneError.value = 'Nomor HP wajib diisi dengan format internasional'
   }
 }
 </script>

@@ -41,35 +41,28 @@
           <div class="space-y-4">
             <!-- NIS/NISN -->
             <div>
-              <input :id="`nisn_${index}`" v-model="student.nisn" type="text"
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                placeholder="NIS / NISN" />
+              <FormInput :id="`nisn_${index}`" v-model="student.nisn" type="text" placeholder="NIS / NISN" />
             </div>
 
             <!-- Nama Anak -->
             <div>
-              <input :id="`student_name_${index}`" v-model="student.student_name" type="text" required
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+              <FormInput :id="`student_name_${index}`" v-model="student.student_name" type="text"
                 placeholder="Nama Anak" />
             </div>
 
             <!-- Unit -->
             <div>
-              <select :id="`school_unit_${index}`" v-model="student.school_unit" required
-                @change="handleSchoolUnitChange(index)" :disabled="isLoadingUnits"
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition appearance-none">
+              <FormSelect :id="`school_unit_${index}`" v-model="student.school_unit">
                 <option value="" disabled>{{ isLoadingUnits ? 'Memuat...' : 'Pilih Unit' }}</option>
                 <option v-for="unit in schoolUnits" :key="unit.name" :value="unit.name">
                   {{ unit.unit_name || unit.name }}
                 </option>
-              </select>
+              </FormSelect>
             </div>
 
             <!-- Kelas -->
             <div>
-              <select :id="`grade_level_${index}`" v-model="student.grade_level"
-                :disabled="!student.school_unit || isLoadingGrades"
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition appearance-none">
+              <FormSelect :id="`grade_level_${index}`" v-model="student.grade_level">
                 <option value="" disabled>
                   {{ !student.school_unit ? 'Pilih Unit terlebih dahulu' : isLoadingGrades ? 'Memuat...' : 'Pilih Kelas'
                   }}
@@ -77,7 +70,7 @@
                 <option v-for="grade in getGradesForStudent(index)" :key="grade.name" :value="grade.name">
                   {{ grade.grade_name }}
                 </option>
-              </select>
+              </FormSelect>
             </div>
 
           </div>
@@ -114,6 +107,8 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRegistrationStore } from '@/stores/registration'
 import { frappeRequest } from 'frappe-ui'
+import FormInput from '@/components/common/FormInput.vue'
+import FormSelect from '@/components/common/FormSelect.vue'
 
 const registrationStore = useRegistrationStore()
 
