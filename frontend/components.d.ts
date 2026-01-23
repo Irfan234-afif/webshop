@@ -23,7 +23,6 @@ declare module 'vue' {
     CateringIcon: typeof import('./src/components/icons/CateringIcon.vue')['default']
     CheckCircleIcon: typeof import('./src/components/icons/CheckCircleIcon.vue')['default']
     Container: typeof import('./src/components/layout/Container.vue')['default']
-    copy: typeof import('./src/components/common/FormInput copy.vue')['default']
     DefaultLayout: typeof import('./src/components/layout/DefaultLayout.vue')['default']
     DynamicModal: typeof import('./src/components/common/DynamicModal.vue')['default']
     FacebookIcon: typeof import('./src/components/icons/FacebookIcon.vue')['default']

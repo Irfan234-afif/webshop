@@ -20,6 +20,7 @@
   "dependencies": {
     "@heroicons/vue": "^2.2.0",
     "frappe-ui": "^0.1.238",
+    "libphonenumber-js": "^1.12.12",
     "pinia": "^3.0.4",
     "socket.io-client": "^4.8.3",
     "vue": "^3.5.25",
