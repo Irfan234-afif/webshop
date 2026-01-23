@@ -60,12 +60,12 @@ COPY --chown=frappe:frappe webshop /home/frappe/frappe-bench/apps/webshop/websho
 COPY --chown=frappe:frappe frontend /home/frappe/frappe-bench/apps/webshop/frontend
 COPY --chown=frappe:frappe pyproject.toml README.md LICENSE /home/frappe/frappe-bench/apps/webshop/
 
+# Install webshop FIRST (so frappe-whatsapp can find the module during its build)
+RUN cd /home/frappe/frappe-bench/apps/webshop && /home/frappe/frappe-bench/env/bin/pip install -e .
+
 # Install frappe-whatsapp
 ARG CACHEBUST=1
 RUN cd /home/frappe/frappe-bench && bench get-app https://github.com/Irfan234-afif/frappe-whatsapp.git --branch version-16
-
-# Install webshop  
-RUN cd /home/frappe/frappe-bench/apps/webshop && /home/frappe/frappe-bench/env/bin/pip install -e .
 
 # Build frontend
 RUN if [ -d "/home/frappe/frappe-bench/apps/webshop/frontend" ]; then \
