@@ -61,10 +61,8 @@ COPY --chown=frappe:frappe frontend /home/frappe/frappe-bench/apps/webshop/front
 COPY --chown=frappe:frappe pyproject.toml README.md LICENSE /home/frappe/frappe-bench/apps/webshop/
 
 # Install frappe-whatsapp
-# CACHE BREAKPOINT: Change WHATSAPP_VERSION to force reinstall
-ARG WHATSAPP_VERSION=latest
-RUN echo "Installing frappe-whatsapp version: ${WHATSAPP_VERSION}" && \
-  bench get-app https://github.com/Irfan234-afif/frappe-whatsapp.git --branch version-16
+ARG CACHEBUST=1
+RUN bench get-app https://github.com/Irfan234-afif/frappe-whatsapp.git --branch version-16
 
 # Install webshop  
 RUN cd /home/frappe/frappe-bench/apps/webshop && /home/frappe/frappe-bench/env/bin/pip install -e .
