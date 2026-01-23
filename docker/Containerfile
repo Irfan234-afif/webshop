@@ -62,7 +62,7 @@ COPY --chown=frappe:frappe pyproject.toml README.md LICENSE /home/frappe/frappe-
 
 # Install frappe-whatsapp
 ARG CACHEBUST=1
-RUN bench get-app https://github.com/Irfan234-afif/frappe-whatsapp.git --branch version-16
+RUN cd /home/frappe/frappe-bench && bench get-app https://github.com/Irfan234-afif/frappe-whatsapp.git --branch version-16
 
 # Install webshop  
 RUN cd /home/frappe/frappe-bench/apps/webshop && /home/frappe/frappe-bench/env/bin/pip install -e .
