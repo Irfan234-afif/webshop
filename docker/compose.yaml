@@ -30,8 +30,7 @@ services:
         bench set-config -g redis_socketio "redis://$$REDIS_QUEUE";
         bench set-config -gp socketio_port $$SOCKETIO_PORT;
         bench set-config -g ignore_csrf 1;
-        bench --site all clear-cache;
-        bench --site all execute frappe.cache.delete_value --args "['assets_json']" --kwargs "{'shared': True}";
+        bench execute frappe.client_cache.delete_value --args "['assets_json']" --kwargs "{'shared': True}";
     environment:
       DB_HOST: db
       DB_PORT: "3306"
