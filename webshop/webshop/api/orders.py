@@ -247,6 +247,17 @@ def get_orders(search_text=None, status=None, student=None, tab="orders", start=
 		frappe.log_error(f"Error fetching orders: {str(e)}")
 		frappe.throw(_("Error fetching orders"), title=_("Error"))
 
+@frappe.whitelist()
+def get_orders_count():
+	party = get_party()
+	if not party:
+		frappe.throw(_("No customer account found"), title=_("Authentication Required"))
+
+	filters = {"customer": party.name}
+	filters["ecommerce_delivery_status"] = ["!=", "Completed"]
+	filters["status"] = ["not in", ["Cancelled", "Canceled"]]
+
+	return frappe.db.count("Sales Order", filters=filters)
 
 @frappe.whitelist()
 def get_order_filter_options():

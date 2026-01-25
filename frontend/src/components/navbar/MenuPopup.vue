@@ -15,6 +15,7 @@ import ArrowRightIcon from '@/components/icons/ArrowRightIcon.vue'
 import UniformIcon from '@/components/icons/UniformIcon.vue'
 import WishlistIcon from '@/components/icons/WishlistIcon.vue'
 import CartIcon from '../icons/CartIcon.vue'
+import { createResource } from 'frappe-ui'
 
 interface MenuItem {
   id: string
@@ -31,12 +32,12 @@ const { students, activeStudent } = storeToRefs(cartStore)
 
 const menuItems = computed<MenuItem[]>(() => {
   const allItems: (MenuItem & { requiresAuth?: boolean })[] = [
-    { id: 'orders', label: 'Pesanan', icon: 'bill', badge: 3, link: '/orders', requiresAuth: true },
+    { id: 'orders', label: 'Pesanan', icon: 'bill', badge: ordersCount.data, link: '/orders', requiresAuth: true },
     { id: 'products', label: 'Produk', icon: 'uniform', link: '/products' },
     { id: 'wishlist', label: 'Wishlist', icon: 'wishlist', link: '/wishlist', requiresAuth: true },
     { id: 'contact', label: 'Kontak', icon: 'info', link: '#' },
-    { id: 'cart', label: 'Keranjang', icon: 'cart', badge: 10, link: '/cart', requiresAuth: true },
-    { id: 'bills', label: 'Tagihan', icon: 'bill-list', badge: 2, link: '/bills', requiresAuth: true },
+    { id: 'cart', label: 'Keranjang', icon: 'cart', badge: cartStore.itemCount, link: '/cart', requiresAuth: true },
+    { id: 'bills', label: 'Tagihan', icon: 'bill-list', badge: billsCount.data, link: '/bills', requiresAuth: true },
     { id: 'help', label: 'Bantuan', icon: 'info', link: '/' },
     { id: 'account', label: 'Pengaturan Akun & Data Siswa', icon: 'user-circle', link: '/profile', requiresAuth: true },
     { id: 'logout', label: 'Log Out', icon: 'logout', onClick: () => handleLogout(), requiresAuth: true },
@@ -49,6 +50,20 @@ const menuItems = computed<MenuItem[]>(() => {
     return allItems.filter(item => !item.requiresAuth)
   }
 })
+
+let billsCount = createResource({
+  url: 'webshop.webshop.api.billing.get_unpaid_bills_count',
+  auto: false
+})
+
+billsCount.fetch()
+
+let ordersCount = createResource({
+  url: 'webshop.webshop.api.orders.get_orders_count',
+  auto: false
+})
+
+ordersCount.fetch()
 
 const emit = defineEmits<{
   selectStudent: [studentId: string]

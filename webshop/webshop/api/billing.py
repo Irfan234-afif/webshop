@@ -4,7 +4,7 @@ from frappe import _
 from webshop.webshop.shopping_cart.cart import get_party
 
 @frappe.whitelist()
-def get_unpaid_bills(tab="bills"):
+def get_bills(tab="bills"):
 	"""
 	Fetch Sales Invoices linked to Subscriptions for the current user.
 	
@@ -62,6 +62,24 @@ def get_unpaid_bills(tab="bills"):
 		"bills": invoices
 	}
 
+@frappe.whitelist()
+def get_unpaid_bills_count():
+	"""
+	Get the count of unpaid bills for the current user.
+	"""
+	party = get_party()
+	if not party:
+		frappe.throw(_("No link to a Customer found for this user."), title=_("Authentication Required"))
+	
+	# Base filters
+	filters = {
+		"customer": party.name,
+		"docstatus": 1,
+		"subscription": ["is", "set"],
+		"outstanding_amount": [">", 0]
+	}
+	order_by = "due_date asc"
+	return frappe.db.count("Sales Invoice", filters=filters)
 
 @frappe.whitelist()
 def get_bill_payment_details(sales_invoice_name):

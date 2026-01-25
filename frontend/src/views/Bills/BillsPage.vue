@@ -104,7 +104,7 @@ const isDetailModalOpen = ref(false)
 const selectedBillForDetail = ref<any | null>(null)
 
 const billsResource = createResource({
-  url: 'webshop.webshop.api.billing.get_unpaid_bills',
+  url: 'webshop.webshop.api.billing.get_bills',
   auto: false,
   params: {
     tab: activeTab.value
