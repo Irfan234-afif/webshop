@@ -68,7 +68,9 @@ const legalLinks: FooterLink[] = [
           <!-- Company Header -->
           <div class="flex flex-col gap-8">
             <div class="flex flex-col gap-6">
-              <Logo/>
+              <div>
+                <Logo/>
+              </div>
               <p class="text-[#1e1e1e] text-sm leading-relaxed">
                 Menyediakan kebutuhan sekolah lengkap dari TK hingga SMA, mulai dari seragam, buku
                 pelajaran, hingga perlengkapan belajar. Kami berkomitmen memberikan layanan cepat,
