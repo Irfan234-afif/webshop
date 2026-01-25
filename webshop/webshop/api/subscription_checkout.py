@@ -21,44 +21,48 @@ def create_subscription_request(data):
 
 	if not frappe.session.user or frappe.session.user == "Guest":
 		frappe.throw(_("Please login to subscribe"), frappe.PermissionError)
+	
+	try:
+		item_code = data.get("item_code")
+		start_date = data.get("start_date")
+		notes = data.get("notes")
 		
-	item_code = data.get("item_code")
-	start_date = data.get("start_date")
-	notes = data.get("notes")
-	
-	if not item_code or not start_date:
-		frappe.throw(_("Missing required fields"))
+		if not item_code or not start_date:
+			frappe.throw(_("Missing required fields"))
 
-	from webshop.webshop.shopping_cart.cart import get_party
-	
-	customer = get_party()
-	if not customer:
-		frappe.throw(_("Customer profile not found for this user."))
+		from webshop.webshop.shopping_cart.cart import get_party
+		
+		customer = get_party()
+		if not customer:
+			frappe.throw(_("Customer profile not found for this user."))
 
-	customer_name = customer.name
+		customer_name = customer.name
 
-	# Get Plan
-	plan = frappe.db.get_value("Item", item_code, "subscription_plan")
-	if not plan:
-		plan_name = frappe.db.get_value("Item", item_code, "subscription_plan")
-		if not plan_name:
-			frappe.throw(_("This item is not configured as a Subscription Plan."))
-	else:
-		plan_name = plan
+		# Get Plan
+		plan = frappe.db.get_value("Item", item_code, "subscription_plan")
+		if not plan:
+			plan_name = frappe.db.get_value("Item", item_code, "subscription_plan")
+			if not plan_name:
+				frappe.throw(_("This item is not configured as a Subscription Plan."))
+		else:
+			plan_name = plan
 
-	doc = frappe.get_doc({
-		"doctype": "Subscription Request",
-		"customer": customer_name,
-		"item": item_code,
-		"subscription_plan": plan_name,
-		"start_date": start_date,
-		"notes": notes,
-		"naming_series": "SR-.MM.-.YYYY.-.#####"
-	})
-	# Note: end_date will be auto-calculated in the DocType controller
-	
-	doc.insert(ignore_permissions=True) # Ignore perms to allow Customer to create if not granted explicit create rights in JSON
-	return doc.name
+		doc = frappe.get_doc({
+			"doctype": "Subscription Request",
+			"customer": customer_name,
+			"item": item_code,
+			"subscription_plan": plan_name,
+			"start_date": start_date,
+			"notes": notes,
+		})
+		# Note: end_date will be auto-calculated in the DocType controller
+		doc.insert(ignore_permissions=True) # Ignore perms to allow Customer to create if not granted explicit create rights in JSON
+		frappe.db.commit()
+		return doc.name
+	except Exception as e:
+		frappe.db.rollback()
+		frappe.log_error(frappe.get_traceback())
+		raise e
 
 @frappe.whitelist(allow_guest=True)
 def get_subscription_item_details(item_code):
@@ -73,7 +77,13 @@ def get_subscription_item_details(item_code):
 	
 	plan = None
 	if item.is_subscription_item: # Custom field check
-		plan = frappe.get_doc("Subscription Plan", item.subscription_plan)
+		if not item.subscription_plan:
+			plan_name = frappe.db.get_value("Subscription Plan", {"item_code": item_code})
+			plan = frappe.get_doc("Subscription Plan", plan_name)
+		else:
+			plan = frappe.get_doc("Subscription Plan", item.subscription_plan)
+	else:
+		frappe.throw(_("This item is not configured as a Subscription Plan."))
 		
 	image = item.image
 	if not image:
