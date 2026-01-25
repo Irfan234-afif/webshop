@@ -62,19 +62,8 @@
           <div
             class="relative min-w-[200px] bg-white border border-gray-200 rounded-lg px-3 py-2 flex items-center gap-3">
             <span class="text-xs text-gray-500 font-medium">Nama Siswa :</span>
-            <select v-model="filters.student"
-              class="appearance-none bg-transparent font-bold text-gray-900 text-sm focus:outline-none w-full pr-6 cursor-pointer">
-              <option value="">Semua</option>
-              <option v-for="student in studentsResource.data" :key="student" :value="student.name">
-                {{ student.student_name }}
-              </option>
-            </select>
-            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 1L5 5L9 1" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round"
-                  stroke-linejoin="round" />
-              </svg>
-            </div>
+            <FormSelect class="w-48" v-if="studentsResource.data" v-model="filters.student" :options="studentsResource.data" optionLabel="student_name"
+              optionValue="name" @update:modelValue="handleChangeFilters()"/>
           </div>
 
           <!-- Status Filter -->
@@ -82,34 +71,8 @@
             class="relative min-w-[200px] bg-white border border-gray-200 rounded-lg px-3 py-2 flex items-center gap-3">
             <span class="text-xs text-gray-500 font-medium">Status {{ activeTab === 'returns' ? 'Pengajuan' : 'Pesanan'
               }} :</span>
-            <select v-model="filters.status"
-              class="appearance-none bg-transparent font-bold text-gray-900 text-sm focus:outline-none w-full pr-6 cursor-pointer">
-              <option value="">Semua</option>
-
-              <!-- Order Statuses -->
-              <template v-if="activeTab === 'orders'">
-                <option value="Pending">Menunggu Pembayaran</option>
-                <option value="Processing">Pesanan Diproses</option>
-                <option value="Shipped">Pesanan Dikirim</option>
-                <option value="Delivered">Sudah Diterima</option>
-              </template>
-
-              <!-- Return Statuses -->
-              <template v-if="activeTab === 'returns'">
-                <option value="Draft">Draft</option>
-                <option value="Pending Approval">Menunggu Persetujuan</option>
-                <option value="Approved">Disetujui</option>
-                <option value="Processing">Diproses</option>
-                <option value="Completed">Selesai</option>
-                <option value="Rejected">Ditolak</option>
-              </template>
-            </select>
-            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 1L5 5L9 1" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round"
-                  stroke-linejoin="round" />
-              </svg>
-            </div>
+            <FormSelect class="w-48" v-model="filters.status" :options="statusOptions()"
+              @update:modelValue="handleChangeFilters()"/>
           </div>
         </div>
 
@@ -196,6 +159,7 @@ import SubscriptionDetailModal from '@/components/features/orders/SubscriptionDe
 import ReturnRequestsTab from '@/components/features/orders/ReturnRequestsTab.vue'
 import type { Order, SubscriptionItem } from '@/types/order'
 import { useAuthStore } from '@/stores/auth'
+import FormSelect from '@/components/common/FormSelect.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -215,6 +179,28 @@ const hasMoreSubscriptions = ref(true)
 const infiniteScrollTrigger = ref<HTMLElement | null>(null)
 
 const authStore = useAuthStore()
+
+const statusOptions = () => {
+  if (activeTab.value === 'orders') {
+    return [
+      { label: 'Semua', value: '' },
+      { label: 'Menunggu Pembayaran', value: 'Pending' },
+      { label: 'Pesanan Diproses', value: 'Processing' },
+      { label: 'Pesanan Dikirim', value: 'Shipped' },
+      { label: 'Sudah Diterima', value: 'Delivered' }
+    ]
+  } else if (activeTab.value === 'returns') {
+    return [
+      { label: 'Semua', value: '' },
+      { label: 'Draft', value: 'Draft' },
+      { label: 'Menunggu Persetujuan', value: 'Pending Approval' },
+      { label: 'Disetujui', value: 'Approved' },
+      { label: 'Diproses', value: 'Processing' },
+      { label: 'Selesai', value: 'Completed' },
+      { label: 'Ditolak', value: 'Rejected' }
+    ]
+  }
+}
 
 // Filters state
 const filters = reactive({
@@ -350,6 +336,15 @@ const fetchSubscriptions = async (reset = false) => {
     page_length: paginationSubscriptions.pageLength
   })
 }
+const handleChangeFilters = () => {
+  return debounce(() => {
+    if (activeTab.value === 'subscriptions') {
+      fetchSubscriptions(true)
+    } else {
+      fetchOrders(true)
+    }
+  }, 500)
+}
 
 // Change tab and update URL
 const changeTab = (tab: 'orders' | 'history' | 'subscriptions' | 'returns') => {
@@ -376,14 +371,9 @@ watch(activeTab, () => {
 
 watch(
   () => [filters.status, filters.student, filters.search],
-  debounce(() => {
-    if (activeTab.value === 'subscriptions') {
-      fetchSubscriptions(true)
-    } else {
-      fetchOrders(true)
-    }
-  }, 500)
+  handleChangeFilters()
 )
+
 
 // Infinite Scroll Observer
 let observer: IntersectionObserver | null = null
@@ -425,58 +415,6 @@ onMounted(() => {
   })
 })
 
-
-// Format date to readable format
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('id-ID', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  })
-}
-
-// Get status label in Indonesian
-const getStatusLabel = (status: string) => {
-  const statusMap: Record<string, string> = {
-    // New ecommerce_delivery_status values
-    'Pending': 'Menunggu Pembayaran',
-    'Processing': 'Pesanan Diproses',
-    'Shipped': 'Pesanan Dikirim',
-    'Delivered': 'Sudah Diterima',
-    'Completed': 'Selesai',
-    // Backward compatibility with old Sales Order status
-    'To Deliver and Bill': 'Menunggu Pembayaran',
-    'Pending Payment': 'Menunggu Pembayaran',
-    'To Deliver': 'Pesanan Diproses',
-    'Cancelled': 'Dibatalkan',
-    'Canceled': 'Dibatalkan'
-  }
-  return statusMap[status] || status
-}
-
-const getStatusBadgeClass = (status: string) => {
-  switch (status) {
-    case 'Completed':
-      return 'bg-green-100 text-green-700'
-    case 'Delivered':
-    case 'Shipped':
-      return 'bg-green-100 text-green-700'
-    case 'Processing':
-    case 'To Deliver':
-      return 'bg-blue-100 text-blue-700'
-    case 'Cancelled':
-    case 'Canceled':
-      return 'bg-red-100 text-red-700'
-    case 'Pending':
-    case 'Draft':
-    case 'To Deliver and Bill':
-    case 'Pending Payment':
-      return 'bg-orange-100 text-orange-700'
-    default:
-      return 'bg-gray-100 text-gray-700'
-  }
-}
 
 // Open order detail modal
 const openOrderDetailModal = (order: Order) => {

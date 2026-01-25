@@ -11,7 +11,7 @@ export interface SelectOption {
 
 interface Props {
     modelValue: string | number | null
-    options: SelectOption[]
+    options: SelectOption[] | [] | any
     label?: string
     placeholder?: string
     disabled?: boolean
@@ -20,6 +20,8 @@ interface Props {
     error?: string | null
     searchable?: boolean
     clearable?: boolean
+    optionLabel?: string
+    optionValue?: string
     optionTemplate?: 'default' | 'detailed' // detailed shows description
 }
 
@@ -31,7 +33,9 @@ const props = withDefaults(defineProps<Props>(), {
     error: null,
     searchable: false, // Default false to match simple select behavior unless more power is needed
     clearable: false,
-    optionTemplate: 'default'
+    optionTemplate: 'default',
+    optionLabel: 'label',
+    optionValue: 'value'
 })
 
 const emit = defineEmits<{
@@ -52,7 +56,7 @@ const highlightedIndex = ref(-1)
 
 // Computed
 const selectedOption = computed(() => {
-    return props.options.find(opt => opt.value === props.modelValue) || null
+    return props.options.find(opt => opt[props.optionValue] === props.modelValue) || null
 })
 
 const filteredOptions = computed(() => {
@@ -62,7 +66,7 @@ const filteredOptions = computed(() => {
 
     const query = searchQuery.value.toLowerCase()
     return props.options.filter(option =>
-        option.label.toLowerCase().includes(query) ||
+        option[props.optionLabel].toLowerCase().includes(query) ||
         option.description?.toLowerCase().includes(query)
     )
 })
@@ -122,7 +126,7 @@ const closeDropdown = () => {
 const selectOption = (option: SelectOption) => {
     if (option.disabled) return
 
-    emit('update:modelValue', option.value)
+    emit('update:modelValue', option[props.optionValue])
     emit('select', option)
     closeDropdown()
 
@@ -264,7 +268,7 @@ watch(() => props.options, () => {
                 <!-- Selected Value or Placeholder -->
                 <span v-if="loading" class="text-gray-500">Memuat...</span>
                 <span v-else-if="selectedOption" class="text-gray-900 font-medium truncate block">
-                    {{ selectedOption.label }}
+                    {{ selectedOption[props.optionLabel] }}
                 </span>
                 <span v-else class="text-gray-500">{{ placeholder }}</span>
 
@@ -332,14 +336,14 @@ watch(() => props.options, () => {
                         </div>
 
                         <!-- Options -->
-                        <button v-for="(option, index) in filteredOptions" :key="option.value" type="button"
-                            role="option" :disabled="option.disabled" :aria-selected="option.value === modelValue"
+                        <button v-for="(option, index) in filteredOptions" :key="option[props.optionValue]" type="button"
+                            role="option" :disabled="option.disabled" :aria-selected="option[props.optionValue] === modelValue"
                             :class="[
                                 'w-full px-4 py-3 text-left transition-colors border-b border-gray-50 last:border-0',
                                 option.disabled
                                     ? 'opacity-50 cursor-not-allowed bg-gray-50'
                                     : 'cursor-pointer hover:bg-gray-50',
-                                option.value === modelValue && !option.disabled
+                                option[props.optionValue] === modelValue && !option.disabled
                                     ? 'bg-primary/5 text-primary'
                                     : 'text-gray-900',
                                 highlightedIndex === index && !option.disabled
@@ -348,10 +352,10 @@ watch(() => props.options, () => {
                             ]" @click="selectOption(option)" @mouseenter="highlightedIndex = index">
                             <!-- Default Template -->
                             <div v-if="optionTemplate === 'default'" class="flex items-center justify-between">
-                                <span class="font-medium truncate">{{ option.label }}</span>
+                                <span class="font-medium truncate">{{ option[props.optionLabel] }}</span>
 
                                 <!-- Check Icon for Selected -->
-                                <svg v-if="option.value === modelValue" class="h-5 w-5 text-primary flex-shrink-0 ml-2"
+                                <svg v-if="option[props.optionValue] === modelValue" class="h-5 w-5 text-primary flex-shrink-0 ml-2"
                                     fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd"
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -363,7 +367,7 @@ watch(() => props.options, () => {
                             <div v-else-if="optionTemplate === 'detailed'">
                                 <div class="flex items-start justify-between">
                                     <div class="flex-1 min-w-0">
-                                        <div class="font-medium truncate">{{ option.label }}</div>
+                                        <div class="font-medium truncate">{{ option[props.optionLabel] }}</div>
                                         <div v-if="option.description"
                                             class="text-xs text-gray-500 mt-0.5 line-clamp-2">
                                             {{ option.description }}
@@ -371,7 +375,7 @@ watch(() => props.options, () => {
                                     </div>
 
                                     <!-- Check Icon for Selected -->
-                                    <svg v-if="option.value === modelValue"
+                                    <svg v-if="option[props.optionValue] === modelValue"
                                         class="h-5 w-5 text-primary flex-shrink-0 ml-2 mt-0.5" fill="currentColor"
                                         viewBox="0 0 20 20">
                                         <path fill-rule="evenodd"
