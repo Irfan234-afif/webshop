@@ -124,9 +124,6 @@ doc_events = {
             "webshop.webshop.api.subscription.process_subscription_order"
         ]
     },
-    "Payment Entry": {
-        "on_submit": "webshop.webshop.api.subscription.process_payment_entry"
-    },
     "Price List": {
         "validate": [
             "webshop.webshop.crud_events.price_list.check_impact_on_cart.execute"
