@@ -52,24 +52,13 @@
 
             <!-- Unit -->
             <div>
-              <FormSelect :id="`school_unit_${index}`" v-model="student.school_unit">
-                <option value="" disabled>{{ isLoadingUnits ? 'Memuat...' : 'Pilih Unit' }}</option>
-                <option v-for="unit in schoolUnits" :key="unit.name" :value="unit.name">
-                  {{ unit.unit_name || unit.name }}
-                </option>
+              <FormSelect :id="`school_unit_${index}`" v-model="student.school_unit" :options="schoolUnits" @select="handleSchoolUnitChange(index)" placeholder="Pilih Unit">
               </FormSelect>
             </div>
 
             <!-- Kelas -->
             <div>
-              <FormSelect :id="`grade_level_${index}`" v-model="student.grade_level">
-                <option value="" disabled>
-                  {{ !student.school_unit ? 'Pilih Unit terlebih dahulu' : isLoadingGrades ? 'Memuat...' : 'Pilih Kelas'
-                  }}
-                </option>
-                <option v-for="grade in getGradesForStudent(index)" :key="grade.name" :value="grade.name">
-                  {{ grade.grade_name }}
-                </option>
+              <FormSelect :id="`grade_level_${index}`" v-model="student.grade_level" :options="getGradesForStudent(index)" placeholder="Pilih Kelas">
               </FormSelect>
             </div>
 
@@ -108,7 +97,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRegistrationStore } from '@/stores/registration'
 import { frappeRequest } from 'frappe-ui'
 import FormInput from '@/components/common/FormInput.vue'
-import FormSelect from '@/components/common/FormSelect.vue'
+import FormSelect, {type SelectOption} from '@/components/common/FormSelect.vue'
 
 const registrationStore = useRegistrationStore()
 
@@ -116,7 +105,8 @@ const formData = computed(() => registrationStore.formData)
 const isStep3Valid = computed(() => registrationStore.isStep3Valid)
 
 // State for school units and grades
-const schoolUnits = ref<{ name: string; unit_name: string; unit_code: string }[]>([])
+const schoolUnits = ref<SelectOption[]>([])
+const effectiveGrades = ref<SelectOption[]>([])
 const allGrades = ref<{ name: string; grade_name: string; school_unit: string }[]>([])
 const isLoadingUnits = ref(false)
 const isLoadingGrades = ref(false)
@@ -129,7 +119,12 @@ const fetchSchoolUnits = async () => {
       url: 'webshop.webshop.api.products.get_school_units',
       method: 'GET'
     })
-    schoolUnits.value = response || []
+    schoolUnits.value = response.map((unit: any) => ({
+      value: unit.name,
+      label: unit.unit_name,
+      description: unit.unit_code
+    }))
+    console.log(schoolUnits.value)
   } catch (error) {
     console.error('Error fetching school units:', error)
   } finally {
@@ -159,7 +154,10 @@ const getGradesForStudent = (studentIndex: number) => {
   if (!selectedUnit) {
     return []
   }
-  return allGrades.value.filter(grade => grade.school_unit === selectedUnit)
+  return allGrades.value.filter(grade => grade.school_unit === selectedUnit).map((grade: any) => ({
+    value: grade.name,
+    label: grade.grade_name
+  }))
 }
 
 // Handle school unit change - clear grade if it doesn't belong to new unit

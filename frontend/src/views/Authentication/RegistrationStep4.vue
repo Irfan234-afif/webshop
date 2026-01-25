@@ -24,17 +24,17 @@
     <div class="mb-6 bg-white border border-gray-200 rounded-xl p-6">
       <h3 class="font-bold text-gray-900 mb-4">Akun</h3>
       <div class="space-y-3">
-        <div class="flex justify-between items-center">
-          <span class="text-gray-600">Nama Lengkap</span>
-          <span class="text-gray-900 font-medium">{{ formData.name }}</span>
+        <div class="flex justify-between items-start gap-4">
+          <span class="text-gray-600 shrink-0">Nama Lengkap</span>
+          <span class="text-gray-900 font-medium text-right break-words">{{ formData.name }}</span>
         </div>
-        <div class="flex justify-between items-center">
-          <span class="text-gray-600">Email Sekolah</span>
-          <span class="text-gray-900 font-medium">{{ formData.email }}</span>
+        <div class="flex justify-between items-start gap-4">
+          <span class="text-gray-600 shrink-0">Email Sekolah</span>
+          <span class="text-gray-900 font-medium text-right break-all">{{ formData.email }}</span>
         </div>
-        <div class="flex justify-between items-center">
-          <span class="text-gray-600">No. HP</span>
-          <span class="text-gray-900 font-medium">{{ formData.phoneNumber }}</span>
+        <div class="flex justify-between items-start gap-4">
+          <span class="text-gray-600 shrink-0">No. HP</span>
+          <span class="text-gray-900 font-medium text-right">{{ formData.phoneNumber }}</span>
         </div>
       </div>
     </div>
