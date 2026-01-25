@@ -16,6 +16,12 @@ interface Props {
   isTogglingWishlist?: boolean
   hasVariantStock: (variant: VariantAttribute) => boolean
   someSelectedVariant: (variant: VariantAttribute) => boolean
+  lastSurveyStatus?: {
+    has_survey: boolean
+    status?: string
+    admin_notes?: string
+    request_date?: string
+  }
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -33,6 +39,7 @@ const emit = defineEmits<{
   'toggleWishlist': []
   'showLoginModal': []
   'selectDate': [date: string]
+  'startSurvey': []
 }>()
 
 const displayImages = computed(() => {
@@ -80,9 +87,11 @@ watch(displayImages, () => {
     <ProductInfo :product="product" :selected-size="selectedSize" :selected-variant="selectedVariant"
       :quantity="quantity" :is-in-wishlist="isInWishlist" :is-adding-to-cart="isAddingToCart"
       :is-toggling-wishlist="isTogglingWishlist" :has-variant-stock="hasVariantStock"
-      :some-selected-variant="someSelectedVariant" @update:quantity="emit('update:quantity', $event)"
+      :some-selected-variant="someSelectedVariant" :last-survey-status="lastSurveyStatus"
+      @update:quantity="emit('update:quantity', $event)"
       @select-size="emit('selectSize', $event)" @select-variant="emit('selectVariant', $event)"
       @customize="emit('customize')" @add-to-cart="emit('addToCart', $event)" @toggle-wishlist="emit('toggleWishlist')"
-      @show-login-modal="emit('showLoginModal')" @select-date="emit('selectDate', $event)" />
+      @show-login-modal="emit('showLoginModal')" @select-date="emit('selectDate', $event)" 
+      @start-survey="emit('startSurvey')" />
   </div>
 </template>

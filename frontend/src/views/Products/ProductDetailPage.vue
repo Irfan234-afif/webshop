@@ -205,6 +205,11 @@ const loadProduct = async (id: string) => {
       await productDetailStore.fetchProductDetail(id)
       lastLoadedProductId.value = id
 
+      // Fetch survey status if product loaded
+      if (productDetailStore.currentProduct?.can_survey) {
+        fetchLastSurveyStatus(productDetailStore.currentProduct.item_code)
+      }
+
       // Handle case where product has no variants
       if (!productDetailStore.currentProduct?.variants) {
         productDetailLogic.selectedItemVariant.value = {
@@ -230,6 +235,36 @@ watch(productId, (newId) => {
   }
 }, { immediate: true })
 
+// Survey Feature Logic
+// import SurveyRequestModal from '@/components/features/product-detail/SurveyRequestModal.vue' // Removed
+
+const lastSurveyStatus = ref<{
+  has_survey: boolean
+  status?: string
+  admin_notes?: string
+  request_date?: string
+}>({ has_survey: false })
+
+const fetchLastSurveyStatus = async (itemCode: string) => {
+  try {
+    const response = await fetch(`/api/method/webshop.webshop.api.survey.get_last_survey_status?item_code=${itemCode}`)
+    const data = await response.json()
+    if (data.message && data.message.success) {
+      lastSurveyStatus.value = data.message
+    }
+  } catch (error) {
+    console.error('Error fetching survey status:', error)
+  }
+}
+
+const handleStartSurvey = () => {
+  if (!cartStore.activeStudent) {
+    alertStore.warning('Silakan pilih siswa terlebih dahulu di menu profil', 'Peringatan')
+    return
+  }
+  
+  router.push(`/survey-request/${productDetailStore.currentProduct!.id}`)
+}
 </script>
 
 <template>
@@ -277,11 +312,16 @@ watch(productId, (newId) => {
             :quantity="productDetailLogic.quantity.value" :is-in-wishlist="isInWishlist"
             :is-adding-to-cart="cartStore.isLoading" :is-toggling-wishlist="wishlistStore.isLoading"
             :some-selected-variant="productDetailLogic.someSelectedVariant"
-            :has-variant-stock="productDetailLogic.hasVariantStock" @select-image="productDetailLogic.selectImage"
+            :has-variant-stock="productDetailLogic.hasVariantStock" 
+            :last-survey-status="lastSurveyStatus"
+            @select-image="productDetailLogic.selectImage"
             @update:quantity="productDetailLogic.setQuantity" @select-size="productDetailLogic.selectSize"
             @select-variant="productDetailLogic.selectVariant" @customize="handleCustomizeSize"
             @add-to-cart="handleAddToCart" @toggle-wishlist="handleToggleWishlist"
-            @show-login-modal="handleShowLoginModal" @select-date="handleSelectDate" />
+            @show-login-modal="handleShowLoginModal" @select-date="handleSelectDate" 
+            @start-survey="handleStartSurvey" />
+
+
 
           <!-- Tabs Section: Details, Size Chart, Reviews -->
           <ProductTabs :product="productDetailStore.currentProduct" :active-tab="productDetailLogic.activeTab.value"

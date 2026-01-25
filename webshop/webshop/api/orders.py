@@ -87,6 +87,7 @@ def get_orders(search_text=None, status=None, student=None, tab="orders", start=
 				"order_type",
 				"customer",
 				"per_billed",
+				"per_delivered",
 				"payment_method_type",
 				"coupon_code",
 				"discount_amount",
@@ -103,6 +104,28 @@ def get_orders(search_text=None, status=None, student=None, tab="orders", start=
 		)
 
 		if orders:
+			order_names = [order.name for order in orders]
+
+			# Filter out returned orders (per_delivered=0 and linked to a Return DN)
+			returned_sos = frappe.db.sql("""
+				SELECT distinct dni.against_sales_order
+				FROM `tabDelivery Note Item` dni
+				JOIN `tabDelivery Note` dn ON dn.name = dni.parent
+				WHERE dni.against_sales_order IN %(orders)s
+				AND dn.is_return = 1 AND dn.docstatus = 1
+			""", {"orders": tuple(order_names)}, as_dict=True)
+			
+			returned_so_names = set([r.against_sales_order for r in returned_sos])
+			
+			orders = [
+				order for order in orders 
+				if not (order.per_delivered <= 0 and order.name in returned_so_names)
+			]
+
+			# Re-calculate order_names after filtering
+			if not orders:
+				return {"orders": []}
+
 			order_names = [order.name for order in orders]
 			
 			# Fetch Payment Requests for these orders
@@ -253,11 +276,22 @@ def get_orders_count():
 	if not party:
 		frappe.throw(_("No customer account found"), title=_("Authentication Required"))
 
-	filters = {"customer": party.name}
-	filters["ecommerce_delivery_status"] = ["!=", "Completed"]
-	filters["status"] = ["not in", ["Cancelled", "Canceled"]]
-
-	return frappe.db.count("Sales Order", filters=filters)
+	# Convert filters to SQL
+	return frappe.db.sql("""
+		SELECT count(so.name)
+		FROM `tabSales Order` so
+		WHERE so.customer = %(customer)s
+		AND so.ecommerce_delivery_status != 'Completed'
+		AND so.status NOT IN ('Cancelled', 'Canceled')
+		AND NOT (
+			so.per_delivered <= 0 AND EXISTS (
+				SELECT 1 FROM `tabDelivery Note Item` dni
+				JOIN `tabDelivery Note` dn ON dn.name = dni.parent
+				WHERE dni.against_sales_order = so.name
+				AND dn.is_return = 1 AND dn.docstatus = 1
+			)
+		)
+	""", {"customer": party.name})[0][0]
 
 @frappe.whitelist()
 def get_order_filter_options():

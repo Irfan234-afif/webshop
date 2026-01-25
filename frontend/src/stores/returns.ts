@@ -220,7 +220,7 @@ export const useReturnsStore = defineStore('returns', () => {
       
       if (response) {
         // Refresh the return requests list
-        await fetchReturnRequests()
+        // await fetchReturnRequests()
         return response
       }
     } catch (err: any) {

@@ -18,6 +18,12 @@ interface Props {
   isTogglingWishlist?: boolean
   hasVariantStock: (variant: VariantAttribute) => boolean
   someSelectedVariant: (variant: VariantAttribute) => boolean
+  lastSurveyStatus?: {
+    has_survey: boolean
+    status?: string
+    admin_notes?: string
+    request_date?: string
+  }
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -27,9 +33,6 @@ const props = withDefaults(defineProps<Props>(), {
 
 const productDetailStore = useProductDetailStore()
 
-onMounted(() => {
-  console.log("ProductInfo mounted with product: ", props.product);
-})
 
 const emit = defineEmits<{
   'update:quantity': [quantity: number]
@@ -40,7 +43,9 @@ const emit = defineEmits<{
   'toggleWishlist': []
   'showLoginModal': []
   'selectDate': [date: string]
+  'startSurvey': []
 }>()
+
 
 // Check if size selection is required and valid
 const canAddToCart = computed(() => {
@@ -208,6 +213,40 @@ const infoNotes = computed(() => {
       @customize="emit('customize')"
     /> -->
 
+
+    <!-- Survey Section -->
+    <template v-if="product.can_survey">
+      <!-- Status Survey Display -->
+      <div v-if="lastSurveyStatus?.has_survey" class="rounded-lg bg-blue-50 p-4 border border-blue-100">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-bold text-blue-900">Status Survey Terakhir</h3>
+          <span 
+            class="px-3 py-1 rounded-full text-sm font-bold capitalize"
+            :class="{
+              'bg-yellow-100 text-yellow-800': lastSurveyStatus.status === 'Pending',
+              'bg-green-100 text-green-800': lastSurveyStatus.status === 'Approved',
+              'bg-red-100 text-red-800': lastSurveyStatus.status === 'Reject'
+            }"
+          >
+            {{ lastSurveyStatus.status }}
+          </span>
+        </div>
+        <p v-if="lastSurveyStatus.admin_notes" class="text-sm text-blue-800 mt-2">
+          <span class="font-bold">Catatan Admin:</span> {{ lastSurveyStatus.admin_notes }}
+        </p>
+        <p class="text-xs text-blue-600 mt-2">
+          Diajukan pada: {{ new Date(lastSurveyStatus.request_date!).toLocaleDateString('id-ID') }}
+        </p>
+      </div>
+
+      <!-- Ajukan Survey Button -->
+      <button
+        @click="emit('startSurvey')"
+        class="w-full rounded-xl border-2 border-primary bg-white px-6 py-3 font-bold text-primary transition-all hover:bg-primary hover:text-white"
+      >
+        Ajukan Survey
+      </button>
+    </template>
 
     <!-- Add to Cart Section -->
     <AddToCartSection :quantity="quantity" :is-in-wishlist="isInWishlist" :is-adding-to-cart="isAddingToCart"

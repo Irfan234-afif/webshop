@@ -52,6 +52,15 @@ const router = createRouter({
       }
     },
     {
+      path: '/survey-request/:webItemCode',
+      name: 'survey-request',
+      component: () => import('../views/Products/SurveyRequestPage.vue'),
+      meta: {
+        title: 'Ajukan Survey',
+        requiresAuth: true
+      }
+    },
+    {
       path: '/subscription-checkout/:itemCode',
       name: 'subscription-checkout',
       component: () => import('../views/Products/SubscriptionCheckoutPage.vue'),

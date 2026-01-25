@@ -155,10 +155,12 @@ import StepPaymentMethod from '@/components/features/returns/StepPaymentMethod.v
 import StepConfirmation from '@/components/features/returns/StepConfirmation.vue'
 import DefaultLayout from '@/components/layout/DefaultLayout.vue'
 import Container from '@/components/layout/Container.vue'
+import { useAlertStore } from '@/stores/alert'
 
 const router = useRouter()
 const route = useRoute()
 const returnsStore = useReturnsStore()
+const alertStore = useAlertStore()
 
 const currentStep = ref(1)
 const isSubmitting = ref(false)
@@ -285,8 +287,8 @@ async function submitReturnRequest() {
 
     if (response) {
       // Success - redirect to return requests list or show success message
-      alert('Pengajuan pengembalian berhasil dibuat!')
-      router.push('/returns')
+      alertStore.success('Pengajuan pengembalian berhasil dibuat!', 'Success')
+      router.push('/orders?tab=returns')
     }
   } catch (err: any) {
     console.error('Error submitting return request:', err)

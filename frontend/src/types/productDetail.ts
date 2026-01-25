@@ -11,6 +11,8 @@ export interface ProductDetail {
   item_code: string
   route: string
   is_subscription_item: boolean
+  can_survey?: number | boolean
+
 
   // Basic info (shared between products and services)
   title: string

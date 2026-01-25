@@ -144,7 +144,8 @@ class ReturnRequest(Document):
 	
 	def populate_items_from_sales_order(self):
 		"""Auto-populate all items from sales order"""
-		if self.sales_order and not self.items:
+		self.items = []
+		if self.sales_order:
 			so = frappe.get_doc("Sales Order", self.sales_order)
 			
 			for item in so.items:

@@ -96,6 +96,7 @@ declare module 'vue' {
     SubscriptionCard: typeof import('./src/components/features/orders/SubscriptionCard.vue')['default']
     SubscriptionDetailModal: typeof import('./src/components/features/orders/SubscriptionDetailModal.vue')['default']
     SubscriptionTab: typeof import('./src/components/features/orders/SubscriptionTab.vue')['default']
+    SurveyRequestModal: typeof import('./src/components/features/product-detail/SurveyRequestModal.vue')['default']
     TabNavigation: typeof import('./src/components/common/TabNavigation.vue')['default']
     TwitterIcon: typeof import('./src/components/icons/TwitterIcon.vue')['default']
     UniformIcon: typeof import('./src/components/icons/UniformIcon.vue')['default']
