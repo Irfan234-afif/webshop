@@ -20,6 +20,7 @@ export interface BillPaymentDetails {
     due_date: string
     posting_date: string
     subscription: string
+    student_name: string
   }
   payment_method: {
     name: string

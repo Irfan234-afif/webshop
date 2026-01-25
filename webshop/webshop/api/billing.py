@@ -81,6 +81,7 @@ def get_bill_payment_details(sales_invoice_name):
 			frappe.throw(_("Sales Invoice {0} not found").format(sales_invoice_name))
 		
 		sales_invoice = frappe.get_doc("Sales Invoice", sales_invoice_name)
+		subscription = frappe.get_doc("Subscription", sales_invoice.subscription)
 		
 		# Validate user has permission to view this invoice
 		party = get_party()
@@ -165,7 +166,8 @@ def get_bill_payment_details(sales_invoice_name):
 				"outstanding_amount": sales_invoice.outstanding_amount,
 				"due_date": sales_invoice.due_date,
 				"posting_date": sales_invoice.posting_date,
-				"subscription": sales_invoice.subscription
+				"subscription": sales_invoice.subscription,
+				"student_name": subscription.student
 			},
 			"payment_method": payment_method_data,
 			"bank_account_details": bank_details,

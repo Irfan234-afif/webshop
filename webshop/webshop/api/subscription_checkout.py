@@ -26,9 +26,14 @@ def create_subscription_request(data):
 		item_code = data.get("item_code")
 		start_date = data.get("start_date")
 		notes = data.get("notes")
+		student = data.get("student")
 		
-		if not item_code or not start_date:
+		if not item_code or not start_date or not student:
 			frappe.throw(_("Missing required fields"))
+
+		# Validate student if provided
+		if student and not frappe.db.exists("Student", student):
+			frappe.throw(_("Invalid student"))
 
 		from webshop.webshop.shopping_cart.cart import get_party
 		
@@ -41,7 +46,7 @@ def create_subscription_request(data):
 		# Get Plan
 		plan = frappe.db.get_value("Item", item_code, "subscription_plan")
 		if not plan:
-			plan_name = frappe.db.get_value("Item", item_code, "subscription_plan")
+			plan_name = frappe.db.get_value("Subscription Plan", {"item": item_code})
 			if not plan_name:
 				frappe.throw(_("This item is not configured as a Subscription Plan."))
 		else:
@@ -55,6 +60,10 @@ def create_subscription_request(data):
 			"start_date": start_date,
 			"notes": notes,
 		})
+		
+		# Set student (Mandatory)
+		doc.student = student
+		
 		# Note: end_date will be auto-calculated in the DocType controller
 		doc.insert(ignore_permissions=True) # Ignore perms to allow Customer to create if not granted explicit create rights in JSON
 		frappe.db.commit()
@@ -78,7 +87,7 @@ def get_subscription_item_details(item_code):
 	plan = None
 	if item.is_subscription_item: # Custom field check
 		if not item.subscription_plan:
-			plan_name = frappe.db.get_value("Subscription Plan", {"item_code": item_code})
+			plan_name = frappe.db.get_value("Subscription Plan", {"item": item_code})
 			plan = frappe.get_doc("Subscription Plan", plan_name)
 		else:
 			plan = frappe.get_doc("Subscription Plan", item.subscription_plan)

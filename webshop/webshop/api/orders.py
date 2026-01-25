@@ -93,6 +93,7 @@ def get_orders(search_text=None, status=None, student=None, tab="orders", start=
 				"ecommerce_delivery_status",
 				"shipped_date",
 				"delivered_date",
+				"payment_method_type.payment_type",
 			],
 			filters=filters,
 			or_filters=or_filters,

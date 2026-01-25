@@ -38,6 +38,7 @@ export interface Order {
   items?: OrderItem[]
   per_billed: number
   payment_method_type?: string
+  payment_type?: string
   delivery_image?: string
   coupon_code?: string
   taxes?: OrderTax[]

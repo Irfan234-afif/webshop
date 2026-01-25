@@ -129,7 +129,7 @@ const isWaitingPayment = computed(() => {
 const isWaitingApproval = computed(() => {
   // Logic: "Waiting Payment Approval"
   // User uploaded proof (Payment Request Created/Draft)
-  if (['Transfer Manual', 'Cash Webshop'].includes(props.order.payment_method_type || '')) {
+  if (['Transfer Manual', 'Cash'].includes(props.order.payment_type || '')) {
     return props.order.payment_request_status === 'Draft' || props.order.payment_request_status === 'Requested'
   }
   return false
@@ -137,8 +137,11 @@ const isWaitingApproval = computed(() => {
 
 const isApproved = computed(() => {
   // Logic: Payment Approved / Processing
-  if (['Transfer Manual', 'Cash Webshop'].includes(props.order.payment_method_type || '')) {
-    return props.order.payment_request_status === 'Submitted' || ['To Deliver', 'Processing', 'Shipped', 'Completed'].includes(getDisplayStatus(props.order))
+  console.log("payment_request_status", props.order.payment_request_status)
+  console.log("props.order.payment_type", props.order.payment_type)
+  if (['Transfer Manual', 'Cash'].includes(props.order.payment_type || '')) {
+    console.log("HHHHH");
+    return props.order.payment_request_status === 'Paid' || ['To Deliver', 'Processing', 'Shipped', 'Completed'].includes(getDisplayStatus(props.order))
   }
   // Payment Gateway: Auto approved if status is Processing/To Deliver
   return ['To Deliver', 'Processing', 'Shipped', 'Completed'].includes(getDisplayStatus(props.order))
@@ -155,6 +158,7 @@ const buttonText = computed(() => {
   if (isWaitingApproval.value) {
     return 'Lihat Detail' // Or specific text? Figma says "Lihat Detail" for waiting approval
   }
+  console.log("isApproved", isApproved.value)
   if (isApproved.value) {
     return 'Lihat Detail'
   }

@@ -885,6 +885,8 @@ def create_payment_request_for_manual_approval(sales_order, payment_method):
 	payment_request.grand_total = sales_order.grand_total
 	payment_request.currency = sales_order.currency
 	payment_request.company = sales_order.company
+	payment_request.payment_method_type = payment_method.name
+	payment_request.make_sales_invoice = 1
 
 	# Set email and subject
 	payment_request.email_to = sales_order.contact_email or frappe.session.user

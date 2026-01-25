@@ -121,6 +121,12 @@ class SubscriptionRequest(Document):
 		subscription.party_type = "Customer"
 		subscription.party = self.customer
 		subscription.company = self.company if self.get("company") else frappe.defaults.get_user_default("Company")
+		subscription.days_until_due = 1
+		
+		# Copy student if available
+		if self.student:
+			subscription.student = self.student
+		
 		subscription.append("plans", {
 			"plan": self.subscription_plan,
 			"qty": qty

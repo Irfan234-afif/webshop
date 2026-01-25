@@ -64,6 +64,7 @@ const adaptedPaymentDetails = ref<any>(null)
 
 // Watch for paymentDetails changes and adapt the structure
 import { watch, computed } from 'vue'
+import PrimaryButton from '@/components/common/PrimaryButton.vue'
 
 // Check if invoice is already paid
 const isPaid = computed(() => {
@@ -79,7 +80,7 @@ watch(paymentDetails, (details) => {
                 customer: details.sales_invoice.customer,
                 grand_total: details.sales_invoice.grand_total,
                 delivery_date: null,
-                student_name: null,
+                student_name: details.sales_invoice.student_name,
                 pickup_type: null,
                 unit: null
             },
@@ -136,7 +137,7 @@ watch(paymentDetails, (details) => {
                             <div class="flex justify-between items-center mb-3">
                                 <span class="text-sm text-gray-500">Nomor Invoice</span>
                                 <span class="font-semibold text-gray-900">{{ paymentDetails?.sales_invoice?.name
-                                    }}</span>
+                                }}</span>
                             </div>
                             <div class="flex justify-between items-center">
                                 <span class="text-sm text-gray-500">Total Dibayar</span>
@@ -150,14 +151,18 @@ watch(paymentDetails, (details) => {
 
                         <!-- Actions -->
                         <div class="flex gap-4">
-                            <button @click="handleViewBills"
+                            <PrimaryButton class="flex-1" variant="outline" @click="handleViewBills">Lihat Tagihan Lain
+                            </PrimaryButton>
+                            <PrimaryButton class="flex-1" @click="handleContinueShopping">Kembali ke Beranda
+                            </PrimaryButton>
+                            <!-- <button @click="handleViewBills"
                                 class="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
                                 Lihat Tagihan Lain
                             </button>
                             <button @click="handleContinueShopping"
                                 class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
                                 Kembali ke Beranda
-                            </button>
+                            </button> -->
                         </div>
                     </div>
                 </div>

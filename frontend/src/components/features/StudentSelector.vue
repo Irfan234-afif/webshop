@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import type { Student } from '@/types/cart'
+import FormSelect, { type SelectOption } from '@/components/common/FormSelect.vue'
 
 interface Props {
   required?: boolean
@@ -26,6 +27,16 @@ const cartStore = useCartStore()
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 
+// Computed options for the select component
+const studentOptions = computed<SelectOption[]>(() => {
+  return cartStore.students.map(student => ({
+    value: student.name,
+    label: student.student_name,
+    description: student.school_unit, // Show school unit in the detailed view
+    ...student // Spread original student data so we can emit it back
+  }))
+})
+
 // Fetch students on mount
 onMounted(async () => {
   if (cartStore.students.length === 0) {
@@ -42,110 +53,30 @@ onMounted(async () => {
   }
 })
 
-const handleSelectStudent = (student: Student) => {
-  emit('update:modelValue', student.name)
-  emit('select', student)
+const handleUpdateValue = (value: string | number | null) => {
+  emit('update:modelValue', value as string | null)
 }
 
-const selectedStudent = ref<Student | null>(null)
-const isOpen = ref(false)
-
-const selectStudent = (student: Student) => {
-  selectedStudent.value = student
-  isOpen.value = false
-  handleSelectStudent(student)
-}
-
-const toggleDropdown = () => {
-  if (!props.disabled && !isLoading.value) {
-    isOpen.value = !isOpen.value
+const handleSelect = (option: SelectOption) => {
+  // Reconstruct student object or just use the extra props we spread into the option
+  // Since we spread ...student into the option, we can cast it back to Student (mostly)
+  // or retrieve it from the store if we want to be strictly type safe with references
+  const student = cartStore.students.find(s => s.name === option.value)
+  if (student) {
+    emit('select', student)
   }
 }
 </script>
 
 <template>
   <div class="flex flex-col gap-2">
-    <!-- Label -->
-    <label class="text-sm font-semibold text-gray-900">
-      {{ label }}
-      <span v-if="required" class="text-red-500">*</span>
-    </label>
-
-    <!-- Loading State -->
-    <div v-if="isLoading" class="rounded-lg border-2 border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-500">
-      Memuat data siswa...
-    </div>
-
-    <!-- Error State -->
-    <div v-else-if="error" class="rounded-lg border-2 border-red-300 bg-red-50 px-4 py-2.5 text-sm text-red-600">
-      {{ error }}
-    </div>
-
-    <!-- Dropdown Selector -->
-    <div v-else class="relative">
-      <button
-        type="button"
-        :disabled="disabled"
-        :class="[
-          'w-full rounded-lg border-2 px-4 py-2.5 text-left text-sm font-medium transition-all',
-          selectedStudent
-            ? 'border-primary bg-white text-gray-900'
-            : 'border-gray-300 bg-white text-gray-500',
-          disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-gray-400',
-          isOpen ? 'border-primary' : ''
-        ]"
-        @click="toggleDropdown"
-        :aria-expanded="isOpen"
-      >
-        <span v-if="selectedStudent">{{ selectedStudent.student_name }}</span>
-        <span v-else>Pilih siswa...</span>
-
-        <!-- Dropdown Arrow -->
-        <svg
-          :class="[
-            'absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 transition-transform',
-            isOpen ? 'rotate-180' : ''
-          ]"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      <!-- Dropdown List -->
-      <div
-        v-if="isOpen"
-        class="absolute z-10 mt-2 w-full rounded-lg border border-gray-200 bg-white shadow-lg"
-      >
-        <div v-if="cartStore.students.length === 0" class="px-4 py-3 text-sm text-gray-500">
-          Tidak ada data siswa
-        </div>
-
-        <button
-          v-for="student in cartStore.students"
-          :key="student.name"
-          type="button"
-          :class="[
-            'w-full px-4 py-3 text-left text-sm transition-colors hover:bg-gray-50',
-            selectedStudent?.name === student.name ? 'bg-primary/10 text-primary' : 'text-gray-900'
-          ]"
-          @click="selectStudent(student)"
-        >
-          <div class="font-medium">{{ student.student_name }}</div>
-          <div class="text-xs text-gray-500">{{ student.school_unit }}</div>
-        </button>
-      </div>
-    </div>
-
-    <!-- Required Validation Message -->
-    <p v-if="required && !selectedStudent && !disabled && !isLoading" class="text-xs text-gray-500">
-      Silakan pilih siswa terlebih dahulu
-    </p>
+    <!-- Using the new reusable FormSelect component -->
+    <FormSelect :model-value="modelValue" :options="studentOptions" :label="label" :required="required"
+      :disabled="disabled" :loading="isLoading" :error="error" placeholder="Pilih siswa..." option-template="detailed"
+      searchable @update:model-value="handleUpdateValue" @select="handleSelect" />
 
     <!-- Active Student Indicator -->
-    <p v-if="selectedStudent && selectedStudent.name === cartStore.activeStudent" class="text-xs text-green-600">
+    <p v-if="modelValue && modelValue === cartStore.activeStudent" class="text-xs text-green-600 mt-1">
       ✓ Siswa aktif saat ini
     </p>
   </div>

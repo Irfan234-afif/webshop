@@ -2,14 +2,17 @@
 import { ref, onMounted, computed, reactive, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
 import DefaultLayout from '@/components/layout/DefaultLayout.vue'
 import Container from '@/components/layout/Container.vue'
 import Breadcrumb from '@/components/common/Breadcrumb.vue'
 import ServiceField from '@/components/features/product-detail/ServiceField.vue'
+import StudentSelector from '@/components/features/StudentSelector.vue'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const cartStore = useCartStore()
 
 const itemCode = route.params.itemCode as string
 const startDateQuery = route.query.start_date as string
@@ -23,7 +26,15 @@ const checkoutData = reactive({
     item: null as any,
     start_date: startDateQuery || '',
     notes: '',
-    termsAccepted: false
+    termsAccepted: false,
+    student: cartStore.activeStudent || null
+})
+
+// Update student when active student changes in store
+watch(() => cartStore.activeStudent, (newVal) => {
+    if (newVal && !checkoutData.student) {
+        checkoutData.student = newVal
+    }
 })
 
 const breadcrumbItems = [
@@ -67,6 +78,10 @@ const nextStep = () => {
             alert('Please select a start date')
             return
         }
+        if (!checkoutData.student) {
+            alert('Mohon pilih siswa terlebih dahulu')
+            return
+        }
     }
     currentStep.value++
 }
@@ -88,7 +103,8 @@ const submitRequest = async () => {
         const payload = {
             item_code: itemCode,
             start_date: checkoutData.start_date,
-            notes: checkoutData.notes
+            notes: checkoutData.notes,
+            student: checkoutData.student
         }
 
         const response = await fetch('/api/method/webshop.webshop.api.subscription_checkout.create_subscription_request', {
@@ -118,6 +134,12 @@ const handleFinish = () => {
     router.push('/orders?tab=subscriptions')
 }
 
+const getStudentName = (studentId: string | null) => {
+    if (!studentId) return 'N/A'
+    const student = cartStore.students.find(s => s.name === studentId)
+    return student?.student_name || studentId
+}
+
 </script>
 
 <template>
@@ -131,25 +153,6 @@ const handleFinish = () => {
 
                 <div v-else class="mx-auto max-w-3xl">
 
-                    <!-- Steps Indicator -->
-                    <div class="mb-8 flex items-center justify-between px-12">
-                        <div class="flex flex-col items-center gap-2">
-                            <div
-                                :class="['flex h-7 w-7 items-center justify-center rounded-full font-bold text-sm', currentStep >= 1 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500']">
-                                1</div>
-                            <span class="text-sm font-medium">Detail</span>
-                        </div>
-                        <div class="h-1 flex-1 bg-gray-200 mx-4">
-                            <div class="h-full bg-primary transition-all duration-300"
-                                :style="{ width: currentStep >= 2 ? '100%' : '0%' }"></div>
-                        </div>
-                        <div class="flex flex-col items-center gap-2">
-                            <div
-                                :class="['flex h-7 w-7 items-center justify-center rounded-full font-bold text-sm', currentStep >= 2 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500']">
-                                2</div>
-                            <span class="text-sm font-medium">Konfirmasi</span>
-                        </div>
-                    </div>
 
                     <!-- Step 1: Details -->
                     <div v-if="currentStep === 1" class="rounded-2xl bg-white p-8 shadow-sm">
@@ -158,7 +161,7 @@ const handleFinish = () => {
                                 class="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-white font-bold text-sm">
                                 1
                             </div>
-                            <h2 class="text-xl font-bold">Detail Pendaftaran</h2>
+                            <h2 class="text-xl font-bold">Pendaftaran</h2>
                         </div>
 
                         <div class="flex mb-8 gap-6 border p-4 rounded-xl">
@@ -183,6 +186,10 @@ const handleFinish = () => {
                         </div>
 
                         <div class="space-y-6">
+                            <div>
+                                <StudentSelector v-model="checkoutData.student" :required="true" label="Pilih Siswa" />
+                            </div>
+
                             <div>
                                 <label class="mb-2 block text-sm font-medium text-gray-700">Tanggal Mulai</label>
                                 <ServiceField :mini="true" :initial-date="checkoutData.start_date"
@@ -215,7 +222,7 @@ const handleFinish = () => {
                                         class="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-white font-bold text-sm">
                                         2
                                     </div>
-                                    <h2 class="text-base font-bold">Konfirmasi Pendaftaran</h2>
+                                    <h2 class="text-xl font-bold">Konfirmasi</h2>
                                 </div>
                                 <button @click="prevStep" class="text-sm text-gray-500 hover:text-gray-800">
                                     Edit
@@ -227,17 +234,12 @@ const handleFinish = () => {
                         <div class="bg-white border-t border-gray-200 p-8">
                             <h3 class="text-sm font-bold mb-4">Informasi Siswa</h3>
                             <div class="flex flex-col gap-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-gray-600">Nama Lengkap</span>
-                                    <span class="text-sm font-medium">{{ authStore.user?.full_name || 'N/A' }}</span>
+                                <div v-if="checkoutData.student" class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Siswa</span>
+                                    <span class="text-sm font-medium">{{ getStudentName(checkoutData.student) }}</span>
                                 </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-gray-600">Email</span>
-                                    <span class="text-sm font-medium">{{ authStore.user?.email || 'N/A' }}</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-gray-600">Nomor Telepon</span>
-                                    <span class="text-sm font-medium">{{ (authStore.user as any)?.phone || '-' }}</span>
+                                <div v-else class="text-sm text-gray-500">
+                                    Tidak ada siswa dipilih
                                 </div>
                             </div>
                         </div>
@@ -298,7 +300,7 @@ const handleFinish = () => {
                             <div class="flex gap-3">
                                 <button @click="prevStep"
                                     class="flex-1 rounded-lg bg-gray-400 px-8 py-3 font-bold text-sm text-white transition hover:bg-gray-500">
-                                    Kembali (isi data alergi)
+                                    Kembali
                                 </button>
                                 <button @click="submitRequest" :disabled="submitting || !checkoutData.termsAccepted"
                                     :class="[

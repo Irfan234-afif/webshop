@@ -28,7 +28,7 @@
                         <div class="flex justify-between items-center mt-4">
                             <span class="text-sm text-gray-500">Total Tagihan</span>
                             <span class="text-2xl font-bold text-primary">{{ formatPrice(bill.outstanding_amount)
-                            }}</span>
+                                }}</span>
                         </div>
                         <div class="text-xs text-gray-400 mt-2">
                             Jatuh Tempo: {{ formatDate(bill.due_date) }}
@@ -42,7 +42,13 @@
 
                     <!-- Actions -->
                     <div class="modal-footer">
-                        <button @click="handleClose" class="btn-secondary">
+                        <PrimaryButton variant="outline" @click="handleClose" class="flex-1">
+                            Batal
+                        </PrimaryButton>
+                        <PrimaryButton variant="primary" @click="handleConfirm" class="flex-1">
+                            Bayar Sekarang
+                        </PrimaryButton>
+                        <!-- <button @click="handleClose" class="btn-secondary">
                             Batal
                         </button>
                         <button @click="handleConfirm" :disabled="!canProceed || isProcessing" class="btn-primary">
@@ -57,7 +63,7 @@
                                 Processing...
                             </span>
                             <span v-else>Bayar Sekarang</span>
-                        </button>
+                        </button> -->
                     </div>
                 </div>
             </div>
@@ -73,6 +79,7 @@ import { initiateBillPayment } from '@/utils/billPaymentApi'
 import { useCheckoutStore } from '@/stores/checkout'
 import { useAlertStore } from '@/stores/alert'
 import { formatIDR } from '@/utils/formatters'
+import PrimaryButton from '@/components/common/PrimaryButton.vue'
 
 interface Props {
     isOpen: boolean
