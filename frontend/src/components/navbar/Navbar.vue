@@ -225,7 +225,7 @@ const handleLoginClick = () => {
             <!-- Menu Popup -->
             <Popup :is-open="isMenuOpen" position="top-right" width="min(468px, 94vw)" max-height="90vh"
               @close="handleCloseMenu">
-              <MenuPopup @select-student="handleSelectStudent" @logout="handleLogout" />
+              <MenuPopup @select-student="handleSelectStudent" @logout="handleLogout" @close="handleCloseMenu" />
             </Popup>
           </div>
           <button v-else

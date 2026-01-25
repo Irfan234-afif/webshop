@@ -53,6 +53,7 @@ const menuItems = computed<MenuItem[]>(() => {
 const emit = defineEmits<{
   selectStudent: [studentId: string]
   logout: []
+  close: []
 }>()
 
 const selectStudent = (studentId: string) => {
@@ -61,6 +62,13 @@ const selectStudent = (studentId: string) => {
 
 const handleLogout = () => {
   emit('logout')
+}
+
+const handleNavigation = (item: MenuItem) => {
+  if (item.onClick) {
+    item.onClick()
+  }
+  emit('close')
 }
 </script>
 
@@ -112,7 +120,7 @@ const handleLogout = () => {
             'flex items-center justify-between p-6 h-[68px] border-[1.5px] border-[rgba(30,30,30,0.1)] bg-white hover:bg-[rgba(242,242,242,0.3)] transition-colors cursor-pointer',
             index === 0 ? 'rounded-t-xl' : '',
             index === menuItems.length - 1 ? 'rounded-b-xl border-t-0' : 'border-t-0'
-          ]" @click="item.onClick?.()">
+          ]" @click="handleNavigation(item)">
             <div class="flex gap-4 items-center">
               <BillIcon v-if="item.icon === 'bill'" class="w-6 h-6" />
               <CartIcon v-else-if="item.icon === 'cart'" class="w-6 h-6 text-primary" />
@@ -135,7 +143,7 @@ const handleLogout = () => {
             'flex items-center justify-between p-6 h-[68px] border-[1.5px] border-[rgba(30,30,30,0.1)] bg-white hover:bg-[rgba(242,242,242,0.3)] transition-colors',
             index === 0 ? 'rounded-t-xl' : '',
             index === menuItems.length - 1 ? 'rounded-b-xl border-t-0' : 'border-t-0'
-          ]">
+          ]" @click="$emit('close')">
             <div class="flex gap-4 items-center">
               <BillIcon v-if="item.icon === 'bill'" class="w-6 h-6" />
               <CartIcon v-else-if="item.icon === 'cart'" class="w-6 h-6 text-primary" />

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, onDeactivated, ref, watch } from 'vue'
 
 interface Props {
   isOpen: boolean
@@ -66,6 +66,13 @@ watch(() => props.isOpen, (isOpen) => {
 
 onUnmounted(() => {
   // Cleanup: restore body scroll and remove event listeners
+  document.body.style.overflow = ''
+  document.removeEventListener('click', handleClickOutside)
+  document.removeEventListener('keydown', handleEscape)
+})
+
+onDeactivated(() => {
+  // Cleanup: restore body scroll and remove event listeners when cached (KeepAlive)
   document.body.style.overflow = ''
   document.removeEventListener('click', handleClickOutside)
   document.removeEventListener('keydown', handleEscape)
