@@ -13,40 +13,40 @@
       <!-- Tab Navigation -->
       <div class="flex gap-6 mb-8 border-b border-gray-200">
         <button @click="changeTab('orders')" :class="[
-          'pb-3 text-lg font-medium transition-colors relative',
+          'pb-3 text-lg font-semibold transition-colors relative',
           activeTab === 'orders'
-            ? 'text-gray-900'
-            : 'text-gray-500 hover:text-gray-700'
+            ? 'text-primary'
+            : 'text-gray-500 hover:text-primary'
         ]">
           Pesanan
           <div v-if="activeTab === 'orders'"
             class="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full" />
         </button>
         <button @click="changeTab('history')" :class="[
-          'pb-3 text-lg font-medium transition-colors relative',
+          'pb-3 text-lg font-semibold transition-colors relative',
           activeTab === 'history'
-            ? 'text-gray-900'
-            : 'text-gray-500 hover:text-gray-700'
+            ? 'text-primary'
+            : 'text-gray-500 hover:text-primary'
         ]">
           Riwayat
           <div v-if="activeTab === 'history'"
             class="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full" />
         </button>
         <button @click="changeTab('subscriptions')" :class="[
-          'pb-3 text-lg font-medium transition-colors relative',
+          'pb-3 text-lg font-semibold transition-colors relative',
           activeTab === 'subscriptions'
-            ? 'text-gray-900'
-            : 'text-gray-500 hover:text-gray-700'
+            ? 'text-primary'
+            : 'text-gray-500 hover:text-primary'
         ]">
           Langganan
           <div v-if="activeTab === 'subscriptions'"
             class="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full" />
         </button>
         <button @click="changeTab('returns')" :class="[
-          'pb-3 text-lg font-medium transition-colors relative',
+          'pb-3 text-lg font-semibold transition-colors relative',
           activeTab === 'returns'
-            ? 'text-gray-900'
-            : 'text-gray-500 hover:text-gray-700'
+            ? 'text-primary'
+            : 'text-gray-500 hover:text-primary'
         ]">
           Pengembalian
           <div v-if="activeTab === 'returns'"
@@ -81,7 +81,7 @@
           <div v-if="['orders', 'returns'].includes(activeTab)"
             class="relative min-w-[200px] bg-white border border-gray-200 rounded-lg px-3 py-2 flex items-center gap-3">
             <span class="text-xs text-gray-500 font-medium">Status {{ activeTab === 'returns' ? 'Pengajuan' : 'Pesanan'
-            }} :</span>
+              }} :</span>
             <select v-model="filters.status"
               class="appearance-none bg-transparent font-bold text-gray-900 text-sm focus:outline-none w-full pr-6 cursor-pointer">
               <option value="">Semua</option>

@@ -11,20 +11,20 @@
       <!-- Tab Navigation -->
       <div class="flex gap-6 mb-8 border-b border-gray-200">
         <button @click="changeTab('bills')" :class="[
-          'pb-3 text-lg font-medium transition-colors relative',
+          'pb-3 text-lg font-semibold transition-colors relative',
           activeTab === 'bills'
-            ? 'text-gray-900'
-            : 'text-gray-500 hover:text-gray-700'
+            ? 'text-primary'
+            : 'text-gray-500 hover:text-primary'
         ]">
           Tagihan Berjalan
           <div v-if="activeTab === 'bills'"
             class="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full" />
         </button>
         <button @click="changeTab('history')" :class="[
-          'pb-3 text-lg font-medium transition-colors relative',
+          'pb-3 text-lg font-semibold transition-colors relative',
           activeTab === 'history'
-            ? 'text-gray-900'
-            : 'text-gray-500 hover:text-gray-700'
+            ? 'text-primary'
+            : 'text-gray-500 hover:text-primary'
         ]">
           Riwayat Pembayaran
           <div v-if="activeTab === 'history'"
@@ -46,12 +46,12 @@
         <h3 class="text-lg font-bold text-gray-900 mb-2">
           {{ activeTab === 'bills' ? 'Tidak Ada Tagihan' : 'Belum Ada Riwayat' }}
         </h3>
-        <p class="text-gray-500">
+        <p class="text-gray-500 font-semibold">
           {{ activeTab === 'bills'
             ? 'Selamat! Seluruh tagihan Anda telah lunas.'
             : 'Belum ada riwayat pembayaran yang tersedia.' }}
         </p>
-        <RouterLink to="/" class="inline-block mt-4 text-primary font-medium hover:underline">
+        <RouterLink to="/" class="inline-block mt-4 text-primary font-semibold hover:underline">
           Kembali ke Beranda
         </RouterLink>
       </div>
@@ -137,26 +137,12 @@ watch(activeTab, () => {
   billsResource.fetch()
 }, { immediate: true })
 
-const formatDate = (dateStr: string) => {
-  if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleDateString('id-ID', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  })
-}
-
-const formatPrice = (amount: number) => {
-  return formatIDR(amount)
-}
 
 const payBill = (bill: any) => {
-  console.log('Initiating payment for bill:', bill.name)
 
   // Check if Payment Request already exists (from backend flag)
   if (bill.has_payment_request) {
     // Direct redirect to payment page if PR exists
-    console.log('Existing Payment Request found, redirecting to payment page')
     router.push(`/bills/${bill.name}/payment`)
     return
   }
@@ -167,7 +153,6 @@ const payBill = (bill: any) => {
 }
 
 const viewBill = (bill: any) => {
-  console.log('Viewing bill details:', bill.name)
   selectedBillForDetail.value = bill
   isDetailModalOpen.value = true
 }
@@ -189,7 +174,6 @@ const closePaymentModal = () => {
 }
 
 const handlePaymentInitiated = (invoiceName: string) => {
-  console.log('Payment initiated for invoice:', invoiceName)
   closePaymentModal()
   // Refresh bills list
   billsResource.reload()

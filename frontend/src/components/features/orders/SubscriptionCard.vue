@@ -23,7 +23,7 @@
                     </div>
                     <!-- Status Badge -->
                     <div
-                        :class="['px-3 py-1 rounded-full flex items-center justify-center text-xs font-bold', statusBadgeClass]">
+                        :class="['px-3 py-1 rounded-full flex items-center justify-center text-xs font-bold whitespace-nowrap', statusBadgeClass]">
                         {{ statusLabel }}
                     </div>
                 </div>
