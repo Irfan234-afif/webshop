@@ -141,6 +141,8 @@ const handleSelectStudent = (studentId: string) => {
 
 const handleLogout = async () => {
   await authStore.logout()
+  cartStore.resetState()
+  wishlistStore.clearWishlist()
   isMenuOpen.value = false
   router.push('/')
 }

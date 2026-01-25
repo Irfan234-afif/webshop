@@ -222,6 +222,17 @@ export const useCartStore = defineStore('cart', () => {
     total.value = 0
   }
 
+  const resetState = () => {
+    students.value = []
+    studentCarts.value = []
+    selectedStudentCart.value = null
+    activeStudent.value = null
+    items.value = []
+    total.value = 0
+    error.value = null
+    localStorage.removeItem('active_student')
+  }
+
   const getItemsByStudent = (studentName: string) => {
     return items.value.filter(item => item.student === studentName)
   }
@@ -300,6 +311,7 @@ export const useCartStore = defineStore('cart', () => {
     updateQuantity,
     removeItem,
     clearCart,
+    resetState,
     initialize
   }
 })
