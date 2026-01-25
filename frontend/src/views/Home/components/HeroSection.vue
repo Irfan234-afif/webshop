@@ -92,7 +92,7 @@ onMounted(() => {
 
             <template v-if="content.secondary_cta_text">
                <a :href="content.secondary_cta_url || '#'">
-                 <PrimaryButton variant="outline" size="medium" icon="arrow">
+                 <PrimaryButton class="text-white border-none" variant="outline" size="medium" icon="arrow">
                    {{ content.secondary_cta_text }}
                  </PrimaryButton>
                </a>
