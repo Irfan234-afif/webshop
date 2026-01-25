@@ -152,19 +152,7 @@ const handleConfirm = async () => {
 
         emit('payment-initiated', props.bill.name)
 
-        // Redirect based on redirect_type
-        if (response.payment_url) {
-            if (response.redirect_type === 'gateway') {
-                // External gateway redirect
-                window.location.href = response.payment_url
-            } else {
-                // Internal page redirect (manual/virtual_account)
-                router.push(response.payment_url)
-            }
-        } else {
-            // Fallback to bill payment page
-            router.push(`/bills/${props.bill.name}/payment`)
-        }
+        router.push(`/bills/${response.sales_invoice}/payment`)
     } catch (error: any) {
         console.error('❌ Failed to initiate payment:', error)
         alertStore.error(error.message || 'Gagal memproses pembayaran', 'Error')

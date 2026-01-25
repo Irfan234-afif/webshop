@@ -1,6 +1,7 @@
 import { call } from 'frappe-ui'
 
 export interface BillPaymentResponse {
+  sales_invoice: string
   payment_request: string
   payment_url: string
   redirect_type: 'gateway' | 'manual' | 'virtual_account'

@@ -105,7 +105,8 @@ def initiate_bill_payment(sales_invoice_name, payment_method_type, payment_chann
 			"payment_request": payment_request.name,
 			"payment_url": payment_data.get("payment_url"),
 			"redirect_type": payment_data.get("redirect_type"),
-			"virtual_account": payment_data.get("virtual_account")
+			"virtual_account": payment_data.get("virtual_account"),
+			"sales_invoice": sales_invoice.name
 		}
 	
 	except Exception as e:
