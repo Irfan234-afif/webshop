@@ -6,7 +6,7 @@
    "label": "Webshop Sales"
   }
  ],
- "content": "[{\"id\":\"XSSo6_PvRE\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Webshop</span>\",\"col\":12}},{\"id\":\"u_LJXCgMCh\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Webshop Sales\",\"col\":12}},{\"id\":\"eFV0m-KOhp\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Sales Amount\",\"col\":3}},{\"id\":\"HjGtkueFVk\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Orders\",\"col\":3}},{\"id\":\"xel7h8y_F6\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Need to Deliver Today\",\"col\":3}},{\"id\":\"A6ujnNJv17\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Return Request\",\"col\":3}},{\"id\":\"deVVvu0SRo\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Orders\",\"col\":3}},{\"id\":\"gm10onjK6J\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payment Request\",\"col\":3}},{\"id\":\"0ug_MMv2M8\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Subscription Request\",\"col\":3}},{\"id\":\"ted8JO4PxK\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Cart\",\"col\":3}},{\"id\":\"R5WVvwa2Mo\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"ug4_kglBdH\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Overview</b></span>\",\"col\":12}},{\"id\":\"xOzN-b4lIN\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Orders Today\",\"col\":4}},{\"id\":\"mS2m5TGH4O\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Sales Invoice\",\"col\":4}},{\"id\":\"Z9O-7zByct\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Subscription\",\"col\":4}}]",
+ "content": "[{\"id\":\"XSSo6_PvRE\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Webshop</span>\",\"col\":12}},{\"id\":\"u_LJXCgMCh\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Webshop Sales\",\"col\":12}},{\"id\":\"5dXxc9mMte\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Today's Total Sales\",\"col\":3}},{\"id\":\"o5ILBJSc02\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Orders Today\",\"col\":3}},{\"id\":\"kNblQq6RLh\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Need to Deliver\",\"col\":3}},{\"id\":\"KJSKfbOufj\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Return Request\",\"col\":3}},{\"id\":\"deVVvu0SRo\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Orders\",\"col\":3}},{\"id\":\"gm10onjK6J\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payment Request\",\"col\":3}},{\"id\":\"0ug_MMv2M8\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Subscription Request\",\"col\":3}},{\"id\":\"ted8JO4PxK\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Cart\",\"col\":3}},{\"id\":\"R5WVvwa2Mo\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"ug4_kglBdH\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Overview</b></span>\",\"col\":12}},{\"id\":\"xOzN-b4lIN\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Orders Today\",\"col\":4}},{\"id\":\"mS2m5TGH4O\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Sales Invoice\",\"col\":4}},{\"id\":\"Z9O-7zByct\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Subscription\",\"col\":4}}]",
  "creation": "2026-01-18 00:38:07.397266",
  "custom_blocks": [],
  "docstatus": 0,
@@ -20,26 +20,26 @@
  "label": "Webshop",
  "link_type": "DocType",
  "links": [],
- "modified": "2026-01-25 22:19:52.112968",
+ "modified": "2026-01-26 00:25:39.580972",
  "modified_by": "Administrator",
  "module": "Webshop",
  "name": "Webshop",
  "number_cards": [
   {
-   "label": "Orders",
+   "label": "Today's Total Sales",
+   "number_card_name": "Webshop Total Sales Amount"
+  },
+  {
+   "label": "Orders Today",
    "number_card_name": "Webshop Orders Count"
   },
   {
-   "label": "Need to Deliver Today",
+   "label": "Need to Deliver",
    "number_card_name": "Need to Deliver Todays"
   },
   {
    "label": "Return Request",
    "number_card_name": "Return Request"
-  },
-  {
-   "label": "Sales Amount",
-   "number_card_name": "Webshop Total Sales Amount"
   }
  ],
  "owner": "Administrator",
