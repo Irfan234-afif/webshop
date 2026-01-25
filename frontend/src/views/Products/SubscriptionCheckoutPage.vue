@@ -115,7 +115,7 @@ const submitRequest = async () => {
 }
 
 const handleFinish = () => {
-    router.push('/orders') // or wherever
+    router.push('/orders?tab=subscriptions')
 }
 
 </script>
@@ -185,9 +185,8 @@ const handleFinish = () => {
                         <div class="space-y-6">
                             <div>
                                 <label class="mb-2 block text-sm font-medium text-gray-700">Tanggal Mulai</label>
-                                <ServiceField :mini="true" @select-date="(d) => checkoutData.start_date = d" />
-                                <p class="mt-1 text-sm text-primary font-medium">Selected: {{ checkoutData.start_date ||
-                                    'None' }}</p>
+                                <ServiceField :mini="true" :initial-date="checkoutData.start_date"
+                                    @select-date="(d) => checkoutData.start_date = d" />
                             </div>
 
                             <div>
@@ -258,7 +257,7 @@ const handleFinish = () => {
                                 <div v-if="checkoutData.notes" class="flex justify-between items-start">
                                     <span class="text-sm text-gray-600">Catatan</span>
                                     <span class="text-sm font-medium text-right max-w-[60%]">{{ checkoutData.notes
-                                    }}</span>
+                                        }}</span>
                                 </div>
                             </div>
                         </div>

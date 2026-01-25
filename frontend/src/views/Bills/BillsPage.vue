@@ -3,11 +3,34 @@
     <Container class="py-6">
       <Breadcrumb :items="[
         { label: 'Home', to: '/' },
-        { label: 'Tagihan Berjalan' }
+        { label: activeTab === 'bills' ? 'Tagihan Berjalan' : 'Riwayat Pembayaran' }
       ]" class="mb-6" />
 
-      <h1 class="text-xl font-bold text-gray-900 mb-2">Tagihan Berjalan</h1>
-      <p class="text-gray-500 mb-8">Daftar tagihan berlangganan yang belum dibayar.</p>
+      <h1 class="text-xl font-bold text-gray-900 mb-10">Tagihan & Pembayaran</h1>
+
+      <!-- Tab Navigation -->
+      <div class="flex gap-6 mb-8 border-b border-gray-200">
+        <button @click="changeTab('bills')" :class="[
+          'pb-3 text-lg font-medium transition-colors relative',
+          activeTab === 'bills'
+            ? 'text-gray-900'
+            : 'text-gray-500 hover:text-gray-700'
+        ]">
+          Tagihan Berjalan
+          <div v-if="activeTab === 'bills'"
+            class="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full" />
+        </button>
+        <button @click="changeTab('history')" :class="[
+          'pb-3 text-lg font-medium transition-colors relative',
+          activeTab === 'history'
+            ? 'text-gray-900'
+            : 'text-gray-500 hover:text-gray-700'
+        ]">
+          Riwayat Pembayaran
+          <div v-if="activeTab === 'history'"
+            class="absolute bottom-0 left-0 right-0 h-[3px] bg-primary rounded-t-full" />
+        </button>
+      </div>
 
       <div v-if="billsResource.loading" class="flex justify-center py-12">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -20,81 +43,99 @@
               stroke-linejoin="round" />
           </svg>
         </div>
-        <h3 class="text-lg font-bold text-gray-900 mb-2">Tidak Ada Tagihan</h3>
-        <p class="text-gray-500">Selamat! Seluruh tagihan Anda telah lunas.</p>
+        <h3 class="text-lg font-bold text-gray-900 mb-2">
+          {{ activeTab === 'bills' ? 'Tidak Ada Tagihan' : 'Belum Ada Riwayat' }}
+        </h3>
+        <p class="text-gray-500">
+          {{ activeTab === 'bills'
+            ? 'Selamat! Seluruh tagihan Anda telah lunas.'
+            : 'Belum ada riwayat pembayaran yang tersedia.' }}
+        </p>
         <RouterLink to="/" class="inline-block mt-4 text-primary font-medium hover:underline">
           Kembali ke Beranda
         </RouterLink>
       </div>
 
-      <div v-else class="space-y-4">
-        <div v-for="bill in bills" :key="bill.name"
-          class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <!-- Left Info -->
-            <div class="flex-1">
-              <div class="flex items-center gap-3 mb-2">
-                <span class="text-sm font-medium text-gray-900">{{ bill.name }}</span>
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                  Belum Lunas
-                </span>
-              </div>
-
-              <div class="text-sm text-gray-500 mb-1">
-                Jatuh Tempo: <span class="font-medium text-gray-900">{{ formatDate(bill.due_date) }}</span>
-              </div>
-              <div class="text-xs text-gray-400">
-                Tanggal Terbit: {{ formatDate(bill.posting_date) }}
-              </div>
-            </div>
-
-            <!-- Right Info & Action -->
-            <div class="flex flex-col md:items-end gap-2">
-              <div class="text-right">
-                <span class="block text-xs text-gray-500">Total Tagihan</span>
-                <span class="text-lg font-bold text-primary">{{ formatPrice(bill.outstanding_amount) }}</span>
-              </div>
-              <button @click="payBill(bill)"
-                class="bg-primary hover:bg-primary-dark text-white font-medium px-6 py-2 rounded-lg transition-colors text-sm w-full md:w-auto">
-                {{ bill.has_payment_request ? 'Lanjutkan Pembayaran' : 'Bayar Sekarang' }}
-              </button>
-            </div>
-          </div>
-        </div>
+      <!-- Bills Grid -->
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <BillCard v-for="bill in bills" :key="bill.name" :bill="bill" :is-paid="activeTab === 'history'" @pay="payBill"
+          @view="viewBill" />
       </div>
 
       <!-- Payment Modal -->
       <BillPaymentModal v-if="selectedBill" :is-open="isPaymentModalOpen" :bill="selectedBill"
         @close="closePaymentModal" @payment-initiated="handlePaymentInitiated" />
 
+      <!-- Detail Modal -->
+      <BillDetailModal v-if="selectedBillForDetail" :is-open="isDetailModalOpen" :bill="selectedBillForDetail"
+        :is-paid="activeTab === 'history'" @close="closeDetailModal" @pay="handlePayFromDetail" />
+
     </Container>
   </DefaultLayout>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import { createResource } from 'frappe-ui'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import DefaultLayout from '@/components/layout/DefaultLayout.vue'
 import Container from '@/components/layout/Container.vue'
 import Breadcrumb from '@/components/common/Breadcrumb.vue'
 import BillPaymentModal from '@/components/features/bills/BillPaymentModal.vue'
+import BillCard from '@/components/features/bills/BillCard.vue'
+import BillDetailModal from '@/components/features/bills/BillDetailModal.vue'
 import { formatIDR } from '@/utils/formatters'
 
 const router = useRouter()
+const route = useRoute()
 const bills = ref<any[]>([])
+
+// Tab state
+const activeTab = ref<'bills' | 'history'>(
+  (route.query.tab as 'bills' | 'history') || 'bills'
+)
 
 // Payment Modal State
 const isPaymentModalOpen = ref(false)
 const selectedBill = ref<any | null>(null)
 
+// Detail Modal State
+const isDetailModalOpen = ref(false)
+const selectedBillForDetail = ref<any | null>(null)
+
 const billsResource = createResource({
   url: 'webshop.webshop.api.billing.get_unpaid_bills',
-  auto: true,
+  auto: false,
+  params: {
+    tab: activeTab.value
+  },
   onSuccess: (data: any) => {
     bills.value = data.bills || []
   }
 })
+
+// Change tab and update URL
+const changeTab = (tab: 'bills' | 'history') => {
+  router.push({ query: { ...route.query, tab } })
+}
+
+// Watch route changes to sync activeTab
+watch(() => route.query.tab, (newTab) => {
+  const validTab = (newTab as 'bills' | 'history') || 'bills'
+  if (activeTab.value !== validTab) {
+    activeTab.value = validTab
+  }
+}, { immediate: true })
+
+// Watch activeTab changes and fetch data
+watch(activeTab, () => {
+  billsResource.update({
+    params: {
+      tab: activeTab.value
+    }
+  })
+  billsResource.fetch()
+}, { immediate: true })
 
 const formatDate = (dateStr: string) => {
   if (!dateStr) return '-'
@@ -123,6 +164,23 @@ const payBill = (bill: any) => {
   // Open modal to select payment method for new payment
   selectedBill.value = bill
   isPaymentModalOpen.value = true
+}
+
+const viewBill = (bill: any) => {
+  console.log('Viewing bill details:', bill.name)
+  selectedBillForDetail.value = bill
+  isDetailModalOpen.value = true
+}
+
+const closeDetailModal = () => {
+  isDetailModalOpen.value = false
+  selectedBillForDetail.value = null
+}
+
+const handlePayFromDetail = (bill: any) => {
+  // Close detail modal and open payment flow
+  closeDetailModal()
+  payBill(bill)
 }
 
 const closePaymentModal = () => {

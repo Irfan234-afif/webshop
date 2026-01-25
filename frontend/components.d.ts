@@ -12,6 +12,8 @@ declare module 'vue' {
     AddToCartSection: typeof import('./src/components/features/product-detail/AddToCartSection.vue')['default']
     ArrowIcon: typeof import('./src/components/icons/ArrowIcon.vue')['default']
     ArrowRightIcon: typeof import('./src/components/icons/ArrowRightIcon.vue')['default']
+    BillCard: typeof import('./src/components/features/bills/BillCard.vue')['default']
+    BillDetailModal: typeof import('./src/components/features/bills/BillDetailModal.vue')['default']
     BillIcon: typeof import('./src/components/icons/BillIcon.vue')['default']
     BillListIcon: typeof import('./src/components/icons/BillListIcon.vue')['default']
     BillPaymentModal: typeof import('./src/components/features/bills/BillPaymentModal.vue')['default']

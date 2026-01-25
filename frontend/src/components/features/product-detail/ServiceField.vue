@@ -1,9 +1,18 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+
+const props = defineProps<{
+  initialDate?: string
+  mini?: boolean
+}>()
 
 const emit = defineEmits(['select-date'])
 
-const selectedDate = ref<string>('')
+const selectedDate = ref<string>(props.initialDate || '')
+
+watch(() => props.initialDate, (newVal) => {
+  if (newVal) selectedDate.value = newVal
+})
 
 // Get today's date in YYYY-MM-DD format for min attribute
 const today = computed(() => {
@@ -14,17 +23,17 @@ const today = computed(() => {
 // Format date for display (e.g., "25 Desember 2025")
 const formattedDate = computed(() => {
   if (!selectedDate.value) return ''
-  
+
   const date = new Date(selectedDate.value + 'T00:00:00')
   const months = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
   ]
-  
+
   const day = date.getDate()
   const month = months[date.getMonth()]
   const year = date.getFullYear()
-  
+
   return `${day} ${month} ${year}`
 })
 
@@ -38,7 +47,7 @@ const handleDateChange = (event: Event) => {
 <template>
   <div class="mb-6">
     <h3 class="mb-4 text-sm font-semibold text-gray-900">Pilih Tanggal Layanan</h3>
-    
+
     <div class="relative date-picker-wrapper">
       <!-- Custom styled display (visual only) -->
       <div
@@ -47,59 +56,34 @@ const handleDateChange = (event: Event) => {
           selectedDate
             ? 'border-secondary bg-secondary-surface text-secondary-alt'
             : 'border-gray-200 bg-white text-gray-500'
-        ]"
-      >
+        ]">
         <div class="flex items-center gap-3">
           <!-- Calendar Icon -->
-          <svg 
-            class="h-5 w-5 flex-shrink-0" 
-            :class="selectedDate ? 'text-secondary-alt' : 'text-gray-400'"
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-          >
-            <path 
-              stroke-linecap="round" 
-              stroke-linejoin="round" 
-              stroke-width="2" 
-              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" 
-            />
+          <svg class="h-5 w-5 flex-shrink-0" :class="selectedDate ? 'text-secondary-alt' : 'text-gray-400'" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          
+
           <!-- Date Text -->
           <span class="text-sm font-semibold">
             {{ selectedDate ? formattedDate : 'Pilih tanggal layanan' }}
           </span>
         </div>
-        
+
         <!-- Chevron Icon -->
-        <svg 
-          class="h-5 w-5 flex-shrink-0 transition-transform" 
-          :class="selectedDate ? 'text-secondary-alt' : 'text-gray-400'"
-          fill="none" 
-          viewBox="0 0 24 24" 
-          stroke="currentColor"
-        >
-          <path 
-            stroke-linecap="round" 
-            stroke-linejoin="round" 
-            stroke-width="2" 
-            d="M19 9l-7 7-7-7" 
-          />
+        <svg class="h-5 w-5 flex-shrink-0 transition-transform"
+          :class="selectedDate ? 'text-secondary-alt' : 'text-gray-400'" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
       </div>
-      
+
       <!-- Actual date input overlaid on top -->
-      <input
-        id="service-date-input"
-        type="date"
-        :value="selectedDate"
-        :min="today"
-        @change="handleDateChange"
-        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-      />
+      <input id="service-date-input" type="date" :value="selectedDate" :min="today" @change="handleDateChange"
+        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
     </div>
-    
+
     <!-- Helper Text -->
     <p v-if="!selectedDate" class="mt-2 text-xs text-gray-500">
       Silakan pilih tanggal untuk memulai layanan

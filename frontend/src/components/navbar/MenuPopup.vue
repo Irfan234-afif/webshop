@@ -37,7 +37,7 @@ const menuItems = computed<MenuItem[]>(() => {
     { id: 'contact', label: 'Kontak', icon: 'info', link: '#' },
     { id: 'cart', label: 'Keranjang', icon: 'cart', badge: 10, link: '/cart', requiresAuth: true },
     { id: 'bills', label: 'Tagihan', icon: 'bill-list', badge: 2, link: '/bills', requiresAuth: true },
-    { id: 'help', label: 'Bantuan', icon: 'info', link: '/help' },
+    { id: 'help', label: 'Bantuan', icon: 'info', link: '/' },
     { id: 'account', label: 'Pengaturan Akun & Data Siswa', icon: 'user-circle', link: '/profile', requiresAuth: true },
     { id: 'logout', label: 'Log Out', icon: 'logout', onClick: () => handleLogout(), requiresAuth: true },
     { id: 'login', label: 'Log In', icon: 'user-circle', link: '/login', requiresAuth: false }

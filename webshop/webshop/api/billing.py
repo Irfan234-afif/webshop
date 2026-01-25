@@ -4,22 +4,37 @@ from frappe import _
 from webshop.webshop.shopping_cart.cart import get_party
 
 @frappe.whitelist()
-def get_unpaid_bills():
+def get_unpaid_bills(tab="bills"):
 	"""
-	Fetch unpaid Sales Invoices linked to Subscriptions for the current user.
+	Fetch Sales Invoices linked to Subscriptions for the current user.
+	
+	Args:
+		tab (str): Filter tab - 'bills' for unpaid invoices, 'history' for paid invoices
 	"""
 	party = get_party()
 	if not party:
 		frappe.throw(_("No link to a Customer found for this user."), title=_("Authentication Required"))
 
+	# Base filters
+	filters = {
+		"customer": party.name,
+		"docstatus": 1,
+		"subscription": ["is", "set"] # Only subscription-generated invoices
+	}
+	
+	# Add outstanding_amount filter based on tab
+	if tab == "bills":
+		# Unpaid invoices
+		filters["outstanding_amount"] = [">", 0]
+		order_by = "due_date asc"
+	else:
+		# Paid invoices (history)
+		filters["outstanding_amount"] = ["=", 0]
+		order_by = "posting_date desc"
+
 	invoices = frappe.get_all(
 		"Sales Invoice",
-		filters={
-			"customer": party.name,
-			"docstatus": 1, 
-			"outstanding_amount": [">", 0],
-			"subscription": ["is", "set"] # Only subscription-generated invoices
-		},
+		filters=filters,
 		fields=[
 			"name",
 			"posting_date",
@@ -30,7 +45,7 @@ def get_unpaid_bills():
 			"subscription",
 			"status"
 		],
-		order_by="due_date asc"
+		order_by=order_by
 	)
 
 	# Check for existing Payment Request for each invoice
