@@ -9,7 +9,12 @@ from frappe.utils import getdate, nowdate
 class SubscriptionRequest(Document):
 	def validate(self):
 		self.calculate_end_date()
+		self.update_holiday_list()
 		self.update_effective_days()
+	
+	def update_holiday_list(self):
+		if not self.holiday_list:
+			self.holiday_list = frappe.db.get_value("Holiday List", {"from_date": ("<", self.start_date), "to_date": (">", self.end_date)}, "name")
 	
 	def update_effective_days(self):
 		"""Update effective_days field based on start_date, end_date, and holiday_list"""
@@ -63,6 +68,9 @@ class SubscriptionRequest(Document):
 		if not self.subscription_plan or not self.start_date:
 			return
 		
+		if self.end_date:
+			return
+		
 		# Fetch plan details
 		plan = frappe.get_doc("Subscription Plan", self.subscription_plan)
 		
@@ -112,6 +120,7 @@ class SubscriptionRequest(Document):
 		subscription = frappe.new_doc("Subscription")
 		subscription.party_type = "Customer"
 		subscription.party = self.customer
+		subscription.company = self.company if self.get("company") else frappe.defaults.get_user_default("Company")
 		subscription.append("plans", {
 			"plan": self.subscription_plan,
 			"qty": qty
@@ -125,11 +134,14 @@ class SubscriptionRequest(Document):
 			subscription.generate_invoice_at = "End of the current subscription period"
 		else:
 			subscription.generate_invoice_at = "Days before the current subscription period"
-			subscription.number_of_days = 30
+			# Calculate number_of_days dynamically as the difference from start_date to today
+			# This ensures invoice can be generated immediately on today's date
+			from frappe.utils import date_diff, nowdate
+			days_difference = date_diff(self.start_date, nowdate())
+			subscription.number_of_days = max(days_difference, 0)  # Ensure non-negative
 		
 		# Submit to activate
 		subscription.insert()
-		subscription.submit()
 		
 		# Link back
 		self.db_set("subscription_ref", subscription.name)
@@ -137,4 +149,14 @@ class SubscriptionRequest(Document):
 		# Link Subscription to this Request (if field exists on Subscription, optional)
 		# subscription.db_set("subscription_request", self.name) 
 		
-		frappe.msgprint(_("Subscription {0} created and activated.").format(subscription.name))
+		# Trigger process() to generate invoice immediately ONLY for Pre-Paid subscriptions
+		# Post-Paid subscriptions should generate invoice at the end of period
+		if billing_timing == "Pre-Paid":
+			try:
+				subscription.process(posting_date=nowdate())
+				frappe.msgprint(_("Subscription {0} created and invoice generated successfully.").format(subscription.name))
+			except Exception as e:
+				frappe.log_error(f"Failed to process subscription {subscription.name}: {str(e)}")
+				frappe.msgprint(_("Subscription {0} created, but invoice generation encountered an issue. Please check the subscription.").format(subscription.name))
+		else:
+			frappe.msgprint(_("Subscription {0} created and activated.").format(subscription.name))
