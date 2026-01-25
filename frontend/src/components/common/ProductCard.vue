@@ -37,7 +37,7 @@ const formattedPrice = (price: number) => {
   <div class="bg-white flex flex-col w-full h-full">
     <!-- Image Container -->
     <div class="bg-gray-100 relative rounded-xl aspect-square w-full overflow-hidden">
-      <img v-if="image" :src="image" :alt="title" class="w-full h-full object-cover" />
+      <img v-if="image" :src="image" :alt="title" class="w-full h-full object-contain" />
       <no-product-icon v-else />
 
       <!-- Subscription Badge -->
