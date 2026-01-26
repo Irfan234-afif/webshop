@@ -149,6 +149,14 @@ const router = createRouter({
       }
     },
     {
+      path: '/update-password',
+      name: 'update-password',
+      component: () => import('../views/Authentication/UpdatePasswordPage.vue'),
+      meta: {
+        title: 'Perbarui Kata Sandi'
+      }
+    },
+    {
       path: '/bills/:id/payment',
       name: 'bill-payment',
       component: () => import('../views/Bills/BillPaymentPage.vue'),

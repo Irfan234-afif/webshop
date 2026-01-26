@@ -38,6 +38,12 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(!!getCookie('user_id') && getCookie('user_id') !== 'Guest')
   const isLoading = ref(true)
 
+  const stripHtml = (html: string) => {
+    const tmp = document.createElement("DIV")
+    tmp.innerHTML = html
+    return tmp.textContent || tmp.innerText || ""
+  }
+
   // Check current user status
   const fetchCurrentUser = async (): Promise<void> => {
     isLoading.value = true
@@ -145,6 +151,29 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  // Update Password function
+  const updateUserPassword = async (newPassword: string, key?: string, oldPassword?: string): Promise<{ success: boolean; message?: string }> => {
+    try {
+      const response = await call('frappe.core.doctype.user.user.update_password', {
+        new_password: newPassword,
+        key: key || undefined,
+        old_password: oldPassword || undefined,
+        logout_all_sessions: 1
+      })
+
+      return { success: true, message: 'Kata sandi berhasil diperbarui' }
+    } catch (error: any) {
+      console.error('Update password error:', error)
+      let message = error.message || 'Gagal memperbarui kata sandi'
+      
+      if (error.messages && error.messages.length > 0) {
+        message = stripHtml(error.messages[0])
+      }
+      
+      return { success: false, message }
+    }
+  }
+
   // Check if user is a guest (not authenticated)
   const isGuest = computed(() => {
     return !isAuthenticated.value
@@ -166,6 +195,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     forgotPassword,
-    updateProfile
+    updateProfile,
+    updateUserPassword
   }
 })
