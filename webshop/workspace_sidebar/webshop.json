@@ -33,12 +33,26 @@
   {
    "child": 0,
    "collapsible": 1,
+   "filters": "[]",
    "icon": "sell",
    "indent": 0,
    "keep_closed": 0,
    "label": "Sales Order",
    "link_to": "Sales Order",
    "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "briefcase",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Subscripton Request",
+   "link_to": "Subscription Request",
+   "link_type": "DocType",
+   "navigate_to_tab": "",
    "show_arrow": 0,
    "type": "Link"
   },
@@ -116,6 +130,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Item",
@@ -127,6 +142,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Website Item",
@@ -138,6 +154,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Item Group",
@@ -160,18 +177,19 @@
   {
    "child": 1,
    "collapsible": 1,
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Price List",
    "link_to": "Price List",
    "link_type": "DocType",
-   "navigate_to_tab": "",
    "show_arrow": 0,
    "type": "Link"
   },
   {
    "child": 1,
    "collapsible": 1,
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Pricing Rule",
@@ -183,6 +201,7 @@
   {
    "child": 1,
    "collapsible": 1,
+   "icon": "list",
    "indent": 0,
    "keep_closed": 0,
    "label": "Coupon Code",
@@ -192,7 +211,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-18 00:39:14.908376",
+ "modified": "2026-01-26 21:09:50.520301",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Webshop",
