@@ -37,7 +37,7 @@
           <div class="mb-6">
             <div class="flex items-center justify-between mb-2">
               <label for="password" class="block text-sm font-medium text-gray-700">Kata Sandi</label>
-              <a href="/forgot-password" class="text-sm text-primary hover:underline">Lupa kata sandi?</a>
+              <router-link to="/forgot-password" class="text-sm text-primary hover:underline">Lupa kata sandi?</router-link>
             </div>
             <div class="relative">
               <input

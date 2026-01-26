@@ -125,6 +125,14 @@ const router = createRouter({
       }
     },
     {
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: () => import('../views/Authentication/ForgotPasswordPage.vue'),
+      meta: {
+        title: 'Lupa Kata Sandi'
+      }
+    },
+    {
       path: '/login',
       name: 'login',
       component: LoginPage,

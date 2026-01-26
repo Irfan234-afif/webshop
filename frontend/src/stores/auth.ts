@@ -103,6 +103,24 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  // Forgot Password function
+  const forgotPassword = async (email: string): Promise<{ success: boolean; message?: string }> => {
+    try {
+      const response = await call('webshop.webshop.api.auth.reset_password', {
+        email
+      })
+
+      if (response.success) {
+        return { success: true, message: response.message }
+      } else {
+        return { success: false, message: response.message }
+      }
+    } catch (error) {
+      console.error('Forgot password error:', error)
+      return { success: false, message: 'Gagal memproses permintaan' }
+    }
+  }
+
     // Update Profile function
   const updateProfile = async (fullName: string, phone: string): Promise<{ success: boolean; message?: string }> => {
     try {
@@ -147,6 +165,7 @@ export const useAuthStore = defineStore('auth', () => {
     fetchCurrentUser,
     login,
     logout,
+    forgotPassword,
     updateProfile
   }
 })

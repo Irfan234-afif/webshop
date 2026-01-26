@@ -987,3 +987,37 @@ def get_grades(school_unit=None):
 	except Exception as e:
 		frappe.log_error(frappe.get_traceback(), "Get Grades Error")
 		frappe.throw("Error, please try again later")
+
+@frappe.whitelist(allow_guest=True)
+def reset_password(email):
+	"""
+	Send password reset email to user
+	
+	Args:
+		email (str): User email
+		
+	Returns:
+		dict: Success status
+	"""
+	try:
+		if not email:
+			frappe.throw(_("Email is required"))
+			
+		# Check if user exists
+		if not frappe.db.exists("User", email):
+			frappe.throw(_("User with email {0} does not exist").format(email))
+			
+		user = frappe.get_doc("User", email)
+		user.reset_password(send_email=True)
+		
+		return {
+			"success": True,
+			"message": _("Password reset instructions have been sent to your email")
+		}
+		
+	except Exception as e:
+		frappe.log_error(frappe.get_traceback(), "Reset Password Error")
+		return {
+			"success": False,
+			"message": str(e)
+		}
