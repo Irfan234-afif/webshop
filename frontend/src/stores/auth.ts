@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { call } from 'frappe-ui'
 import { getCookie } from '@/utils/storage'
+import { extractErrorMessage } from '@/utils/errorHandler'
 
 interface User {
   email: string
@@ -81,18 +82,13 @@ export const useAuthStore = defineStore('auth', () => {
         password
       })
 
-      if (response.success) {
-        user.value = response.user
-        customer.value = response.customer
-        students.value = response.students || []
-        isAuthenticated.value = true
-        return { success: true }
-      } else {
-        return { success: false, message: response.message }
-      }
+      user.value = response.user
+      customer.value = response.customer
+      students.value = response.students || []
+      isAuthenticated.value = true
+      return { success: true }
     } catch (error) {
-      console.error('Login error:', error)
-      return { success: false, message: 'Login failed' }
+      return { success: false, message: extractErrorMessage(error) }
     }
   }
 

@@ -95,19 +95,8 @@ def login(email, password):
 			"students": students,
 		}
 
-	except frappe.exceptions.AuthenticationError:
-		frappe.local.response["http_status_code"] = 401
-		return {
-			"success": False,
-			"message": _("Invalid email or password")
-		}
 	except Exception as e:
-		frappe.log_error(frappe.get_traceback(), "Webshop Login Error")
-		frappe.local.response["http_status_code"] = 500
-		return {
-			"success": False,
-			"message": str(e)
-		}
+		raise e
 
 
 @frappe.whitelist(allow_guest=True)
