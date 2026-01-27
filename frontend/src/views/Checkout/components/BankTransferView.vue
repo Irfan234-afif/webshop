@@ -113,11 +113,7 @@ const getApprovalStatusStyle = (status: string) => {
           Pembayaran Transfer Manual
         </h1>
         <p class="text-sm text-gray-500 leading-relaxed">
-          Selesaikan pembayaran Anda melalui Virtual Account sebelum batas waktu
-          <span v-if="showPaymentDeadline" class="text-[#ac208e] font-semibold">
-            15 Desember 2025, 23:59 WIB
-          </span>
-          agar pesanan dapat diproses.
+          Selesaikan pembayaran Anda melalui transfer bank agar pesanan dapat diproses. Setelah melakukan transfer, harap upload bukti pembayaran untuk selanjutnya diverifikasi.
         </p>
       </div>
 
