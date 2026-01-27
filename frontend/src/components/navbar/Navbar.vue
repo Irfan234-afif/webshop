@@ -13,6 +13,7 @@ import { useCartStore } from '@/stores/cart'
 import type { NavLink } from '@/types/navigation'
 import { useAuthStore } from '@/stores/auth'
 import { useWishlistStore } from '@/stores/wishlist'
+import PrimaryButton from '../common/PrimaryButton.vue'
 
 withDefaults(
   defineProps<{
@@ -211,8 +212,8 @@ const handleLoginClick = () => {
 
           <!-- User Profile Button - Full on desktop, compact on mobile/tablet -->
           <div class="relative" v-if="!isGuest">
-            <button ref="menuButtonRef"
-              class="bg-primary text-white font-bold text-xs sm:text-sm uppercase px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 rounded-xl flex items-center gap-2 sm:gap-4 lg:gap-6 hover:opacity-90 transition-opacity"
+            <PrimaryButton ref="menuButtonRef"
+              class="bg-primary text-white font-bold text-xs sm:text-sm uppercase !px-6 !py-2.5 sm:py-3 rounded-xl flex items-center gap-2 sm:gap-4 lg:gap-6 hover:opacity-90 transition-opacity"
               @click.stop="handleToggleMenu">
               <span class="truncate max-w-[100px] lg:max-w-none font-semibold">
                 {{
@@ -220,7 +221,7 @@ const handleLoginClick = () => {
                 }}
               </span>
               <HumbergerIcon />
-            </button>
+            </PrimaryButton>
 
             <!-- Menu Popup -->
             <Popup :is-open="isMenuOpen" position="top-right" width="min(468px, 94vw)" max-height="90vh"
@@ -228,11 +229,11 @@ const handleLoginClick = () => {
               <MenuPopup @select-student="handleSelectStudent" @logout="handleLogout" @close="handleCloseMenu" />
             </Popup>
           </div>
-          <button v-else
-            class="h-12 bg-primary text-white font-bold text-xs sm:text-sm uppercase px-3 sm:px-4 lg:px-12 py-2 sm:py-2.5 lg:py-3 rounded-xl flex items-center gap-2 sm:gap-4 lg:gap-6 hover:opacity-90 transition-opacity"
+          <PrimaryButton v-else
+            class=""
             @click="handleLoginClick">
             <span class="">Login</span>
-          </button>
+          </PrimaryButton>
 
         </div>
       </div>
