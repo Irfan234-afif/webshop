@@ -211,3 +211,41 @@ def handle_webhook():
 		return {"status": "success"}
 
 	return {"status": "ignored"}
+
+@frappe.whitelist()
+def simulate_va_payment(payment_request_name):
+	settings = frappe.get_doc("Xendit Settings")
+	payment_request = frappe.get_doc("Payment Request", payment_request_name)
+	api_key = settings.get_api_key()
+	
+	# Validate
+	if not api_key:
+		frappe.throw(_("API Key not found"))
+		
+	# Prepare Headers
+	api_key_with_colon = f"{api_key}:"
+	encoded_api_key = base64.b64encode(api_key_with_colon.encode()).decode('utf-8')
+	
+	headers = {
+		"Authorization": f"Basic {encoded_api_key}",
+		"Content-Type": "application/json"
+	}
+	
+	# URL for simulation
+	url = f"https://api.xendit.co/callback_virtual_accounts/external_id={payment_request.name}/simulate_payment"
+	
+	# Payload
+	payload = {
+		"amount": payment_request.grand_total
+	}
+	
+	try:
+		response = make_post_request(
+			url=url,
+			headers=headers,
+			json=payload
+		)
+		return response
+	except Exception as e:
+		frappe.log_error(title="Xendit VA Simulation Failed", message=str(e))
+		frappe.throw(_("Simulation Failed: {0}").format(str(e)))

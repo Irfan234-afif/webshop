@@ -7,6 +7,25 @@ frappe.ui.form.on('Payment Request', {
 		if (is_webshop_manual_payment(frm)) {
 			add_approval_buttons(frm);
 		}
+
+		// Add Simulation Button for Xendit VA
+		if (frm.doc.status === "Requested" && frm.doc.payment_method_type === "Virtual Account") {
+			frm.add_custom_button(__('Simulate Payment'), function() {
+				frappe.call({
+					method: 'webshop.webshop.doctype.xendit_settings.xendit_settings.simulate_va_payment',
+					args: {
+						payment_request_name: frm.doc.name
+					},
+					freeze: true,
+					callback: function(r) {
+						if (!r.exc) {
+							frappe.msgprint(__('Simulation Triggered'));
+							frm.reload_doc();
+						}
+					}
+				});
+			}, __("Actions"));
+		}
 	}
 });
 
