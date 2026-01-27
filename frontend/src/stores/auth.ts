@@ -84,9 +84,7 @@ export const useAuthStore = defineStore('auth', () => {
         password
       })
 
-      user.value = response.user
-      customer.value = response.customer
-      students.value = response.students || []
+      await fetchCurrentUser()
       isAuthenticated.value = true
       return { success: true }
     } catch (error) {
