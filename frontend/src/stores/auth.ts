@@ -3,6 +3,8 @@ import { ref, computed } from 'vue'
 import { call } from 'frappe-ui'
 import { getCookie } from '@/utils/storage'
 import { extractErrorMessage } from '@/utils/errorHandler'
+import { useCartStore } from './cart'
+import { useWishlistStore } from './wishlist'
 
 interface User {
   email: string
@@ -105,6 +107,15 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const handleLogout = async (): Promise<void> => {
+    const cartStore = useCartStore()
+    const wishlistStore = useWishlistStore()
+
+    await logout()
+    cartStore.resetState()
+    wishlistStore.clearWishlist()
+  }
+
   // Forgot Password function
   const forgotPassword = async (email: string): Promise<{ success: boolean; message?: string }> => {
     try {
@@ -190,6 +201,7 @@ export const useAuthStore = defineStore('auth', () => {
     fetchCurrentUser,
     login,
     logout,
+    handleLogout,
     forgotPassword,
     updateProfile,
     updateUserPassword

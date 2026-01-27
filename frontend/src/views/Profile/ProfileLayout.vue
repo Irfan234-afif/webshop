@@ -100,7 +100,7 @@ const isActive = (path: string) => {
 }
 
 const handleLogout = async () => {
-    await authStore.logout()
+    await authStore.handleLogout()
     router.push('/login')
 }
 </script>
