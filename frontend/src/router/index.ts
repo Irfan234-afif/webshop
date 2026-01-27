@@ -213,7 +213,7 @@ const router = createRouter({
         {
             path: 'security',
             name: 'profile-security',
-            component: () => import('../views/Profile/ProfilePage.vue'), // Reusing for now
+            component: () => import('../views/Profile/SecurityPage.vue'),
             meta: { title: 'Keamanan Akun' }
         }
       ]

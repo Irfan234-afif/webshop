@@ -6,12 +6,14 @@ interface Props {
   size?: 'small' | 'medium' | 'large'
   icon?: string
   disabled?: boolean
+  type?: 'button' | 'submit' | 'reset'
 }
 
 const props = withDefaults(defineProps<Props>(), {
   variant: 'primary',
   size: 'medium',
-  disabled: false
+  disabled: false,
+  type: 'button'
 })
 
 const buttonClasses = computed(() => {
@@ -37,7 +39,7 @@ const buttonClasses = computed(() => {
 </script>
 
 <template>
-  <button :class="buttonClasses" :disabled="disabled">
+  <button :class="buttonClasses" :disabled="disabled" :type="type">
     <slot />
     <span v-if="icon" class="w-5 h-5">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
