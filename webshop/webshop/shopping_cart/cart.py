@@ -878,6 +878,10 @@ def apply_coupon_code(applied_code, quotation_name=None, applied_referral_sales_
 
 	coupon_name = coupon_list[0].name
 
+	pricing_rule_disabled = frappe.db.get_value("Coupon Code", coupon_name, "pricing_rule.disable")
+	if pricing_rule_disabled:
+		frappe.throw(_("Please enter a valid coupon code"))
+
 	from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 
 	validate_coupon_code(coupon_name)
