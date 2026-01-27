@@ -124,8 +124,11 @@ const getImageContainerGradient = (color: string) => {
         <div v-for="(offer, index) in offers" :key="index"
           class="block group flex-shrink-0 w-full sm:w-[calc(100%-32px)] md:w-[calc(50%-16px)] lg:w-[calc(33.333%-16px)]"
           style="scroll-snap-align: start">
-          <div
+          <component
+            :is="offer.cta_url ? 'RouterLink' : 'div'"
+            v-bind="offer.cta_url ? { to: offer.cta_url } : {}"
             class="relative rounded-[12px] h-full overflow-hidden flex flex-col min-h-[568px] transition-transform hover:scale-[1.02] hover:z-10 duration-300"
+            :class="{ 'cursor-pointer': offer.cta_url }"
             :style="getCardStyle(offer.theme_color)">
             <!-- Content -->
             <div class="flex flex-col items-start text-left z-10 w-full p-[24px] md:p-[48px] flex-1">
@@ -148,7 +151,7 @@ const getImageContainerGradient = (color: string) => {
                   class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105" />
               </div>
             </div>
-          </div>
+          </component>
         </div>
       </div>
     </Container>
