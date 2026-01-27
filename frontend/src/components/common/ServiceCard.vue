@@ -10,7 +10,7 @@ defineProps<Props>()
 </script>
 
 <template>
-  <div class="flex flex-col h-full justify-between overflow-hidden rounded-xl p-12 relative"
+  <div class="flex flex-col h-full justify-between overflow-hidden rounded-xl p-6 md:p-12 relative"
     :style="{ background: bgGradient }">
     <!-- Content -->
     <div class="flex flex-col gap-12 items-start relative shrink-0 w-full z-10">
@@ -24,7 +24,7 @@ defineProps<Props>()
         <h3 class="!font-bold text-lg md:text-xl leading-tight text-white uppercase">
           {{ title }}
         </h3>
-        <p class="font-medium text-sm leading-relaxed text-white/80">
+        <p class="font-medium text-sm leading-relaxed text-white/80 line-clamp-2 md:line-clamp-4">
           {{ description }}
         </p>
       </div>
