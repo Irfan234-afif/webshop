@@ -764,6 +764,7 @@ def get_payment_gateway_url(sales_order_name, payment_method_type, payment_chann
 				payment_request.mute_email = 1
 				payment_request.company = sales_order.company
 				payment_request.payment_method_type = payment_method_type
+				payment_request.mode_of_payment = payment_method.mode_of_payment
 
 				# Calculate payment due date based on duration
 				payment_duration_seconds = payment_method.payment_duration or 86400  # Default 24h if 0 or None
@@ -887,6 +888,7 @@ def create_payment_request_for_manual_approval(sales_order, payment_method):
 	payment_request.company = sales_order.company
 	payment_request.payment_method_type = payment_method.name
 	payment_request.make_sales_invoice = 1
+	payment_request.mode_of_payment = payment_method.mode_of_payment
 
 	# Set email and subject
 	payment_request.email_to = sales_order.contact_email or frappe.session.user
