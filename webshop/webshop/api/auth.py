@@ -218,6 +218,7 @@ def register(name, email, phone_number, password, address=None, students=None):
 				"last_name": " ".join(name.split()[1:]) if len(name.split()) > 1 else "",
 				"full_name": name,
 				"user_type": "Website User",
+				"language": "id",
 				"send_welcome_email": 0,
 				"enabled": 1,
 			})

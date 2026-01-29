@@ -1,0 +1,423 @@
+Please enter a coupon code,Silakan masukkan kode kupon
+Please enter a valid coupon code,Silakan masukkan kode kupon yang valid
+Coupon code applied,Kode kupon berhasil digunakan
+Invalid Coupon Code,Kode Kupon Tidak Valid
+Not in Stock,Tidak tersedia
+Only {0} in Stock for item {1},Hanya tersisa {0} untuk barang {1}
+Checkout,Pembayaran
+Cart,Keranjang
+Shopping Cart,Keranjang Belanja
+Item,Barang
+Price,Harga
+Quantity,Jumlah
+Total,Total
+Subtotal,Subtotal
+Grand Total,Total Keseluruhan
+Apply,Terapkan
+Remove,Hapus
+Update,Perbarui
+Continue Shopping,Lanjut Belanja
+Place Order,Buat Pesanan
+Billing Address,Alamat Tagihan
+Shipping Address,Alamat Pengiriman
+Payment Method,Metode Pembayaran
+Order Summary,Ringkasan Pesanan
+My Account,Akun Saya
+Orders,Pesanan
+Wishlist,Daftar Keinginan
+Login,Masuk
+Logout,Keluar
+Register,Daftar
+Search,Cari
+Filter,Filter
+Sort By,Urutkan Berdasarkan
+Description,Deskripsi
+Review,Ulasan
+Submit,Kirim
+Cancel,Batal
+Save,Simpan
+Edit,Ubah
+Delete,Hapus
+Success,Berhasil
+Error,Kesalahan
+Warning,Peringatan
+Message,Pesan
+Password reset instructions have been sent to your email,Instruksi pengaturan ulang kata sandi telah dikirim ke email Anda
+Mohon periksa email Anda untuk melanjutkan proses reset kata sandi,Mohon periksa email Anda untuk melanjutkan proses reset kata sandi
+Return Request already exists for Sales Order {0},Permintaan Pengembalian sudah ada untuk Pesanan Penjualan {0}
+Subscription End Date is mandatory when using Fixed Period subscription plan,Tanggal Berakhir Berlangganan wajib diisi saat menggunakan paket berlangganan Periode Tetap
+Subscription End Date must be after Start Date,Tanggal Berakhir Berlangganan harus setelah Tanggal Mulai
+Student Migration Failed,Migrasi Siswa Gagal
+Virtual Account Payment,Pembayaran Akun Virtual
+Products,Produk
+Add to Cart,Tambah ke Keranjang
+Buy Now,Beli Sekarang
+Out of Stock,Stok Habis
+In Stock,Tersedia
+SKU,SKU
+Category,Kategori
+Tags,Tag
+Related Products,Produk Terkait
+Reviews,Ulasan
+Write a Review,Tulis Ulasan
+Rating,Peringkat
+Submit Review,Kirim Ulasan
+Please login to add to wishlist,Silakan masuk untuk menambah ke daftar keinginan
+Added to wishlist,Ditambahkan ke daftar keinginan
+Removed from wishlist,Dihapus dari daftar keinginan
+Cart is empty,Keranjang kosong
+Continue to Checkout,Lanjut ke Pembayaran
+Order Confirmed,Pesanan Dikonfirmasi
+Thank you for your order,Terima kasih atas pesanan Anda
+Transaction Failed,Transaksi Gagal
+Please try again,Silakan coba lagi
+Return to Home,Kembali ke Beranda
+Contact Us,Hubungi Kami
+About Us,Tentang Kami
+Terms and Conditions,Syarat dan Ketentuan
+Privacy Policy,Kebijakan Privasi
+Address,Alamat
+Phone,Telepon
+Email,Email
+Name,Nama
+Subject,Subjek
+Products,Produk
+Services,Layanan
+Home,Beranda
+Dashboard,Dasbor
+Profile,Profil
+Settings,Pengaturan
+Help,Bantuan
+Support,Dukungan
+FAQ,FAQ
+Blog,Blog
+News,Berita
+Events,Acara
+Careers,Karir
+Partners,Mitra
+Team,Tim
+History,Riwayat
+Notifications,Notifikasi
+Messages,Pesan
+Active,Aktif
+Inactive,Tidak Aktif
+Pending,Menunggu
+Completed,Selesai
+Cancelled,Dibatalkan
+Returned,Dikembalikan
+Refunded,Dikembalikan Dananya
+Shipped,Dikirim
+Delivered,Diterima
+Processing,Sedang Diproses
+On Hold,Ditahan
+Draft,Draf
+Submitted,Dikirim
+Approved,Disetujui
+Rejected,Ditolak
+Date,Tanggal
+Status,Status
+Action,Aksi
+View,Lihat
+Download,Unduh
+Print,Cetak
+Share,Bagikan
+Copy,Salin
+Paste,Tempel
+Upload,Unggah
+Image,Gambar
+File,Berkas
+Link,Tautan
+Type,Tipe
+Value,Nilai
+Code,Kode
+Group,Grup
+Role,Peran
+User,Pengguna
+Customer,Pelanggan
+Supplier,Pemasok
+Employee,Karyawan
+Student,Siswa
+Teacher,Guru
+Parent,Orang Tua
+School,Sekolah
+Class,Kelas
+Grade,Nilai
+Subject,Mata Pelajaran
+Exam,Ujian
+Result,Hasil
+Report,Laporan
+Certificate,Sertifikat
+Fee,Biaya
+Attendance,Kehadiran
+Timetable,Jadwal
+Library,Perpustakaan
+Book,Buku
+Author,Penulis
+Publisher,Penerbit
+Year,Tahun
+Edition,Edisi
+ISBN,ISBN
+Call Number,Nomor Panggil
+Rack,Rak
+Row,Baris
+Column,Kolom
+Section,Bagian
+Stock,Stok
+Inventory,Inventaris
+Warehouse,Gudang
+Location,Lokasi
+Bin,Bin
+Batch,Batch
+Serial No,Nomor Seri
+Barcode,Barcode
+QR Code,Kode QR
+Manufacturer,Pabrikan
+Brand,Merek
+Model,Model
+Color,Warna
+Size,Ukuran
+Weight,Berat
+Volume,Volume
+Dimension,Dimensi
+Material,Bahan
+Style,Gaya
+Feature,Fitur
+Specification,Spesifikasi
+Warranty,Garansi
+Guarantee,Jaminan
+Return Policy,Kebijakan Pengembalian
+Shipping Policy,Kebijakan Pengiriman
+Payment Policy,Kebijakan Pembayaran
+Exchange Policy,Kebijakan Penukaran
+Refund Policy,Kebijakan Pengembalian Dana
+Cancellation Policy,Kebijakan Pembatalan
+Security Policy,Kebijakan Keamanan
+Cookie Policy,Kebijakan Cookie
+Sitemap,Peta Situs
+RSS Feed,Umpan RSS
+API,API
+Developer,Pengembang
+Documentation,Dokumentasi
+Forum,Forum
+Community,Komunitas
+Marketplace,Pasar
+App,Aplikasi
+Extension,Ekstensi
+Plugin,Plugin
+Module,Modul
+Theme,Tema
+Design,Desain
+Layout,Tata Letak
+Template,Templat
+Component,Komponen
+Widget,Widget
+Block,Blok
+Element,Elemen
+Style,Gaya
+Script,Skrip
+Database,Basis Data
+Server,Server
+Cloud,Cloud
+Hosting,Hosting
+Domain,Domain
+SSL,SSL
+Security,Keamanan
+Performance,Performa
+Optimization,Optimasi
+SEO,SEO
+Analytics,Analitik
+Marketing,Pemasaran
+Sales,Penjualan
+Support,Dukungan
+Accounting,Akuntansi
+HR,SDM
+CRM,CRM
+Manufacturing,Manufaktur
+Projects,Proyek
+Assets,Aset
+Quality,Kualitas
+Help Desk,Meja Bantuan
+Knowledge Base,Basis Pengetahuan
+Learning,Pembelajaran
+Healthcare,Kesehatan
+Hospitality,Perhotelan
+Agriculture,Pertanian
+Non Profit,Nirlaba
+Real Estate,Real Estat
+Construction,Konstruksi
+Education,Pendidikan
+Government,Pemerintah
+Retail,Ritel
+Wholesale,Grosir
+Service,Layanan
+Logistics,Logistik
+Transport,Transportasi
+Media,Media
+Entertainment,Hiburan
+Sports,Olahraga
+Travel,Perjalanan
+Food,Makanan
+Fashion,Mode
+Electronics,Elektronik
+Home & Living,Rumah & Gaya Hidup
+Beauty,Kecantikan
+Health,Kesehatan
+Toys,Mainan
+Kids,Anak-anak
+Baby,Bayi
+Automotive,Otomotif
+Industrial,Industri
+Office,Kantor
+Books,Buku
+Music,Musik
+Movies,Film
+Games,Game
+Collectibles,Koleksi
+Art,Seni
+Crafts,Kerajinan
+Pet Supplies,Perlengkapan Hewan Peliharaan
+Garden,Taman
+Tools,Alat
+Hardware,Perangkat Keras
+Software,Perangkat Lunak
+Computer,Komputer
+Laptop,Laptop
+Mobile,Ponsel
+Tablet,Tablet
+Camera,Kamera
+Audio,Audio
+Video,Video
+TV,TV
+Smart Home,Rumah Pintar
+Wearable,Dapat Dipakai
+Accessories,Aksesoris
+Gift Cards,Kartu Hadiah
+Vouchers,Voucher
+Coupons,Kupon
+Deals,Penawaran
+Offers,Penawaran
+Discounts,Diskon
+Promotions,Promosi
+Clearance,Obral
+New Arrivals,Produk Baru
+Best Sellers,Terlaris
+Recommended,Direkomendasikan
+Trending,Populer
+Featured,Unggulan
+Popular,Populer
+Top Rated,Peringkat Tertinggi
+On Sale,Sedang Dijual
+Sold Out,Terjual Habis
+Coming Soon,Segera Hadir
+Pre Order,Pre Order
+Back Order,Pesanan Kembali
+Waitlist,Daftar Tunggu
+Notify Me,Beritahu Saya
+Subscribe,Berlangganan
+Unsubscribe,Berhenti Berlangganan
+Follow,Ikuti
+Unfollow,Berhenti Mengikuti
+Like,Suka
+Dislike,Tidak Suka
+Comment,Komentar
+Reply,Balas
+Share,Bagikan
+Report,Laporkan
+Flag,Tandai
+Block,Blokir
+Mute,Bisukan
+Hide,Sembunyikan
+Show,Tampilkan
+Expand,Perluas
+Collapse,Ciutkan
+Open,Buka
+Close,Tutup
+Next,Selanjutnya
+Previous,Sebelumnya
+First,Pertama
+Last,Terakhir
+Page,Halaman
+Rows,Baris
+Columns,Kolom
+Grid,Kisi
+List,Daftar
+Table,Tabel
+Card,Kartu
+Tile,Ubin
+Detail,Detail
+Compact,Kompak
+Standard,Standar
+Large,Besar
+Medium,Sedang
+Small,Kecil
+Tiny,Sangat Kecil
+Extra Large,Sangat Besar
+Extra Small,Sangat Kecil
+Full Screen,Layar Penuh
+Default,Default
+Custom,Kustom
+Auto,Otomatis
+Manual,Manual
+System,Sistem
+User,Pengguna
+Admin,Admin
+Staff,Staf
+Manager,Manajer
+Director,Direktur
+Supervisor,Supervisor
+Coordinator,Koordinator
+Assistant,Asisten
+Associate,Rekan
+Lead,Pimpinan
+Head,Kepala
+Chief,Ketua
+Officer,Petugas
+Executive,Eksekutif
+Consultant,Konsultan
+Advisor,Penasihat
+Partner,Mitra
+Owner,Pemilik
+Founder,Pendiri
+Co-Founder,Salah Satu Pendiri
+Investor,Investor
+Board,Dewan
+Committee,Komite
+Member,Anggota
+Guest,Tamu
+Visitor,Pengunjung
+Subscriber,Pelanggan
+Follower,Pengikut
+Fan,Penggemar
+Client,Klien
+Address is required,Alamat wajib diisi
+Address must include address_line1, city, and country,"Alamat harus mencakup baris alamat 1, kota, dan negara"
+Address updated successfully,Alamat berhasil diperbarui
+All address fields are required,Semua kolom alamat wajib diisi
+At least one student is required for registration,Setidaknya satu siswa diperlukan untuk pendaftaran
+Customer not found,Pelanggan tidak ditemukan
+Each student must be an object with student_name and school_unit,Setiap siswa harus berupa objek dengan nama_siswa dan unit_sekolah
+Each student must have student_name and school_unit,Setiap siswa harus memiliki nama_siswa dan unit_sekolah
+Email and password are required,Email dan kata sandi diperlukan
+Email is already registered,Email sudah terdaftar
+Email is available,Email tersedia
+Email is required,Email diperlukan
+Full Name is required,Nama Lengkap diperlukan
+Invalid email format,Format email tidak valid
+Invalid email or password,Email atau kata sandi tidak valid
+Invalid phone number format,Format nomor telepon tidak valid
+Invalid phone number format. Please use international format (e.g., +628123456789),"Format nomor telepon tidak valid. Gunakan format internasional (contoh: +628123456789)"
+Name, email, and password are required,"Nama, email, dan kata sandi diperlukan"
+No address found,Tidak ada alamat ditemukan
+Phone number is required,Nomor telepon diperlukan
+Phone number must start with international country code (e.g., +62 for Indonesia),"Nomor telepon harus dimulai dengan kode negara internasional (contoh: +62 untuk Indonesia)"
+Profile updated successfully,Profil berhasil diperbarui
+School Unit {0} does not exist,Unit Sekolah {0} tidak ada
+Student ID, student name and school unit are required,"ID Siswa, nama siswa, dan unit sekolah diperlukan"
+Student created successfully,Siswa berhasil dibuat
+Student name and school unit are required,Nama siswa dan unit sekolah diperlukan
+Student not found,Siswa tidak ditemukan
+Student updated successfully,Siswa berhasil diperbarui
+Students must be a list,Siswa harus berupa daftar
+User with email {0} already exists,Pengguna dengan email {0} sudah ada
+User with email {0} does not exist,Pengguna dengan email {0} tidak ada
+User with this email already exists,Pengguna dengan email ini sudah ada

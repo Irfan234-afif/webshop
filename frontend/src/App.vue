@@ -5,6 +5,7 @@ import DynamicModal from '@/components/common/DynamicModal.vue'
 import LoginModal from '@/components/common/LoginModal.vue'
 import RegistrationModal from '@/components/common/RegistrationModal.vue'
 import GlobalAlert from '@/components/common/GlobalAlert.vue'
+import { getCookie, setCookie } from '@/utils/storage'
 import { onMounted } from 'vue'
 
 const router = useRouter()
@@ -12,6 +13,11 @@ const modalStore = useModalStore()
 
 // Listen for global event to show login modal
 onMounted(() => {
+  // Set default language to Indonesian if not set
+  if (!getCookie('preferred_language')) {
+    setCookie('preferred_language', 'id')
+  }
+
   window.addEventListener('showLoginModal', () => {
     modalStore.showModal({
       component: LoginModal,
