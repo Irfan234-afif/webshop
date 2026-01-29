@@ -128,6 +128,22 @@
                                     </div>
                                 </div>
 
+                                <!-- Return Proof Image -->
+                                <div v-if="detail.return_proof_image"
+                                    class="bg-white border-[1.5px] border-gray-100 rounded-xl p-6">
+                                    <h4 class="text-sm font-bold text-gray-900 mb-4 capitalize">Bukti Pengembalian</h4>
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                        <div class="aspect-square rounded-lg overflow-hidden border border-gray-200 cursor-pointer group relative"
+                                            @click="openImage(detail.return_proof_image)">
+                                            <img :src="detail.return_proof_image"
+                                                class="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                                            <div
+                                                class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Proof Images -->
                                 <div v-if="documents.length > 0"
                                     class="bg-white border-[1.5px] border-gray-100 rounded-xl p-6">
@@ -211,25 +227,32 @@ async function fetchDetail(name: string) {
 }
 
 const documents = computed(() => {
-    if (!detail.value?.supporting_documents) return []
+    const docsList: string[] = []
+
+    if (!detail.value?.supporting_documents) return docsList
+
     // supporting_documents can be a string (single url) or stringified array (if multiple, though usually comma separated in simple file fields)
     // or array if backend returns pre-processed.
     // Assuming backend returns string (from `returns.py` which returns doc.supporting_documents)
     // If it's a Text/Code field storing JSON array of strings
-    let docs = detail.value.supporting_documents
+    const docs = detail.value.supporting_documents
     if (typeof docs === 'string') {
         if (docs.startsWith('[')) {
             try {
-                return JSON.parse(docs)
+                docsList.push(...JSON.parse(docs))
             } catch {
-                return [docs]
+                docsList.push(docs)
             }
+        } else if (docs.includes(',')) {
+            docsList.push(...docs.split(','))
+        } else {
+            docsList.push(docs)
         }
-        // Comma separated?
-        if (docs.includes(',')) return docs.split(',')
-        return [docs]
+    } else if (Array.isArray(docs)) {
+        docsList.push(...docs)
     }
-    return Array.isArray(docs) ? docs : []
+    
+    return docsList
 })
 
 function formatDate(dateString?: string): string {

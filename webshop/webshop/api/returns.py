@@ -358,6 +358,11 @@ def get_return_request_detail(name):
 	if doc.refund_payment_mode:
 		payment_method = frappe.get_doc("Webshop Payment Method", doc.refund_payment_mode)
 	
+	# Get return delivery note details
+	return_delivery_note_image = None
+	if doc.return_delivery_note:
+		return_delivery_note_image = frappe.db.get_value("Delivery Note", doc.return_delivery_note, "image")
+
 	return {
 		"name": doc.name,
 		"sales_order": doc.sales_order,
@@ -384,6 +389,7 @@ def get_return_request_detail(name):
 		],
 		"status": doc.status,
 		"return_delivery_note": doc.return_delivery_note,
+		"return_proof_image": return_delivery_note_image,
 		"credit_note": doc.credit_note
 	}
 
