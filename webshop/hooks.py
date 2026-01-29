@@ -49,6 +49,7 @@ override_doctype_class = {
     "Item Group": "webshop.webshop.doctype.override_doctype.item_group.WebshopItemGroup",
     "Item": "webshop.webshop.doctype.override_doctype.item.WebshopItem",
     "Subscription": "webshop.overrides.subscription_override.CustomSubscription",
+    "Delivery Note": "webshop.webshop.doctype.override_doctype.delivery_note.WebshopDeliveryNote",
 }
 
 doctype_js = {
@@ -132,11 +133,15 @@ doc_events = {
     "Delivery Note": {
         "on_submit": [
             "webshop.webshop.doctype.return_request.return_request.update_return_request_on_dn_submit",
-            "webshop.webshop.crud_events.delivery_note_events.on_delivery_note_submit"
+            "webshop.webshop.crud_events.delivery_note_events.on_delivery_note_submit",
+            "webshop.webshop.api.sales_order_return.close_so_on_full_return"
         ]
     },
     "Sales Invoice": {
-        "on_submit": "webshop.webshop.doctype.return_request.return_request.update_return_request_on_si_submit"
+        "on_submit": [
+            "webshop.webshop.doctype.return_request.return_request.update_return_request_on_si_submit",
+            "webshop.webshop.api.sales_order_return.close_so_on_full_return"
+        ]
     },
     "Tax Rule": {
         "validate": [
