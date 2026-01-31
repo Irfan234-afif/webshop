@@ -9,7 +9,7 @@ export const useCartStore = defineStore('cart', () => {
   const students = ref<Student[]>([])
   const studentCarts = ref<StudentCart[]>([])
   const selectedStudentCart = ref<StudentCart | null>(null)
-  const activeStudent = ref<string | null>(getCookie('active_student'))
+  const activeStudent = ref<string | null>(getCookie('active_student') ? decodeURIComponent(getCookie('active_student')!) : null)
   const items = ref<CartItem[]>([])
   const total = ref<number>(0)
   const isLoading = ref(false)
@@ -260,7 +260,7 @@ export const useCartStore = defineStore('cart', () => {
     }
     // Try to get active student from cookie first
     const storedActiveStudent = getCookie('active_student')
-    activeStudent.value = storedActiveStudent
+    activeStudent.value = storedActiveStudent ? decodeURIComponent(storedActiveStudent) : null
     
     // If no active student, select the primary student
     if (!activeStudent.value && students.value.length > 0) {

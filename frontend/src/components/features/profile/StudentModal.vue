@@ -62,12 +62,12 @@
                                     </template>
                                     Unit Sekolah
                                 </FormLabel>
-                                <FormSelect v-model="formData.schoolUnit" placeholder="Pilih unit sekolah" required>
-                                    <option value="" disabled>Pilih unit sekolah</option>
-                                    <option v-for="unit in schoolUnits" :key="unit.value" :value="unit.value">
-                                        {{ unit.label }}
-                                    </option>
-                                </FormSelect>
+                                <FormSelect 
+                                    v-model="formData.schoolUnit" 
+                                    placeholder="Pilih unit sekolah" 
+                                    required
+                                    :options="schoolUnits"
+                                />
                             </div>
 
                             <!-- Grade Level -->
@@ -83,12 +83,7 @@
                                     Kelas
                                 </FormLabel>
                                 <FormSelect v-model="formData.gradeLevel" placeholder="Pilih kelas"
-                                    :disabled="!formData.schoolUnit">
-                                    <option value="" disabled>Pilih kelas</option>
-                                    <option v-for="grade in grades" :key="grade.value" :value="grade.value">
-                                        {{ grade.label }}
-                                    </option>
-                                </FormSelect>
+                                    :disabled="!formData.schoolUnit" :options="grades" />
                             </div>
 
                             <!-- Date of Birth -->
@@ -136,6 +131,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onUnmounted } from 'vue'
 import { useAlertStore } from '@/stores/alert'
+import { useCartStore } from '@/stores/cart'
 import FormLabel from '@/components/common/FormLabel.vue'
 import FormInput from '@/components/common/FormInput.vue'
 import FormSelect from '@/components/common/FormSelect.vue'
@@ -167,6 +163,7 @@ const emit = defineEmits<{
 }>()
 
 const alertStore = useAlertStore()
+const cartStore = useCartStore()
 
 const formData = ref({
     studentName: '',
@@ -305,6 +302,23 @@ const handleSubmit = async () => {
         }
 
         const response = await call(endpoint, payload)
+
+        // Refresh student list and handle renaming
+        const newStudentId = response.student.student_id
+        if (isEditMode.value && props.studentId && props.studentId !== newStudentId) {
+            // If active student was renamed, update it in the store
+            if (cartStore.activeStudent === props.studentId) {
+                await cartStore.setActiveStudent(newStudentId)
+            }
+        }
+        
+        // Always refresh students list
+        await cartStore.fetchStudents()
+        
+        // If in edit mode, refresh all student carts as well (student names are keys)
+        if (isEditMode.value) {
+            await cartStore.fetchAllStudentCarts()
+        }
 
         alertStore.success(isEditMode.value ? 'Data siswa berhasil diperbarui' : 'Siswa berhasil ditambahkan')
         emit('student-saved')

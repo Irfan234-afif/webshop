@@ -892,7 +892,12 @@ def update_student(student_id, student_name, nisn, school_unit, grade_level, dat
 			frappe.throw(_("Student not found"))
 
 		# Update student
-		student.student_name = student_name
+		if student.student_name != student_name:
+			# If student_name changes, we must use rename_doc because it's the naming field
+			new_name = frappe.rename_doc("Student", student_id, student_name, force=True)
+			# Re-get the document with the new name to update other fields
+			student = frappe.get_doc("Student", new_name)
+
 		student.isn = nisn or ""
 		student.school_unit = school_unit
 		student.grade_level = grade_level or ""
