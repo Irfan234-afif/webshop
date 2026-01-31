@@ -11,9 +11,9 @@ export default {
 	],
 	theme: {
 		extend: {
-			fontFamily: {
-				sans: ['Poppins', 'sans-serif'],
-			},
+			// fontFamily: {
+			// 	sans: ['Inter', 'sans-serif'],
+			// },
 			screens: {
 				standalone: {
 					raw: "(display-mode: standalone)",

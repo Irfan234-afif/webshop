@@ -57,13 +57,13 @@ onMounted(() => {
         <div class="flex flex-col gap-12 items-start max-w-3xl">
           <!-- Heading -->
           <h1
-            class="font-bold text-2xl md:text-5xl leading-tight text-white capitalize"
+            class="font-bold text-2xl md:text-5xl leading-tight text-white capitalize merriweather-font"
           >
             {{ content.title || 'Semua Kebutuhan Sekolah, Lengkap dalam Satu Tempat' }}
           </h1>
 
           <!-- Description -->
-          <p class="!font-semibold text-base md:text-xl leading-7 text-white/80 max-w-[630px]">
+          <p class="!font-semibold text-base md:text-xl/7 leading-7 text-white/80 max-w-[630px] poppins-semibold">
             {{ content.subtitle || 'Belanja seragam, buku pelajaran, dan perlengkapan sekolah kini lebih mudah. Tersedia pilihan sesuai jenjang dan kebutuhan murid untuk memudahkan wali murid dan koperasi dalam setiap pembelian.' }}
           </p>
 
