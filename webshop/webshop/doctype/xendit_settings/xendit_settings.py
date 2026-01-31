@@ -16,8 +16,14 @@ class XenditSettings(Document):
 		"""
 		Standard Entry point for Payment Request.
 		"""
-		pr_name = kwargs.get("name") or kwargs.get("order_id")
-		payment_request = frappe.get_doc("Payment Request", pr_name)
+		# Use passed document instance if available (during before_submit flow)
+		# This ensures we modify the original instance that will be saved
+		payment_request = kwargs.get("payment_request_doc")
+		if not payment_request:
+			# Fallback: fetch from DB (for other callers)
+			pr_name = kwargs.get("name") or kwargs.get("order_id")
+			payment_request = frappe.get_doc("Payment Request", pr_name)
+		
 		self.create_payment_request(payment_request)
 		# Return a dummy URL or redirect to success page
 		return get_url(f"/order/{payment_request.reference_name}/checkout")
@@ -98,10 +104,10 @@ class XenditSettings(Document):
 			}
 
 			# Update Payment Request with response data
-			# payment_request.db_set("virtual_account_number", response_data.get("account_number"))
-			# payment_request.db_set("virtual_account_bank", response_data.get("bank_code"))
-			# frappe.db.set_value("Payment Request", payment_request.name, "virtual_account_number", response_data.get("account_number"))
-			# frappe.db.set_value("Payment Request", payment_request.name, "virtual_account_bank", response_data.get("bank_code"))
+			# Since this is called during before_submit, the document isn't saved yet
+			# Set values on the document instance directly - they'll be saved when submit completes
+			payment_request.virtual_account_number = response_data.get("account_number")
+			payment_request.virtual_account_bank = response_data.get("bank_code")
 			
 			# Parse expiration date
 			expiry_str = response_data.get("expiration_date")
@@ -111,9 +117,9 @@ class XenditSettings(Document):
 				if expiry_str.endswith("Z"):
 					expiry_str = expiry_str[:-1]
 				expiry_date = get_datetime(expiry_str)
-				payment_request.db_set("payment_due_date", expiry_date)
+				payment_request.payment_due_date = expiry_date
 				
-			payment_request.db_set("status", "Requested")
+			payment_request.status = "Requested"
 			
 			# Update Integration Request with complete log and mark as completed
 			integration_request.db_set("status", "Completed", update_modified=False)

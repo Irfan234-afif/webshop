@@ -216,6 +216,7 @@ class PaymentRequest(OriginalPaymentRequest):
                 "order_id": self.name,
                 "currency": self.currency,
                 "payment_gateway": self.payment_gateway,
+                "payment_request_doc": self,  # Pass the document instance for direct modification
             }
 
             # Call the controller's get_payment_url method
