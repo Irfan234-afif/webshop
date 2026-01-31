@@ -32,10 +32,10 @@ def get_checkout_data(student_name=None):
 
 		quotation = _get_cart_quotation()
 
-		frappe.log_error(
-			f"get_checkout_data - Quotation: {quotation.name if quotation else 'None'}, Student: {quotation.student if quotation else 'N/A'}",
-			"Checkout Debug"
-		)
+		# frappe.log_error(
+		# 	f"get_checkout_data - Quotation: {quotation.name if quotation else 'None'}, Student: {quotation.student if quotation else 'N/A'}",
+		# 	"Checkout Debug"
+		# )
 
 		if not quotation:
 			frappe.throw(_("No active cart found. Please add items to cart first."))
@@ -167,10 +167,10 @@ def update_pickup_type(quotation_name, pickup_type, delivery_date=None, delivery
 		if quotation.contact_email != frappe.session.user:
 			frappe.throw(_("You don't have permission to update this quotation"))
 
-		frappe.log_error(
-			f"Updating quotation: {quotation.name}, Student: {quotation.student}, Pickup: {pickup_type}",
-			"Checkout Debug"
-		)
+		# frappe.log_error(
+		# 	f"Updating quotation: {quotation.name}, Student: {quotation.student}, Pickup: {pickup_type}",
+		# 	"Checkout Debug"
+		# )
 
 		# Update pickup information using db_set to avoid validation errors
 		# db_set updates the database directly without triggering validation
