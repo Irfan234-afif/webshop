@@ -53,6 +53,8 @@ export interface ReturnRequest {
   pickup_schedule?: string
   virtual_account?: string
   payment_method_type?: string
+  coupon_code?: string
+  discount_amount?: number
 }
 
 export interface ReturnRequestItem {

@@ -363,6 +363,9 @@ def get_return_request_detail(name):
 	if doc.return_delivery_note:
 		return_delivery_note_image = frappe.db.get_value("Delivery Note", doc.return_delivery_note, "image")
 
+	# Get sales order details for discounts
+	so_details = frappe.db.get_value("Sales Order", doc.sales_order, ["coupon_code", "discount_amount"], as_dict=True)
+
 	return {
 		"name": doc.name,
 		"sales_order": doc.sales_order,
@@ -377,6 +380,8 @@ def get_return_request_detail(name):
 		"bank_name": doc.bank_name,
 		"account_number": doc.account_number,
 		"account_holder_name": doc.account_holder_name,
+		"coupon_code": so_details.get("coupon_code") if so_details else None,
+		"discount_amount": so_details.get("discount_amount") if so_details else 0,
 		"items": [
 			{
 				"item_code": item.item_code,

@@ -73,7 +73,7 @@
                                             <div class="flex-1">
                                                 <p class="text-sm font-semibold text-gray-900 line-clamp-2">{{
                                                     item.item_name }}</p>
-                                                <p class="text-xs text-gray-500">{{ item.item_code }}</p>
+                                                <p class="text-xs text-gray-500 mt-1">{{ item.item_code }}</p>
                                             </div>
                                             <div class="text-right shrink-0">
                                                 <p class="text-sm font-bold text-gray-900">{{ item.qty }} x {{
@@ -81,6 +81,13 @@
                                                 <p class="text-sm font-semibold text-[#ac208e]">{{
                                                     formatIDR(item.amount) }}</p>
                                             </div>
+                                        </div>
+
+                                        <!-- Coupon Discount (only if applied) -->
+                                        <div v-if="detail.coupon_code && detail.discount_amount && detail.discount_amount > 0"
+                                            class="flex items-center justify-between text-sm font-semibold pt-4 border-t border-gray-100">
+                                            <span class="text-gray-500">Diskon Voucher ({{ detail.coupon_code }})</span>
+                                            <span class="text-red-600 text-right">- {{ formatIDR(detail.discount_amount) }}</span>
                                         </div>
                                     </div>
                                 </div>

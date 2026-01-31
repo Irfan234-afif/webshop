@@ -34,7 +34,7 @@
             <div class="space-y-3">
                 <div class="flex justify-between items-center text-sm">
                     <span class="text-gray-500 font-medium">Nomor Pesanan</span>
-                    <span class="text-gray-900 font-medium font-mono text-right">#{{ returnRequest.sales_order }}</span>
+                    <span class="text-gray-900 font-medium text-right">#{{ returnRequest.sales_order }}</span>
                 </div>
                 <div class="flex justify-between items-center text-sm">
                     <span class="text-gray-500 font-medium">Tanggal</span>
