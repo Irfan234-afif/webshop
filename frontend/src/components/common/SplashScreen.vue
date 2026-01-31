@@ -37,7 +37,6 @@
 }
 
 .loading-text {
-  font-family: 'Inter', sans-serif;
   font-size: 1.25rem;
   color: #374151;
   font-weight: 500;
