@@ -4,7 +4,7 @@ from frappe import _
 import json
 import base64
 from frappe.utils import get_url, add_days, now_datetime
-from frappe.integrations.utils import create_request_log, make_post_request
+from frappe.integrations.utils import make_post_request
 
 class XenditSettings(Document):
 	def get_api_key(self):
@@ -59,17 +59,21 @@ class XenditSettings(Document):
 			"payload": payload
 		}
 
-		# Create Integration Request Log with request data
-		integration_request = create_request_log(
-			data=payload,
-			service_name="Xendit",
-			request_description=f"Create VA for {payment_request.name}",
-			reference_doctype="Payment Request",
-			reference_docname=payment_request.name
-		)
+		# Create Integration Request Log manually (without using create_request_log which commits)
+		# This allows the caller to control the transaction and rollback if needed
+		integration_request = frappe.get_doc({
+			"doctype": "Integration Request",
+			"integration_request_service": "Xendit",
+			"request_description": f"Create VA for {payment_request.name}",
+			"data": json.dumps(payload),
+			"reference_doctype": "Payment Request",
+			"reference_docname": payment_request.name
+		})
+		integration_request.insert(ignore_permissions=True)
+		# NOTE: Do NOT commit here - let the caller control the transaction
 		
 		# Store the integration request for later updates
-		frappe.db.commit()  # Commit the integration request creation
+		# frappe.db.commit()  # Commit the integration request creation
 
 		try:
 			# Make API Request using Frappe's integration utilities
@@ -94,8 +98,10 @@ class XenditSettings(Document):
 			}
 
 			# Update Payment Request with response data
-			payment_request.db_set("virtual_account_number", response_data.get("account_number"))
-			payment_request.db_set("virtual_account_bank", response_data.get("bank_code"))
+			# payment_request.db_set("virtual_account_number", response_data.get("account_number"))
+			# payment_request.db_set("virtual_account_bank", response_data.get("bank_code"))
+			# frappe.db.set_value("Payment Request", payment_request.name, "virtual_account_number", response_data.get("account_number"))
+			# frappe.db.set_value("Payment Request", payment_request.name, "virtual_account_bank", response_data.get("bank_code"))
 			
 			# Parse expiration date
 			expiry_str = response_data.get("expiration_date")
@@ -112,7 +118,8 @@ class XenditSettings(Document):
 			# Update Integration Request with complete log and mark as completed
 			integration_request.db_set("status", "Completed", update_modified=False)
 			integration_request.db_set("output", json.dumps(log_data, indent=2), update_modified=False)
-			frappe.db.commit()  # Commit the updates
+			# NOTE: Do NOT commit here - let the caller control the transaction
+			# This allows proper rollback if subsequent operations fail
 
 			return response_data
 
@@ -144,7 +151,8 @@ class XenditSettings(Document):
 			integration_request.db_set("status", "Failed", update_modified=False)
 			integration_request.db_set("error", json.dumps(error_data, indent=2), update_modified=False)
 			integration_request.db_set("output", json.dumps(error_data, indent=2), update_modified=False)
-			frappe.db.commit()  # Ensure the error is saved
+			# NOTE: Do NOT commit here - the caller will handle the rollback
+			# Committing here would persist the Sales Order before the error is thrown
 			
 			frappe.log_error(title="Xendit VA Creation Failed", message=json.dumps(error_data, indent=2))
 			frappe.throw(_("Failed to create Virtual Account: {0}").format(str(e)))

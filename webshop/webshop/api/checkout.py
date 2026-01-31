@@ -609,44 +609,51 @@ def place_order_with_payment(quotation_name, payment_channel=None):
 			redirect_type: "gateway" or "manual" or "cash"
 		}
 	"""
+	# Perform validation first (before savepoint)
+	from webshop.webshop.shopping_cart.cart import place_order
+
+	# Validate quotation name provided
+	if not quotation_name:
+		frappe.throw(_("Quotation name is required"))
+
+	# Get quotation by name explicitly
+	if not frappe.db.exists("Quotation", quotation_name):
+		frappe.throw(_("Quotation {0} not found").format(quotation_name))
+
+	quotation = frappe.get_doc("Quotation", quotation_name)
+
+	# Validate quotation is a shopping cart
+	if quotation.order_type != "Shopping Cart":
+		frappe.throw(_("Invalid quotation type"))
+
+	# Validate quotation belongs to current user
+	if quotation.contact_email != frappe.session.user:
+		frappe.throw(_("You don't have permission to update this quotation"))
+
+	# Validate checkout data
+	if not quotation.pickup_type:
+		frappe.throw(_("Please select a pickup type"))
+
+	if not quotation.payment_method_type:
+		frappe.throw(_("Please select a payment method"))
+
+	if quotation.pickup_type == "Ambil di koperasi":
+		if not quotation.delivery_date or not quotation.delivery_time:
+			frappe.throw(_("Please select delivery date and time"))
+
+	# Store checkout data temporarily
+	pickup_type = quotation.pickup_type
+	payment_method_type = quotation.payment_method_type
+	delivery_date = quotation.delivery_date
+	delivery_time = quotation.delivery_time
+
+	# CRITICAL: Create a savepoint before starting the checkout transaction
+	# This ensures the entire transaction is atomic - if any step fails (including payment gateway),
+	# we can rollback to this savepoint and prevent partial data from being saved
+	savepoint_name = "checkout_transaction"
+	frappe.db.savepoint(savepoint_name)
+
 	try:
-		from webshop.webshop.shopping_cart.cart import place_order
-
-		# Validate quotation name provided
-		if not quotation_name:
-			frappe.throw(_("Quotation name is required"))
-
-		# Get quotation by name explicitly
-		if not frappe.db.exists("Quotation", quotation_name):
-			frappe.throw(_("Quotation {0} not found").format(quotation_name))
-
-		quotation = frappe.get_doc("Quotation", quotation_name)
-
-		# Validate quotation is a shopping cart
-		if quotation.order_type != "Shopping Cart":
-			frappe.throw(_("Invalid quotation type"))
-
-		# Validate quotation belongs to current user
-		if quotation.contact_email != frappe.session.user:
-			frappe.throw(_("You don't have permission to update this quotation"))
-
-		# Validate checkout data
-		if not quotation.pickup_type:
-			frappe.throw(_("Please select a pickup type"))
-
-		if not quotation.payment_method_type:
-			frappe.throw(_("Please select a payment method"))
-
-		if quotation.pickup_type == "Ambil di koperasi":
-			if not quotation.delivery_date or not quotation.delivery_time:
-				frappe.throw(_("Please select delivery date and time"))
-
-		# Store checkout data temporarily
-		pickup_type = quotation.pickup_type
-		payment_method_type = quotation.payment_method_type
-		delivery_date = quotation.delivery_date
-		delivery_time = quotation.delivery_time
-
 		# CRITICAL: Re-calculate totals before submitting
 		# db_set() skips calculation, so we need to trigger it manually
 		# This ensures grand_total, net_total, etc. are calculated
@@ -661,14 +668,6 @@ def place_order_with_payment(quotation_name, payment_channel=None):
 		# Reload quotation from database to ensure we have saved values
 		# Use force=True to reload from DB, bypassing cache
 		quotation.reload()
-
-		# Deprecate
-		# # CRITICAL: Set active student so place_order() gets the right quotation
-		# # place_order() internally calls _get_cart_quotation() which needs active student
-		# if quotation.student:
-		# 	from webshop.webshop.shopping_cart.student_utils import set_active_student
-		# 	set_active_student(quotation.student)
-		# 	frappe.log_error(f"Set active student for place_order: {quotation.student}", "Checkout Debug")
 
 		# CRITICAL: Prevent auto-commit from submit() calls in place_order
 		# This ensures the entire transaction (quotation submit + SO creation + payment setup) is atomic
@@ -686,22 +685,13 @@ def place_order_with_payment(quotation_name, payment_channel=None):
 		# Get the created Sales Order
 		sales_order = frappe.get_doc("Sales Order", sales_order_name)
 
-		# # Copy custom fields from Quotation to Sales Order
-		# sales_order.pickup_type = pickup_type
-		# sales_order.payment_method_type = payment_method_type
-		
-		# # Save payment channel to Sales Order
-		# if payment_channel:
-		# 	sales_order.payment_channel = payment_channel
-
-		# # Set the delivery date using the default field in Sales Order
-		# if delivery_date:
-		# 	sales_order.delivery_date = delivery_date
-		# if delivery_time:
-		# 	sales_order.delivery_time = delivery_time
-
 		sales_order.save(ignore_permissions=True)
+		
+		# Get payment gateway URL - if this fails (e.g., Xendit API error),
+		# the exception will trigger rollback to savepoint
 		payment_data = get_payment_gateway_url(sales_order_name, payment_method_type, payment_channel)
+		
+		# Only commit if all operations succeeded
 		frappe.db.commit()
 
 		return {
@@ -712,7 +702,9 @@ def place_order_with_payment(quotation_name, payment_channel=None):
 		}
 
 	except Exception as e:
-		frappe.db.rollback()
+		# Rollback to savepoint - this undoes all changes since savepoint was created
+		# including Sales Order creation, Payment Request, etc.
+		frappe.db.rollback(save_point=savepoint_name)
 		frappe.log_error(frappe.get_traceback(), "Checkout: Place Order Error")
 		frappe.throw(_("Failed to create order: {0}").format(str(e)))
 
@@ -782,53 +774,6 @@ def get_payment_gateway_url(sales_order_name, payment_method_type, payment_chann
 				# so admin can review payment proof before submitting (approving)
 				# Payment gateways need submitted status for webhooks to work
 				payment_request.submit()
-
-				# Xendit VA Creation Trigger
-				if payment_channel:
-					# Check if this gateway is Xendit
-					# We assume "payment_gateway_account" is linked to "Xendit" gateway or check settings
-					# Better: Check if Xendit Settings is enabled and this PR targets it.
-					# For now, if payment_channel is passed, we try to create VA.
-					try:
-						xendit_settings = frappe.get_doc("Xendit Settings")
-						if xendit_settings.enabled:
-							# Prepare data for Xendit create_request (following Stripe pattern)
-							payment_data = {
-								"order_id": payment_request.name,
-								"reference_doctype": "Sales Order",
-								"reference_docname": sales_order_name,
-								"amount": payment_request.grand_total,
-								"currency": payment_request.currency or "IDR",
-								"bank_code": payment_channel,
-								"payment_channel_code": payment_channel,
-								"payer_name": sales_order.customer_name,
-								"payer_email": payment_request.email_to,
-								"redirect_to": f"/order/{sales_order_name}/checkout"
-							}
-							
-							# Create virtual account using new API
-							result = xendit_settings.create_request(payment_data)
-							
-							# Update payment request with VA details
-							if xendit_settings.virtual_account_number:
-								payment_request.db_set("virtual_account_number", xendit_settings.virtual_account_number)
-							if xendit_settings.virtual_account_bank:
-								payment_request.db_set("virtual_account_bank", xendit_settings.virtual_account_bank)
-							
-							return {
-								"payment_url": result.get("redirect_to", f"/order/{sales_order_name}/checkout"),
-								"redirect_type": "virtual_account",
-								"virtual_account": {
-									"account_number": xendit_settings.virtual_account_number,
-									"bank_code": xendit_settings.virtual_account_bank
-								}
-							}
-					except Exception as e:
-						frappe.log_error(f"Xendit VA Creation Error: {str(e)}", "Checkout")
-						frappe.errprint(f"Xendit VA Creation Error: {str(e)}") # Debugging
-						# Fallback to standard flow or re-raise? 
-						# If creation fails, we might want to tell basic checkout page
-						pass
 
 			# Get payment URL from payment request
 			payment_url = payment_request.get_payment_url()
