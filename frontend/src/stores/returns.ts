@@ -211,7 +211,7 @@ export const useReturnsStore = defineStore('returns', () => {
       // Convert array of file URLs to comma-separated string for backend
       const requestData = {
         ...data,
-        supporting_documents: data.supporting_documents.join(',')
+        supporting_documents: data.supporting_documents
       }
 
       const response = await call('webshop.webshop.api.returns.create_return_request', {

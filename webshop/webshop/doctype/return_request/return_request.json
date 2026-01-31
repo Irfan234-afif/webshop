@@ -111,8 +111,9 @@
   },
   {
    "fieldname": "supporting_documents",
-   "fieldtype": "Attach",
-   "label": "Supporting Documents"
+   "fieldtype": "Table",
+   "label": "Supporting Documents",
+   "options": "Return Request Document"
   },
   {
    "fieldname": "refund_information_section",

@@ -223,7 +223,7 @@ def create_return_request(data):
 			"sales_order": data.get("sales_order"),
 			"return_reason": data.get("return_reason"),
 			"other_reason": data.get("other_reason"),
-			"supporting_documents": data.get("supporting_documents"),
+			"supporting_documents": [{"document": d} for d in data.get("supporting_documents") or []],
 			"refund_payment_mode": data.get("refund_payment_mode"),
 			"bank_name": data.get("bank_name"),
 			"account_number": data.get("account_number"),
