@@ -73,7 +73,7 @@ export interface VirtualAccountDetails {
 
 export interface OrderConfirmationResponse {
   sales_order: string
-  payment_url: string
+  // payment_url: string
   redirect_type: 'gateway' | 'manual' | 'cash' | 'virtual_account'
   virtual_account?: VirtualAccountDetails
 }

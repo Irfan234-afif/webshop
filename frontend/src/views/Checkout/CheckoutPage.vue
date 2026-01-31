@@ -257,11 +257,11 @@ async function handleNext() {
       const result = await checkoutStore.placeOrder()
 
       // Redirect to unified checkout payment page
-      if (result.payment_url) {
-        router.push(`/order/${result.sales_order}/checkout`)
-      } else {
-        router.push(`/orders`) // Or somewhere else reasonable
-      }
+      // if (result.payment_url) {
+      router.push(`/order/${result.sales_order}/checkout`)
+      // } else {
+      //   router.push(`/orders`) // Or somewhere else reasonable
+      // }
     }
   } catch (err) {
     console.error('Checkout error:', err)
