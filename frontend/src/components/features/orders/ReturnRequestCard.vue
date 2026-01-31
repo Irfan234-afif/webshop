@@ -95,11 +95,11 @@
                     <span class="text-gray-500 font-medium">Nama Pemilik Rekening</span>
                     <span class="text-gray-900 font-medium text-right">{{ returnRequest.account_holder_name }}</span>
                 </div>
-                <div v-if="!returnRequest.credit_note && !returnRequest.return_delivery_note"
+                <!-- <div v-if="!returnRequest.credit_note && !returnRequest.return_delivery_note"
                     class="flex justify-between items-start text-sm">
                     <span class="text-gray-500 font-medium shrink-0">Estimasi Waktu Refund Dana</span>
                     <span class="text-gray-900 font-medium text-right">Maks H+1 Setelah Barang Dikembalikan</span>
-                </div>
+                </div> -->
             </div>
         </div>
 

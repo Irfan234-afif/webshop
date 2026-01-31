@@ -249,7 +249,14 @@ const documents = computed(() => {
             docsList.push(docs)
         }
     } else if (Array.isArray(docs)) {
-        docsList.push(...docs)
+        // If it's an array, it might be an array of strings (old) or array of objects (new Child Table)
+        docs.forEach((doc: any) => {
+            if (typeof doc === 'string') {
+                docsList.push(doc)
+            } else if (doc && typeof doc === 'object' && doc.document) {
+                docsList.push(doc.document)
+            }
+        })
     }
     
     return docsList

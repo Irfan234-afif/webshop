@@ -86,10 +86,10 @@
           </div>
         </div>
 
-        <div>
+        <!-- <div>
           <p class="text-sm text-gray-500">Estimasi Waktu Refund Dana</p>
           <p class="font-semibold text-gray-900">Maks H+1 Setelah Barang Dikembalikan</p>
-        </div>
+        </div> -->
       </div>
     </div>
 
