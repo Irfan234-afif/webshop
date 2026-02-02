@@ -63,6 +63,7 @@ class WebsiteItem(WebsiteGenerator):
 		self.validate_variant_images()
 		self.make_thumbnail()
 		self.publish_unpublish_desk_item(publish=True)
+		self.set_default_warehouse()
 
 		if not self.get("__islocal"):
 			wig = frappe.qb.DocType("Website Item Group")
@@ -173,6 +174,10 @@ class WebsiteItem(WebsiteGenerator):
 							row.idx, frappe.bold(row.for_variant), frappe.bold(self.item_code)
 						)
 					)
+
+	def set_default_warehouse(self):
+		if not self.website_warehouse:
+			self.website_warehouse = frappe.db.get_single_value("Webshop Settings", "default_warehouse")
 
 	def make_thumbnail(self):
 		"""Make a thumbnail of `website_image`"""
