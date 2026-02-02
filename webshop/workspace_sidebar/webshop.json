@@ -49,7 +49,7 @@
    "icon": "briefcase",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Subscripton Request",
+   "label": "Subscription Request",
    "link_to": "Subscription Request",
    "link_type": "DocType",
    "navigate_to_tab": "",
@@ -62,7 +62,7 @@
    "icon": "website",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Subscripton",
+   "label": "Subscription",
    "link_to": "Subscription",
    "link_type": "DocType",
    "show_arrow": 0,
@@ -100,6 +100,18 @@
    "keep_closed": 0,
    "label": "Payment Request",
    "link_to": "Payment Request",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "user-round-search",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Survey Request",
+   "link_to": "Survey Request",
    "link_type": "DocType",
    "show_arrow": 0,
    "type": "Link"
@@ -223,7 +235,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-29 21:47:44.023941",
+ "modified": "2026-02-02 15:18:13.417210",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Webshop",
