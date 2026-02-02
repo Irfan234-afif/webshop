@@ -8,41 +8,21 @@ export function extractErrorMessage(error: any): string {
     return error
   }
 
-  // Try to get the exception message from Frappe error structure
-  if (error?.exc) {
-    try {
-      // Frappe errors often come in this format with exc containing stringified JSON
-      const exc = typeof error.exc === 'string' ? JSON.parse(error.exc) : error.exc
-      
-      // Extract the actual error message
-      if (Array.isArray(exc) && exc.length > 0) {
-        // Sometimes it's an array of error strings
-        return exc.join('\n')
-      } else if (typeof exc === 'string') {
-        return exc
-      }
-    } catch (e) {
-      // If JSON parsing fails, try to extract message from the string
-      if (typeof error.exc === 'string') {
-        // Look for ValidationError pattern and extract the actual message
-        const match = error.exc.match(/ValidationError:\s*(.+?)(?:\n|$)/)
-        if (match && match[1]) {
-          return match[1].trim()
-        }
-        return error.exc
-      }
-    }
-  }
+  // Get the actual error data - could be nested in Axios or frappe-ui wrapper
+  const errorData = error?.response?.data || error?.data || error
 
-  // Try _server_messages which Frappe sometimes uses
-  if (error?._server_messages) {
+  // Try _server_messages which Frappe often uses for user-facing validation errors
+  if (errorData?._server_messages) {
     try {
-      const messages = JSON.parse(error._server_messages)
+      const messages = typeof errorData._server_messages === 'string' 
+        ? JSON.parse(errorData._server_messages) 
+        : errorData._server_messages
+
       if (Array.isArray(messages) && messages.length > 0) {
-        // Each message might be a JSON string itself
         const parsedMessages = messages.map((msg: any) => {
           try {
-            const parsed = JSON.parse(msg)
+            // Each message might be a JSON string itself or already an object
+            const parsed = typeof msg === 'string' ? JSON.parse(msg) : msg
             return parsed.message || msg
           } catch {
             return msg
@@ -55,21 +35,53 @@ export function extractErrorMessage(error: any): string {
     }
   }
 
-  // Try the exception field
-  if (error?.exception) {
-    // Sometimes the exception contains the detailed message
-    const exceptionMsg = extractMessageFromException(error.exception)
+  // Try the 'messages' field which frappe-ui often populates
+  if (errorData?.messages && Array.isArray(errorData.messages) && errorData.messages.length > 0) {
+    return errorData.messages.map((m: any) => typeof m === 'string' ? m : (m.message || JSON.stringify(m))).join('\n')
+  }
+
+  // Try to get the exception message from Frappe error structure (often contains traceback in dev)
+  if (errorData?.exc) {
+    try {
+      const exc = typeof errorData.exc === 'string' ? JSON.parse(errorData.exc) : errorData.exc
+      
+      if (Array.isArray(exc) && exc.length > 0) {
+        // Look for the last line if it's a traceback array
+        const lastLine = exc[exc.length - 1]
+        if (typeof lastLine === 'string' && lastLine.includes('ValidationError:')) {
+           const match = lastLine.match(/ValidationError:\s*(.+?)(?:\n|$)/)
+           if (match && match[1]) return match[1].trim()
+        }
+        return exc.join('\n')
+      } else if (typeof exc === 'string') {
+        const match = exc.match(/ValidationError:\s*(.+?)(?:\n|$)/)
+        if (match && match[1]) return match[1].trim()
+        return exc
+      }
+    } catch (e) {
+      if (typeof errorData.exc === 'string') {
+        const match = errorData.exc.match(/ValidationError:\s*(.+?)(?:\n|$)/)
+        if (match && match[1]) {
+          return match[1].trim()
+        }
+        return errorData.exc
+      }
+    }
+  }
+
+  // Try the exception field directly
+  if (errorData?.exception) {
+    const exceptionMsg = extractMessageFromException(errorData.exception)
     if (exceptionMsg) {
       return exceptionMsg
     }
   }
 
-  // Try standard message field
-  if (error?.message) {
-    // Clean up the message if it contains the full path
-    const message = error.message
+  // Try standard message field (Axios default or Frappe fallback)
+  if (errorData?.message || error?.message) {
+    const message = errorData?.message || error?.message
     
-    // Remove the method path prefix if present
+    // Remove the method path prefix if present (common in Frappe errors)
     const match = message.match(/webshop\.[^\s]+\s+(.+)/)
     if (match && match[1]) {
       return match[1]
@@ -79,11 +91,10 @@ export function extractErrorMessage(error: any): string {
   }
 
   // Fallback to error details or generic message
-  if (error?.httpStatus && error?.httpStatusText) {
-    return `${error.httpStatusText} (${error.httpStatus})`
+  if (errorData?.httpStatus && errorData?.httpStatusText) {
+    return `${errorData.httpStatusText} (${errorData.httpStatus})`
   }
 
-  // Last resort
   return 'Terjadi kesalahan. Silakan coba lagi.'
 }
 
