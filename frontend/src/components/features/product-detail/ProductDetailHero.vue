@@ -61,28 +61,13 @@ watch(displayImages, () => {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
+  <div class="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12">
     <!-- Left: Image Gallery -->
     <div v-if="displayImages && displayImages.length > 0">
       <ProductImageGallery :images="displayImages" :selected-index="selectedImageIndex"
         @select-image="emit('selectImage', $event)" />
     </div>
     <NoProductIcon v-else />
-
-    <!-- Service Icon Display (for services without image gallery) -->
-    <!-- <div
-      v-else-if="product.type === 'service'"
-      class="flex items-center justify-center rounded-xl p-12"
-      :style="{ background: product.bgGradient }"
-    >
-      Service icon placeholder
-      <div class="flex h-32 w-32 items-center justify-center rounded-full bg-white/20">
-        <span class="text-6xl" :style="{ color: product.iconColor }">
-          {{ product.icon }}
-        </span>
-      </div>
-    </div> -->
-
     <!-- Right: Product Info -->
     <ProductInfo :product="product" :selected-size="selectedSize" :selected-variant="selectedVariant"
       :quantity="quantity" :is-in-wishlist="isInWishlist" :is-adding-to-cart="isAddingToCart"

@@ -54,7 +54,7 @@ onUnmounted(() => {
 <template>
   <div class="flex w-full flex-col gap-4">
     <!-- Main Image -->
-    <div class="relative aspect-[621/504] w-full overflow-hidden rounded-xl bg-gray-100">
+    <div class="relative aspect-square w-full overflow-hidden rounded-xl bg-gray-100">
       <img :src="mainImage" :alt="`Product image ${selectedIndex + 1}`" class="h-full w-full object-contain"
         loading="eager" />
 
