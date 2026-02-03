@@ -63,7 +63,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
   })
 
   // Actions
-  async function initializeCheckout(studentName: string) {
+  async function initializeCheckout(quotation_name: string) {
     isLoading.value = true
     error.value = null
 
@@ -72,7 +72,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
 
       // CRITICAL: Pass student_name directly to get_checkout_data
       // Backend will set active student and fetch quotation for that student
-      const data = await getCheckoutData(studentName)
+      const data = await getCheckoutData(quotation_name)
       checkoutData.value = data
 
       console.log('✅ initializeCheckout: Data fetched successfully', data)
@@ -100,12 +100,12 @@ export const useCheckoutStore = defineStore('checkout', () => {
     }
   }
 
-  async function fetchCheckoutData(studentName?: string) {
+  async function fetchCheckoutData() {
     isLoading.value = true
     error.value = null
 
     try {
-      const data = await getCheckoutData(studentName)
+      const data = await getCheckoutData(quotationName.value)
       checkoutData.value = data
 
       // Initialize local state from checkout data

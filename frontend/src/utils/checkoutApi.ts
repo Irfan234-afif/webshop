@@ -8,9 +8,9 @@ import type {
   CheckoutPaymentDetails
 } from '@/types/checkout'
 
-export async function getCheckoutData(studentName?: string): Promise<CheckoutData> {
+export async function getCheckoutData(quotationName?: string): Promise<CheckoutData> {
   const response = await call('webshop.webshop.api.checkout.get_checkout_data', {
-    student_name: studentName
+    quotation_name: quotationName
   })
   return response as CheckoutData
 }

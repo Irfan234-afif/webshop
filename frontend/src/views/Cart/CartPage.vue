@@ -92,7 +92,7 @@ const handleCheckout = async () => {
     // Navigate to checkout page with selected student
     router.push({
       name: 'checkout',
-      query: { student: cartStore.selectedStudentCart.student_name }
+      query: { student: cartStore.selectedStudentCart.student_name, quotation: cartStore.selectedStudentCart.quotation_name }
     })
   } catch (error: any) {
     const errorMessage = extractErrorMessage(error)

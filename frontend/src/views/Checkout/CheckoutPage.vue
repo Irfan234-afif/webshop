@@ -95,6 +95,7 @@ const route = useRoute()
 
 // Get student name from route query
 const studentName = computed(() => route.query.student as string || '')
+const quotationName = computed(() => route.query.quotation as string || '')
 
 const checkoutStore = useCheckoutStore()
 const {
@@ -122,7 +123,7 @@ onMounted(async () => {
   console.log('🔍 CheckoutPage: Initializing with student:', studentName.value)
 
   try {
-    await checkoutStore.initializeCheckout(studentName.value)
+    await checkoutStore.initializeCheckout(quotationName.value)
     console.log('✅ CheckoutPage: Initialization successful')
   } catch (err) {
     console.error('❌ CheckoutPage: Initialization failed:', err)
@@ -212,7 +213,7 @@ async function handleAddressCreated() {
 
   try {
     // Reload checkout data to get updated has_address status
-    await checkoutStore.fetchCheckoutData(studentName.value)
+    await checkoutStore.fetchCheckoutData()
   } catch (err) {
     console.error('Failed to reload checkout data:', err)
     error.value = err as Error

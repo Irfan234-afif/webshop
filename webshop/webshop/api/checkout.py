@@ -13,24 +13,18 @@ from datetime import timedelta
 
 
 @frappe.whitelist()
-def get_checkout_data(student_name=None):
+def get_checkout_data(quotation_name=None):
 	"""
 	Get cart quotation data formatted for checkout
 
 	Args:
-		student_name (str, optional): Student name to fetch quotation for
+		quotation_name (str, optional): Quotation name to fetch quotation for
 
 	Returns:
 		dict: Checkout data including quotation details, items, totals, and current checkout selections
 	"""
 	try:
-		# If student_name provided, set as active student first
-		if student_name:
-			from webshop.webshop.shopping_cart.student_utils import set_active_student
-			set_active_student(student_name)
-			# frappe.log_error(f"Set active student to: {student_name}", "Checkout Debug")
-
-		quotation = _get_cart_quotation()
+		quotation = _get_cart_quotation(quotation_name=quotation_name)
 
 		# frappe.log_error(
 		# 	f"get_checkout_data - Quotation: {quotation.name if quotation else 'None'}, Student: {quotation.student if quotation else 'N/A'}",
