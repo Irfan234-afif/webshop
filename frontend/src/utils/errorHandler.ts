@@ -8,6 +8,10 @@ export function extractErrorMessage(error: any): string {
     return error
   }
 
+  if (Array.isArray(error.messages) && error.messages.length > 0 && typeof error.messages[0] === 'string') {
+    return error.messages.join('\n')
+  }
+
   // Get the actual error data - could be nested in Axios or frappe-ui wrapper
   const errorData = error?.response?.data || error?.data || error
 
