@@ -171,47 +171,6 @@ const infoNotes = computed(() => {
 
     <!-- Service Field -->
     <ServiceField v-if="product.is_subscription_item" @select-date="emit('selectDate', $event)" />
-    <!-- <div v-else-if="product.type === 'service'" class="flex flex-col gap-4">
-      <p class="text-xl font-bold capitalize text-primary">
-        {{ product.priceLabel }}
-      </p>
-      Service Info Notes
-      <div v-if="product.infoNotes && product.infoNotes.length > 0" class="flex flex-col gap-2">
-        <div
-          v-for="(note, index) in product.infoNotes"
-          :key="index"
-          class="flex items-center gap-2"
-        >
-          <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span class="text-xs font-medium capitalize text-gray-600">
-            {{ note }}
-          </span>
-        </div>
-      </div>
-    </div> -->
-
-    <!-- Variant Selector (Only for products with variants) -->
-    <VariantSelector v-if="product.attributes && product.attributes.length > 0" :variants="product.attributes"
-      :is-service="product.is_subscription_item" :selected-variant="selectedVariant"
-      :has-variant-stock="hasVariantStock" :some-selected-variant="someSelectedVariant"
-      @select-variant="emit('selectVariant', $event)" />
-
-    <!-- Size Selector (Only for products with sizes and no variants) -->
-    <!-- <SizeSelector
-      v-if="
-        product.type === 'product' &&
-        (!product.variants || product.variants.length === 0) &&
-        product.sizes &&
-        product.sizes.length > 0
-      "
-      :sizes="product.sizes"
-      :selected-size="selectedSize"
-      :disabled="isAddingToCart"
-      @select="emit('selectSize', $event)"
-      @customize="emit('customize')"
-    /> -->
 
 
     <!-- Survey Section -->
@@ -247,6 +206,12 @@ const infoNotes = computed(() => {
         Ajukan Survey
       </button>
     </template>
+
+    <!-- Variant Selector (Only for products with variants) -->
+    <VariantSelector v-if="product.attributes && product.attributes.length > 0" :variants="product.attributes"
+      :is-service="product.is_subscription_item" :selected-variant="selectedVariant"
+      :has-variant-stock="hasVariantStock" :some-selected-variant="someSelectedVariant"
+      @select-variant="emit('selectVariant', $event)" />
 
     <!-- Add to Cart Section -->
     <AddToCartSection :quantity="quantity" :is-in-wishlist="isInWishlist" :is-adding-to-cart="isAddingToCart"
