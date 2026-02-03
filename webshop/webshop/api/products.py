@@ -4,6 +4,7 @@ from webshop.webshop.shopping_cart.product_info import get_product_info_for_webs
 from webshop.webshop.doctype.item_review.item_review import get_item_reviews
 from erpnext.utilities.product import get_price
 import time
+import html
 
 @frappe.whitelist(allow_guest=True)
 def get_items_home(student=None):
@@ -172,7 +173,7 @@ def get_product_detail(route):
         "type": "product",  # Default to product type
         "title": doc.web_item_name or doc.item_name,
         "category": doc.item_group,
-        "short_description": doc.short_description or doc.description or "",
+        "short_description": html.unescape(doc.short_description or doc.description or ""),
         "description": doc.web_long_description or doc.description or "",
         "is_subscription_item": doc.is_subscription_item,
         "can_survey": doc.can_survey,
