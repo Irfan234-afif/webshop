@@ -117,13 +117,17 @@ def set_reviews_in_cache(web_item, reviews_dict):
 
 
 @frappe.whitelist()
-def add_item_review(web_item, title, rating, comment=None):
+def add_item_review(web_item, title, rating, comment=None, sales_order=None):
 	"""Add an Item Review by a user if non-existent."""
 	if frappe.session.user == "Guest":
 		# guest user should not reach here ideally in the case they do via an API, throw error
 		frappe.throw(_("You are not verified to write a review yet."), exc=UnverifiedReviewer)
 
-	if not frappe.db.exists("Item Review", {"user": frappe.session.user, "website_item": web_item}):
+	filters = {"user": frappe.session.user, "website_item": web_item}
+	if sales_order:
+		filters["sales_order"] = sales_order
+
+	if not frappe.db.exists("Item Review", filters):
 		doc = frappe.new_doc("Item Review")
 		doc.update(
 			{
@@ -134,6 +138,7 @@ def add_item_review(web_item, title, rating, comment=None):
 				"review_title": title,
 				"rating": rating,
 				"comment": comment,
+				"sales_order": sales_order,
 			}
 		)
 		doc.published_on = datetime.today().strftime("%d %B %Y")

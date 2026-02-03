@@ -186,17 +186,28 @@
                   class="flex-1 py-4 px-8 bg-primary text-white font-bold text-sm rounded-lg hover:bg-primary-dark transition-colors capitalize text-center">
                   Bayar Pesanan - {{ formatIDR(order.grand_total) }}
                 </router-link>
-                <button v-else-if="!canRequestReturn" @click="emit('close')"
-                  class="flex-1 py-4 px-8 bg-primary text-white font-bold text-sm rounded-lg hover:bg-primary-dark transition-colors capitalize">
-                  Tutup
-                </button>
-              </div>
+                
+                <template v-else>
+                  <!-- Review Button -->
+                  <PrimaryButton v-if="canReview" @click="navigateToReview"
+                    class="flex-1 py-4 px-8 bg-primary text-white font-bold text-sm rounded-lg hover:bg-primary-dark transition-colors capitalize">
+                    Beri Penilaian
+                  </PrimaryButton>
 
-              <!-- Return request button for completed orders -->
-              <button v-if="canRequestReturn" @click="openReturnModal"
-                class="w-full py-4 px-8 bg-[#ac208e] hover:opacity-90 text-white font-bold text-sm rounded-lg transition-opacity capitalize">
-                Ajukan Pengembalian
-              </button>
+
+                  <PrimaryButton @click="emit('close')"
+                    class="flex-1"
+                    variant="outline"
+                    v-if="!canRequestReturn">
+                    Tutup
+                  </PrimaryButton>
+                  <!-- Return request button for completed orders -->
+                  <PrimaryButton v-if="canRequestReturn" @click="openReturnModal" variant="outline"
+                    class="flex-1 w-full">
+                    Ajukan Pengembalian
+                  </PrimaryButton>
+                </template>
+              </div>
             </div>
           </div>
         </Transition>
@@ -218,6 +229,7 @@ import ReceiptIcon from '@/components/icons/ReceiptIcon.vue'
 import InfoCircleIcon from '@/components/icons/InfoCircleIcon.vue'
 import ReturnRequestModal from '@/components/features/returns/ReturnRequestModal.vue'
 import type { Order } from '@/types/order'
+import PrimaryButton from '@/components/common/PrimaryButton.vue'
 
 // Helper function to get display status
 const getDisplayStatus: (order: Order) => string = (order: Order) => order.status != "Completed" ? order.status : order.ecommerce_delivery_status
@@ -308,6 +320,15 @@ const canRequestReturn = computed(() => {
   // Must have eligible status AND be confirmed eligible by API
   return hasEligibleStatus && isEligibleForReturn.value === true
 })
+
+const canReview = computed(() => {
+  return ['Completed', 'Delivered', 'Selesai'].includes(getDisplayStatus(props.order))
+})
+
+const navigateToReview = () => {
+  emit('close')
+  router.push(`/orders/${props.order.name}/review`)
+}
 
 
 // Format date to readable format

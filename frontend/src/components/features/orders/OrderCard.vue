@@ -66,11 +66,23 @@
           <p class="text-base font-bold text-gray-900">{{ formatIDR(order.grand_total) }}</p>
         </div>
 
-        <!-- Action Button based on Status -->
-        <button @click="$emit('view', order)"
-          :class="['px-5 py-2.5 rounded-lg text-sm font-bold transition-colors', buttonClass]">
-          {{ buttonText }}
-        </button>
+        <!-- Action Buttons -->
+        <div class="flex gap-2">
+          <!-- Review Button (Primary if completed) -->
+          <button 
+            v-if="canReview"
+            @click="router.push(`/orders/${order.name}/review`)"
+            class="px-5 py-2.5 rounded-lg text-sm font-bold transition-colors bg-primary text-white hover:bg-primary-dark">
+            Beri Penilaian
+          </button>
+
+          <!-- Detail Button (Secondary/Outline if Review available, otherwise Primary) -->
+          <button 
+            @click="$emit('view', order)"
+            :class="['px-5 py-2.5 rounded-lg text-sm font-bold transition-colors', detailButtonClass]">
+            {{ buttonText }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -81,6 +93,9 @@ import { computed } from 'vue'
 import type { Order } from '@/types/order'
 import { formatIDR } from '@/utils/formatters'
 import ReceiptIcon from '@/components/icons/ReceiptIcon.vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 // Helper function to get display status
 const getDisplayStatus = (order: any) => order.status != "Completed" ? order.status : order.ecommerce_delivery_status
@@ -90,7 +105,7 @@ const props = defineProps<{
   isHistory?: boolean
 }>()
 
-defineEmits(['view'])
+const emit = defineEmits(['view'])
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
@@ -137,10 +152,7 @@ const isWaitingApproval = computed(() => {
 
 const isApproved = computed(() => {
   // Logic: Payment Approved / Processing
-  console.log("payment_request_status", props.order.payment_request_status)
-  console.log("props.order.payment_type", props.order.payment_type)
   if (['Transfer Manual', 'Cash'].includes(props.order.payment_type || '')) {
-    console.log("HHHHH");
     return props.order.payment_request_status === 'Paid' || ['To Deliver', 'Processing', 'Shipped', 'Completed'].includes(getDisplayStatus(props.order))
   }
   // Payment Gateway: Auto approved if status is Processing/To Deliver
@@ -165,13 +177,29 @@ const buttonText = computed(() => {
   if (getDisplayStatus(props.order) === 'Cancelled') {
     return 'Lihat Detail'
   }
+  // If Delivered/Completed, show Review button logic?
+  // Only if status is Completed (Ecommerce)
+  if (getDisplayStatus(props.order) === 'Cancelled') {
+    return 'Lihat Detail'
+  }
+  
   return 'Lihat Detail'
 })
 
-const buttonClass = computed(() => {
+const canReview = computed(() => {
+  return ['Completed', 'Delivered', 'Selesai'].includes(getDisplayStatus(props.order))
+})
+
+const detailButtonClass = computed(() => {
+  // If review button is visible, make this button secondary/outline or just simpler
+  if (canReview.value) {
+    return 'bg-white text-primary border border-primary hover:bg-primary/5'
+  }
+
   if (isWaitingPayment.value) {
     return 'bg-primary text-white hover:bg-primary-dark'
   }
+  
   // Default / History / Approved
   return 'bg-primary text-white hover:bg-primary-dark'
 })
@@ -218,4 +246,6 @@ const statusBadgeClass = computed(() => {
   // Default / Processing
   return 'bg-blue-50 text-blue-600'
 })
+
+
 </script>

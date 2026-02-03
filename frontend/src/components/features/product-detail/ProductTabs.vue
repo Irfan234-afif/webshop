@@ -71,12 +71,6 @@ const extendedDescription = computed(() => {
         :specifications="product.specifications"
       />
 
-      <!-- Size Chart Tab -->
-      <SizeChartTab
-        v-else-if="activeTab === 'size-chart' && product.sizeChart"
-        :size-chart="product.sizeChart"
-      />
-
       <!-- Reviews Tab -->
       <ReviewsTab
         v-else-if="activeTab === 'reviews'"

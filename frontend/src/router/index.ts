@@ -107,6 +107,15 @@ const router = createRouter({
       }
     },
     {
+      path: '/orders/:id/review',
+      name: 'order-review',
+      component: () => import('../views/Orders/ReviewOrderPage.vue'),
+      meta: {
+        title: 'Beri Penilaian',
+        requiresAuth: true
+      }
+    },
+    {
       path: '/bills',
       name: 'bills',
       component: () => import('../views/Bills/BillsPage.vue'),

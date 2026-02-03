@@ -10,7 +10,11 @@ interface Props {
 const props = defineProps<Props>()
 
 // Format date as relative time
-const formatRelativeTime = (date: Date) => {
+const formatRelativeTime = (dateString: string) => {
+  const date = new Date(dateString)
+  // Check if invalid date
+  if (isNaN(date.getTime())) return dateString
+
   const now = new Date()
   const diffTime = Math.abs(now.getTime() - date.getTime())
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
@@ -25,9 +29,11 @@ const formatRelativeTime = (date: Date) => {
 
 // Sort reviews by date (newest first)
 const sortedReviews = computed(() => {
-  return [...props.reviews].sort((a, b) =>
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
+  return [...props.reviews].sort((a, b) => {
+    const dateA = new Date(a.createdAt).getTime()
+    const dateB = new Date(b.createdAt).getTime()
+    return dateB - dateA
+  })
 })
 </script>
 
@@ -79,7 +85,7 @@ const sortedReviews = computed(() => {
 
           <!-- Rating -->
           <ProductRating
-            :rating="review.rating"
+            :rating="review.rating * 5"
             :show-review-count="false"
             size="sm"
           />

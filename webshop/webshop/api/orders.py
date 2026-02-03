@@ -158,6 +158,7 @@ def get_orders(search_text=None, status=None, student=None, tab="orders", start=
 					soi.qty,
 					soi.amount,
 					soi.idx,
+					wi_direct.name as website_item,
 					COALESCE(wi_parent.website_image, wi_direct.website_image, soi.image) as image
 				FROM `tabSales Order Item` soi
 				LEFT JOIN `tabItem` item ON item.name = soi.item_code
@@ -358,6 +359,7 @@ def get_order_details(order_name):
 				soi.amount,
 				soi.description,
 				soi.idx,
+				wi_direct.name as website_item,
 				COALESCE(wi_parent.website_image, wi_direct.website_image, soi.image) as image
 			FROM `tabSales Order Item` soi
 			LEFT JOIN `tabItem` item ON item.name = soi.item_code
@@ -392,6 +394,32 @@ def get_order_details(order_name):
 			image = frappe.db.get_value("Delivery Note", dn, "image")
 			if image:
 				order_data["delivery_image"] = image
+
+		# Check for existing reviews for this order
+		reviewed_items = set()
+		try:
+			# Check if Item Review references this Sales Order
+			reviews = frappe.get_all("Item Review", 
+				filters={
+					"user": frappe.session.user,
+					"sales_order": order_name
+				}, 
+				fields=["website_item"]
+			)
+			# Fallback: if 'sales_order' field doesn't exist yet in older records or schema, this might fail or return nothing.
+			# But we rely on it now. if it fails due to column missing, we catch exception?
+			reviewed_items = set([r.website_item for r in reviews])
+		except Exception:
+			# If column doesn't exist or other error, ignore
+			pass
+
+		# If we found reviews by sales_order, great. 
+		# If user wants to block based on *any* review by user for this item? 
+		# Requirement: "if Item has review on THAT sales order, cannot review again" -> Implies specific link.
+		
+		# Add is_reviewed flag to items
+		for item in order_data["items"]:
+			item["is_reviewed"] = item["website_item"] in reviewed_items
 
 		return order_data
 

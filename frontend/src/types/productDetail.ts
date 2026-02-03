@@ -121,9 +121,9 @@ export interface Review {
   productId: string
   author: string
   authorAvatar?: string
-  rating: number // 1-5 stars
+  rating: number // 0-1 (normalized)
   comment: string
-  createdAt: Date
+  createdAt: string
   helpful: number // Number of "helpful" votes
   images?: string[] // Review images (optional)
 }

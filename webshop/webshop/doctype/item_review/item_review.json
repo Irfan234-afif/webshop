@@ -12,6 +12,7 @@
   "column_break_3",
   "item",
   "published_on",
+  "sales_order",
   "reviews_section",
   "review_title",
   "rating",
@@ -82,11 +83,20 @@
    "fieldtype": "Data",
    "label": "Published on",
    "read_only": 1
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Order",
+   "options": "Sales Order",
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-10-13 17:35:32.281964",
+ "modified": "2026-02-03 23:58:34.342130",
  "modified_by": "Administrator",
  "module": "Webshop",
  "name": "Item Review",
@@ -127,6 +137,7 @@
    "share": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

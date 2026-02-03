@@ -500,7 +500,7 @@ def format_reviews(reviews):
             "id": review.get("name"),
             "productId": review.get("website_item"),
             "author": review.get("customer") or review.get("user"),
-            "rating": cint(review.get("rating", 0)),
+            "rating": review.get("rating", 0),
             "comment": review.get("review"),
             "createdAt": review.get("creation"),
             "helpful": 0  # This would need to be implemented if we add helpful voting
