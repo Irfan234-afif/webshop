@@ -7,6 +7,7 @@ import ProductPricing from './ProductPricing.vue'
 import ServiceField from './ServiceField.vue'
 import VariantSelector from './VariantSelector.vue'
 import AddToCartSection from './AddToCartSection.vue'
+import { formatIDR } from '@/utils/formatters'
 
 interface Props {
   product: ProductDetail
@@ -72,36 +73,37 @@ watch(() => props.selectedVariant, async (newVariant) => {
   }
 })
 
-// Calculate price to display
+// Calculate price to display (multiplied by quantity)
 const displayPrice = computed(() => {
+  let unitPrice = 0
+  
   // If variant selected
   if (props.selectedVariant) {
     // Use fetched price from store if available
     if (productDetailStore.selectedVariantPrice?.price) {
-      return productDetailStore.selectedVariantPrice.price
+      unitPrice = productDetailStore.selectedVariantPrice.price
     }
     // Fallback to variant price on prop (if exists)
-    if (props.selectedVariant.price) {
-      return props.selectedVariant.price
+    else if (props.selectedVariant.price) {
+      unitPrice = props.selectedVariant.price
     }
-    // If loading or error, return undefined to handle in template
-    return undefined
-  }
-
+  } 
+  
   // If lazy loading mode and no variant selected, show range (return undefined to ProductPricing)
-  if (isLazyLoadingPrice.value) {
+  else if (isLazyLoadingPrice.value) {
     return undefined
   }
 
   // Fallback to product base price
-  return props.product.price
-})
-
-const displayOriginalPrice = computed(() => {
-  if (props.selectedVariant && productDetailStore.selectedVariantPrice?.originalPrice) {
-    return productDetailStore.selectedVariantPrice.originalPrice
+  else {
+    unitPrice = props.product.price || 0
   }
-  return props.product.originalPrice
+  
+  if (unitPrice > 0) {
+    return unitPrice * props.quantity
+  }
+  
+  return undefined
 })
 
 const displayDiscount = computed(() => {
@@ -109,6 +111,24 @@ const displayDiscount = computed(() => {
     return productDetailStore.selectedVariantPrice.discountPercent
   }
   return props.product.discountPercent
+})
+
+const displayOriginalPrice = computed(() => {
+  // If we have a calculated current price (total) and discount, derive expected original total
+  // original = current / ((100 - discount) / 100)
+  const currentTotal = displayPrice.value
+  const discount = displayDiscount.value
+
+  if (currentTotal !== undefined && discount && discount > 0) {
+    const originalTotal = currentTotal * 100 / (100 - discount)
+    return formatIDR(Math.round(originalTotal))
+  }
+
+  // Fallback if no calculation possible (e.g. qty 1, or no discount found to use for calc)
+  if (props.selectedVariant && productDetailStore.selectedVariantPrice?.originalPrice) {
+    return productDetailStore.selectedVariantPrice.originalPrice
+  }
+  return props.product.originalPrice
 })
 
 const displayHasDiscount = computed(() => {
