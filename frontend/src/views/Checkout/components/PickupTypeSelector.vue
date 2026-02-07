@@ -1,5 +1,11 @@
 <template>
   <div class="pickup-type-selector">
+    <template v-if="isLoading">
+      <div class="flex items-center justify-center py-12">
+        <div class="spinner"></div>
+      </div>
+    </template>
+    <template v-else>
     <div class="space-y-4">
       <!-- Option 1: Ambil Di Koperasi -->
       <div class="pickup-option" :class="{ 'selected': selectedType === 'Ambil di koperasi' }"
@@ -26,18 +32,29 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">
                 Tanggal Pengambilan <span class="text-red-500">*</span>
               </label>
-              <input v-model="selectedDate" type="date" :min="minDate"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                @click.stop />
+              <DatePicker
+                class="custom-datepicker"
+                v-model="selectedDate"
+                placeholder="Pilih tanggal pengambilan"
+                @change="handleDateChange"
+                @click.stop
+              />
             </div>
             <!-- Time Picker -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
                 Waktu Pengambilan <span class="text-red-500">*</span>
               </label>
-              <input v-model="selectedTime" type="time"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                @click.stop />
+              <TimePicker
+                class="custom-timepicker"
+                v-model="selectedTime"
+                placeholder="Pilih waktu pengambilan"
+                :use12-hour="false"
+                :options="timeOptions"
+                :allowCustom="false"
+                @change="handleTimeChange"
+                @click.stop
+              />
             </div>
           </div>
         </div>
@@ -69,52 +86,172 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">
                 Tanggal Pengiriman <span class="text-red-500">*</span>
               </label>
-              <input v-model="selectedDate" type="date" :min="minDate"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                @click.stop />
+              <DatePicker
+                class="custom-datepicker"
+                v-model="selectedDate"
+                placeholder="Pilih tanggal pengiriman"
+                @change="handleDateChange"
+                @click.stop
+              />
             </div>
             <!-- Time Picker -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
                 Waktu Pengiriman <span class="text-red-500">*</span>
               </label>
-              <input v-model="selectedTime" type="time"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                @click.stop />
+              <TimePicker
+                class="custom-timepicker"
+                v-model="selectedTime"
+                placeholder="Pilih waktu pengiriman"
+                :use12-hour="false"
+                :options="timeOptions"
+                :allowCustom="false"
+                @change="handleTimeChange"
+                @click.stop
+              />
             </div>
           </div>
         </div>
       </div>
     </div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue'
+import { DatePicker, TimePicker } from 'frappe-ui'
 import { useCheckoutStore } from '@/stores/checkout'
 import { storeToRefs } from 'pinia'
+import { getPickupTimeSettings, type PickupTimeSettings } from '@/utils/timeSettingsApi'
+import { useAlertStore } from '@/stores/alert'
+import { debounce } from 'frappe-ui'
 
 const checkoutStore = useCheckoutStore()
 const { pickupType, deliveryDate, deliveryTime } = storeToRefs(checkoutStore)
 
 const selectedType = ref<string>(pickupType.value || '')
+const isLoading = ref<boolean>(true)
 const selectedDate = ref<string>(deliveryDate.value || '')
 const selectedTime = ref<string>(deliveryTime.value || '')
+const timeSettings = ref<PickupTimeSettings | null>(null)
 
-// Minimum date is tomorrow (+1 day)
+// Minimum date based on configured minimum_days_ahead
 const minDate = computed(() => {
-  const tomorrow = new Date()
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  return tomorrow.toISOString().slice(0, 10) // Format: YYYY-MM-DD
+  const daysAhead = timeSettings.value?.minimum_days_ahead || 1
+  const minDate = new Date()
+  minDate.setDate(minDate.getDate() + daysAhead)
+  return minDate.toISOString().slice(0, 10) // Format: YYYY-MM-DD
 })
 
-// Initialize with default date (tomorrow) and time (10:00)
-onMounted(() => {
-  if (!selectedDate.value) {
-    // Set default to tomorrow
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    selectedDate.value = tomorrow.toISOString().slice(0, 10)
+// Helper function to check if a date is disabled
+const isDateDisabled = (dateStr: string): boolean => {
+  if (!timeSettings.value) return false
+  
+  // Check if date is before minimum date (string comparison is safe for YYYY-MM-DD format)
+  if (dateStr < minDate.value) {
+    return true
+  }
+  
+  const date = new Date(dateStr)
+  
+  // Check if weekdays only is enabled and date is weekend
+  if (timeSettings.value.weekdays_only) {
+    const dayOfWeek = date.getDay()
+    // 0 = Sunday, 6 = Saturday
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      return true
+    }
+  }
+  
+  // Check if date falls within any disabled range
+  if (timeSettings.value.disabled_date_ranges) {
+    for (const range of timeSettings.value.disabled_date_ranges) {
+      if (!range.from_date || !range.to_date) continue
+      
+      // Use string comparison for YYYY-MM-DD format
+      if (dateStr >= range.from_date && dateStr <= range.to_date) {
+        return true
+      }
+    }
+  }
+  
+  return false
+}
+
+// Available time slots: 09:00-12:00 and 13:00-16:00 with configurable intervals
+const timeOptions = computed(() => {
+  if (!timeSettings.value) {
+    return []
+  }
+  const options = []
+  
+  // Use time settings from backend or fallback to defaults
+  const settings = timeSettings.value
+  console.log("timeSettings", settings)
+  
+  // Helper function to convert HH:MM to minutes
+  const timeToMinutes = (time: string): number => {
+    const parts = time.split(':').map(Number)
+    const hours = parts[0] ?? 0
+    const minutes = parts[1] ?? 0
+    return hours * 60 + minutes
+  }
+  
+  // Helper function to convert minutes to HH:MM
+  const minutesToTime = (minutes: number): string => {
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`
+  }
+  
+  const morningStart = timeToMinutes(settings.morning_start)
+  const morningEnd = timeToMinutes(settings.morning_end)
+  const afternoonStart = timeToMinutes(settings.afternoon_start)
+  const afternoonEnd = timeToMinutes(settings.afternoon_end)
+  const interval = settings.interval
+  
+  // Generate morning slots
+  for (let m = morningStart; m <= morningEnd; m += interval) {
+    if (m > morningEnd) break
+    options.push({ value: minutesToTime(m) })
+  }
+  
+  // Generate afternoon slots
+  for (let m = afternoonStart; m <= afternoonEnd; m += interval) {
+    if (m > afternoonEnd) break
+    options.push({ value: minutesToTime(m) })
+  }
+  
+  return options
+})
+
+// Initialize with default date and time based on settings
+onMounted(async () => {
+  // Fetch time settings from backend
+  try {
+    timeSettings.value = await getPickupTimeSettings()
+  } catch (error) {
+    useAlertStore().error('Gagal memuat pengaturan waktu pengambilan')
+  } finally {
+    isLoading.value = false
+  }
+  
+  if (!selectedDate.value && timeSettings.value) {
+    // Set default to minimum days ahead
+    const daysAhead = timeSettings.value.minimum_days_ahead || 1
+    let defaultDate = new Date()
+    defaultDate.setDate(defaultDate.getDate() + daysAhead)
+    
+    // Skip disabled dates to find the first available date
+    let attempts = 0
+    const maxAttempts = 90 // Look ahead up to 90 days
+    while (isDateDisabled(defaultDate.toISOString().slice(0, 10)) && attempts < maxAttempts) {
+      defaultDate.setDate(defaultDate.getDate() + 1)
+      attempts++
+    }
+    
+    selectedDate.value = defaultDate.toISOString().slice(0, 10)
   }
 
   if (!selectedTime.value) {
@@ -158,20 +295,62 @@ function selectPickupType(type: string) {
   selectedType.value = type
 }
 
-// Watch for local changes and sync to store
-watch([selectedDate, selectedTime], ([newDate, newTime]) => {
-  if (selectedType.value && newDate && newTime) {
-    // Debounce or just update? Store action might be async but we can update state
-    // Ideally use debounce if calling API, but here we update store which calls API
-    // Let's rely on the store action from the watcher above, wait, calling setPickupType on every keystroke/change?
-    // Better to update store state only if needed or let the user confirm? 
-    // The original code updated store immediately.
+// Debounced function to update store - prevents rapid API calls and database conflicts
+const debouncedStoreUpdate = debounce((type: string, date: string, time: string) => {
+  checkoutStore.setPickupType(type, date, time)
+}, 500)
 
-    // Check if values actually changed to avoid loop
-    if (newDate !== deliveryDate.value || newTime !== deliveryTime.value) {
-      checkoutStore.setPickupType(selectedType.value, newDate, newTime)
+// Handle date change with validation
+function handleDateChange(newDate: string) {
+  if (!newDate) return
+  
+  // Check if selected date is disabled
+  if (isDateDisabled(newDate)) {
+    useAlertStore().error('Tanggal yang dipilih tidak tersedia.')
+    
+    // Find the next available date
+    let nextDate = new Date(newDate)
+    nextDate.setDate(nextDate.getDate() + 1) // Start from the next day
+    let attempts = 0
+    const maxAttempts = 90
+    
+    while (isDateDisabled(nextDate.toISOString().slice(0, 10)) && attempts < maxAttempts) {
+      nextDate.setDate(nextDate.getDate() + 1)
+      attempts++
     }
+    
+    if (attempts < maxAttempts) {
+      // Set to the next available date
+      setTimeout(() => {
+        selectedDate.value = nextDate.toISOString().slice(0, 10)
+      }, 100)
+    } else {
+      // Fallback to minimum date if no available date found
+      setTimeout(() => {
+        selectedDate.value = minDate.value
+      }, 100)
+      useAlertStore().error('Tidak ada tanggal tersedia dalam 90 hari ke depan')
+    }
+    return
   }
+  
+  // Date is valid, update the store with debounce
+  if (selectedType.value && selectedTime.value) {
+    debouncedStoreUpdate(selectedType.value, newDate, selectedTime.value)
+  }
+}
+
+// Handle time change
+function handleTimeChange(newTime: string) {
+  if (selectedType.value && selectedDate.value && newTime) {
+    debouncedStoreUpdate(selectedType.value, selectedDate.value, newTime)
+  }
+}
+
+// Watch for date/time changes - no API calls here, only done via change handlers
+watch([selectedDate, selectedTime], ([newDate, newTime]) => {
+  // Just ensure we have valid values, no store updates
+  // The change handlers will update the store with debouncing
 })
 
 

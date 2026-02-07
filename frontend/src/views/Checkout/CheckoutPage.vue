@@ -288,7 +288,4 @@ async function handleNext() {
   @apply border-gray-300 text-gray-300 cursor-not-allowed;
 }
 
-.spinner {
-  @apply w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin;
-}
 </style>

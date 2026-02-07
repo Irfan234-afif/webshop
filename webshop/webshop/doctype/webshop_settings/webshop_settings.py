@@ -31,6 +31,7 @@ class WebshopSettings(Document):
 		self.validate_attribute_filters()
 		self.validate_checkout()
 		self.validate_search_index_fields()
+		self.validate_pickup_time_settings()
 
 		if self.enabled:
 			self.validate_price_list_exchange_rate()
@@ -75,6 +76,46 @@ class WebshopSettings(Document):
 
 		# if attribute filters are enabled, hide_variants should be disabled
 		self.hide_variants = 0
+
+	def validate_pickup_time_settings(self):
+		"""Validate pickup time settings to ensure logical time ranges"""
+		if not (self.morning_start_time and self.morning_end_time and 
+				self.afternoon_start_time and self.afternoon_end_time):
+			return
+
+		from datetime import datetime
+
+		def parse_time(time_str):
+			"""Parse time string to datetime for comparison"""
+			if isinstance(time_str, str):
+				return datetime.strptime(time_str, "%H:%M:%S")
+			return time_str
+
+		morning_start = parse_time(self.morning_start_time)
+		morning_end = parse_time(self.morning_end_time)
+		afternoon_start = parse_time(self.afternoon_start_time)
+		afternoon_end = parse_time(self.afternoon_end_time)
+
+		# Validate morning time range
+		if morning_end <= morning_start:
+			frappe.throw(
+				_("Morning End Time must be after Morning Start Time"),
+				title=_("Invalid Time Range")
+			)
+
+		# Validate afternoon time range
+		if afternoon_end <= afternoon_start:
+			frappe.throw(
+				_("Afternoon End Time must be after Afternoon Start Time"),
+				title=_("Invalid Time Range")
+			)
+
+		# Validate that afternoon starts after morning ends
+		if afternoon_start <= morning_end:
+			frappe.throw(
+				_("Afternoon Start Time must be after Morning End Time"),
+				title=_("Invalid Time Range")
+			)
 
 	def validate_checkout(self):
 		if self.enable_checkout and not self.payment_gateway_account:
@@ -189,6 +230,45 @@ def get_return_eligibility_days():
 	"""Get configured return eligibility days from settings"""
 	settings = get_shopping_cart_settings()
 	return settings.get("return_eligibility_days") or 7
+
+
+@frappe.whitelist(allow_guest=True)
+def get_pickup_time_settings():
+	"""Get pickup time and date settings for frontend configuration"""
+	settings = get_shopping_cart_settings()
+	
+	def format_time(time_value):
+		"""Convert time to HH:MM format"""
+		if not time_value:
+			return None
+		if isinstance(time_value, str):
+			# If already in HH:MM:SS format, extract HH:MM
+			return time_value[:5] if len(time_value) >= 5 else time_value
+		# If it's a time object
+		return time_value.strftime("%H:%M")
+	
+	# Get disabled date ranges
+	disabled_ranges = []
+	if settings.get("disabled_date_ranges"):
+		for row in settings.disabled_date_ranges:
+			disabled_ranges.append({
+				"from_date": str(row.from_date) if row.from_date else None,
+				"to_date": str(row.to_date) if row.to_date else None,
+				"reason": row.reason or ""
+			})
+	
+	return {
+		# Time settings
+		"morning_start": format_time(settings.get("morning_start_time")) or "09:00",
+		"morning_end": format_time(settings.get("morning_end_time")) or "12:00",
+		"afternoon_start": format_time(settings.get("afternoon_start_time")) or "13:00",
+		"afternoon_end": format_time(settings.get("afternoon_end_time")) or "16:00",
+		"interval": settings.get("time_slot_interval") or 30,
+		# Date settings
+		"minimum_days_ahead": settings.get("minimum_days_ahead") or 1,
+		"weekdays_only": settings.get("weekdays_only") or 0,
+		"disabled_date_ranges": disabled_ranges
+	}
 
 
 @frappe.whitelist()

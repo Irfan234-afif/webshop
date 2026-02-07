@@ -120,6 +120,26 @@
   outline: none !important;
 }
 
-.vti__search_box input:focus {
-  border-color: var(--primary-color, #3b82f6) !important;
+/* DatePicker Information: selected date style - Primary Color */
+[role="dialog"] [role="grid"] button[aria-selected="true"] {
+    background-color: var(--color-primary) !important;
+    color: white !important;
 }
+
+/* TimePicker Information: selected time style - Primary Color */
+[role="listbox"] button[aria-selected="true"] {
+    background-color: var(--color-primary) !important;
+    color: white !important;
+}
+[role="listbox"] button[aria-selected="true"]:hover {
+    background-color: var(--color-primary) !important;
+    color: white !important;
+}
+
+/* DatePicker & TimePicker Input Style requesting to match FormInput */
+.custom-datepicker input,
+.custom-timepicker input {
+    @apply bg-white w-full px-4 py-3 border rounded-lg text-sm text-gray-900 transition-all border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition !important;
+    height: auto !important; /* Override frappe-ui fixed height */
+}
+

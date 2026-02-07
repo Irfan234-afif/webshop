@@ -91,6 +91,17 @@ def get_checkout_data(quotation_name=None):
 				"account_head": tax.account_head,
 				"cost_center": tax.cost_center
 			})
+		
+		# Format delivery time to HH:MM
+		delivery_time = None
+		if hasattr(quotation, 'delivery_time') and quotation.delivery_time:
+			if isinstance(quotation.delivery_time, timedelta):
+				total_seconds = int(quotation.delivery_time.total_seconds())
+				hours = total_seconds // 3600
+				minutes = (total_seconds % 3600) // 60
+				delivery_time = f"{hours:02}:{minutes:02}"
+			else:
+				delivery_time = str(quotation.delivery_time)[:5]
 
 		checkout_data = {
 			"quotation_name": quotation.name,
@@ -105,7 +116,7 @@ def get_checkout_data(quotation_name=None):
 			"pickup_type": quotation.pickup_type if hasattr(quotation, 'pickup_type') else None,
 			"payment_method_type": quotation.payment_method_type if hasattr(quotation, 'payment_method_type') else None,
 			"delivery_date": quotation.delivery_date if hasattr(quotation, 'delivery_date') else None,
-			"delivery_time": quotation.delivery_time if hasattr(quotation, 'delivery_time') else None,
+			"delivery_time": delivery_time,
 			"has_address": has_address,
 			"shipping_address": quotation.shipping_address_name,
 			"billing_address": quotation.customer_address,
@@ -120,14 +131,15 @@ def get_checkout_data(quotation_name=None):
 
 
 @frappe.whitelist()
-def update_pickup_type(quotation_name, pickup_type, delivery_date=None, delivery_time=None):
+def update_pickup_type(quotation_name, pickup_type, delivery_date, delivery_time):
 	"""
 	Update pickup type on cart quotation
 
 	Args:
 		quotation_name (str): Name of the quotation to update
 		pickup_type (str): "Ambil di koperasi" or "Ambil secara online"
-		delivery_date (str, optional): Date and time of delivery/pickup (required if pickup_type is koperasi)
+		delivery_date (str): Date of delivery/pickup in YYYY-MM-DD format
+		delivery_time (str): Time of delivery/pickup in HH:MM format
 
 	Returns:
 		dict: Success message with updated quotation name
@@ -146,6 +158,9 @@ def update_pickup_type(quotation_name, pickup_type, delivery_date=None, delivery
 		if pickup_type == "Ambil di koperasi":
 			if not delivery_date or not delivery_time:
 				frappe.throw(_("Delivery date and time are required for koperasi pickup"))
+			
+			# Validate date and time formats and business rules
+			_validate_pickup_datetime(delivery_date, delivery_time)
 
 		# Get quotation by name explicitly (not via session)
 		if not frappe.db.exists("Quotation", quotation_name):
@@ -161,23 +176,11 @@ def update_pickup_type(quotation_name, pickup_type, delivery_date=None, delivery
 		if quotation.contact_email != frappe.session.user:
 			frappe.throw(_("You don't have permission to update this quotation"))
 
-		# frappe.log_error(
-		# 	f"Updating quotation: {quotation.name}, Student: {quotation.student}, Pickup: {pickup_type}",
-		# 	"Checkout Debug"
-		# )
-
 		# Update pickup information using db_set to avoid validation errors
-		# db_set updates the database directly without triggering validation
-		# CRITICAL: db_set only works on saved documents (with name)
 		quotation.db_set("pickup_type", pickup_type, update_modified=True)
 
-		if pickup_type == "Ambil di koperasi":
-			quotation.db_set("delivery_date", delivery_date, update_modified=False)
-			quotation.db_set("delivery_time", delivery_time, update_modified=False)
-		else:
-			# Clear delivery date for online delivery
-			quotation.db_set("delivery_date", None, update_modified=False)
-			quotation.db_set("delivery_time", None, update_modified=False)
+		quotation.db_set("delivery_date", delivery_date, update_modified=False)
+		quotation.db_set("delivery_time", delivery_time, update_modified=False)
 
 		frappe.db.commit()
 
@@ -190,6 +193,90 @@ def update_pickup_type(quotation_name, pickup_type, delivery_date=None, delivery
 	except Exception as e:
 		frappe.log_error(frappe.get_traceback(), "Checkout: Update Pickup Type Error")
 		frappe.throw(_("Failed to update pickup type: {0}").format(str(e)))
+
+
+def _validate_pickup_datetime(delivery_date, delivery_time):
+	"""
+	Validate pickup date and time against configured business rules
+	
+	Args:
+		delivery_date (str): Date in YYYY-MM-DD format
+		delivery_time (str): Time in HH:MM format
+	"""
+	from datetime import datetime, timedelta
+	from webshop.webshop.doctype.webshop_settings.webshop_settings import get_shopping_cart_settings
+	
+	# Validate date format
+	try:
+		date_obj = datetime.strptime(delivery_date, "%Y-%m-%d").date()
+	except ValueError:
+		frappe.throw(_("Invalid date format. Expected YYYY-MM-DD"))
+	
+	# Validate time format
+	time_obj = None
+	for fmt in ("%H:%M", "%H:%M:%S"):
+		try:
+			time_obj = datetime.strptime(delivery_time, fmt).time()
+			break
+		except ValueError:
+			pass
+
+	if not time_obj:
+		frappe.throw(_("Invalid time format. Expected HH:MM or HH:MM:SS"))
+	
+	# Get webshop settings
+	settings = get_shopping_cart_settings()
+	
+	# Get today's date
+	today = datetime.now().date()
+	
+	# Validate minimum days ahead
+	minimum_days_ahead = settings.get("minimum_days_ahead") or 1
+	min_date = today + timedelta(days=minimum_days_ahead)
+	
+	if date_obj < min_date:
+		frappe.throw(_("Pickup date must be at least {0} day(s) from today").format(minimum_days_ahead))
+	
+	# Validate weekdays only (if enabled)
+	if settings.get("weekdays_only"):
+		# 0 = Monday, 6 = Sunday in Python's weekday()
+		if date_obj.weekday() in [5, 6]:  # Saturday = 5, Sunday = 6
+			frappe.throw(_("Pickup is only available on weekdays (Monday-Friday)"))
+	
+	# Validate against disabled date ranges
+	if settings.get("disabled_date_ranges"):
+		for row in settings.disabled_date_ranges:
+			if row.from_date and row.to_date:
+				if row.from_date <= date_obj <= row.to_date:
+					reason = f" ({row.reason})" if row.reason else ""
+					frappe.throw(_("Pickup is not available on the selected date{0}").format(reason))
+	
+	# Validate time is within allowed slots
+	morning_start = settings.get("morning_start_time")
+	morning_end = settings.get("morning_end_time")
+	afternoon_start = settings.get("afternoon_start_time")
+	afternoon_end = settings.get("afternoon_end_time")
+	
+	if all([morning_start, morning_end, afternoon_start, afternoon_end]):
+		# Convert time strings to time objects for comparison
+		morning_start_time = datetime.strptime(str(morning_start)[:5], "%H:%M").time()
+		morning_end_time = datetime.strptime(str(morning_end)[:5], "%H:%M").time()
+		afternoon_start_time = datetime.strptime(str(afternoon_start)[:5], "%H:%M").time()
+		afternoon_end_time = datetime.strptime(str(afternoon_end)[:5], "%H:%M").time()
+		
+		# Check if time is within morning or afternoon slots
+		in_morning = morning_start_time <= time_obj <= morning_end_time
+		in_afternoon = afternoon_start_time <= time_obj <= afternoon_end_time
+		
+		if not (in_morning or in_afternoon):
+			frappe.throw(_(
+				"Pickup time must be between {0}-{1} or {2}-{3}"
+			).format(
+				morning_start_time.strftime("%H:%M"),
+				morning_end_time.strftime("%H:%M"),
+				afternoon_start_time.strftime("%H:%M"),
+				afternoon_end_time.strftime("%H:%M")
+			))
 
 
 @frappe.whitelist()

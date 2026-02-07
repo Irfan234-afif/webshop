@@ -61,7 +61,20 @@
   "return_policy_section",
   "enable_returns",
   "return_eligibility_days",
-  "return_policy_description"
+  "return_policy_description",
+  "pickup_time_settings_section",
+  "morning_start_time",
+  "morning_end_time",
+  "column_break_pickup_1",
+  "afternoon_start_time",
+  "afternoon_end_time",
+  "column_break_pickup_2",
+  "time_slot_interval",
+  "pickup_date_settings_section",
+  "minimum_days_ahead",
+  "weekdays_only",
+  "column_break_pickup_3",
+  "disabled_date_ranges"
  ],
  "fields": [
   {
@@ -430,6 +443,86 @@
    "fieldname": "no_image_product",
    "fieldtype": "Attach Image",
    "label": "No Image Product"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "pickup_time_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Pickup Time Settings"
+  },
+  {
+   "default": "09:00:00",
+   "description": "Start time for morning pickup/delivery slots",
+   "fieldname": "morning_start_time",
+   "fieldtype": "Time",
+   "label": "Morning Start Time"
+  },
+  {
+   "default": "12:00:00",
+   "description": "End time for morning pickup/delivery slots",
+   "fieldname": "morning_end_time",
+   "fieldtype": "Time",
+   "label": "Morning End Time"
+  },
+  {
+   "fieldname": "column_break_pickup_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "13:00:00",
+   "description": "Start time for afternoon pickup/delivery slots",
+   "fieldname": "afternoon_start_time",
+   "fieldtype": "Time",
+   "label": "Afternoon Start Time"
+  },
+  {
+   "default": "16:00:00",
+   "description": "End time for afternoon pickup/delivery slots",
+   "fieldname": "afternoon_end_time",
+   "fieldtype": "Time",
+   "label": "Afternoon End Time"
+  },
+  {
+   "fieldname": "column_break_pickup_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "30",
+   "description": "Time interval in minutes for pickup/delivery slots",
+   "fieldname": "time_slot_interval",
+   "fieldtype": "Int",
+   "label": "Time Slot Interval (Minutes)"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "pickup_date_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Pickup Date Settings"
+  },
+  {
+   "default": "1",
+   "description": "Minimum number of days ahead for pickup/delivery (1 = tomorrow, 2 = day after tomorrow, etc.)",
+   "fieldname": "minimum_days_ahead",
+   "fieldtype": "Int",
+   "label": "Minimum Days Ahead"
+  },
+  {
+   "default": "0",
+   "description": "If checked, only weekdays (Monday-Friday) will be available for selection",
+   "fieldname": "weekdays_only",
+   "fieldtype": "Check",
+   "label": "Weekdays Only"
+  },
+  {
+   "fieldname": "column_break_pickup_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Specific date ranges to disable for pickup/delivery",
+   "fieldname": "disabled_date_ranges",
+   "fieldtype": "Table",
+   "label": "Disabled Date Ranges",
+   "options": "Disabled Date Range"
   }
  ],
  "index_web_pages_for_search": 1,
