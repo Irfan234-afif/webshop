@@ -34,19 +34,17 @@
         <!-- Content -->
         <div class="px-6 py-4 min-h-[400px]">
           <!-- Address Form (shown if no address) -->
-          <AddressForm v-if="needsAddress" :student-name="studentName" @address-created="handleAddressCreated" />
+          <!-- <AddressForm v-if="needsAddress" :student-name="studentName" @address-created="handleAddressCreated" /> -->
 
           <!-- Regular checkout steps (shown if has address) -->
-          <template v-else>
-            <!-- Step 1: Pickup Type -->
-            <PickupTypeSelector v-if="currentStep === 1" ref="pickupTypeSelectorRef" />
+          <!-- Step 1: Pickup Type -->
+          <PickupTypeSelector v-if="currentStep === 1" ref="pickupTypeSelectorRef" />
 
-            <!-- Step 2: Payment Method -->
-            <PaymentMethodSelector v-if="currentStep === 2" ref="paymentMethodSelectorRef" />
+          <!-- Step 2: Payment Method -->
+          <PaymentMethodSelector v-if="currentStep === 2" ref="paymentMethodSelectorRef" />
 
-            <!-- Step 3: Order Confirmation -->
-            <OrderConfirmation v-if="currentStep === 3" />
-          </template>
+          <!-- Step 3: Order Confirmation -->
+          <OrderConfirmation v-if="currentStep === 3" />
 
           <!-- Loading State -->
           <div v-if="isLoading" class="flex items-center justify-center py-12">

@@ -1,5 +1,5 @@
 <template>
-    <div class="payment-success-view">
+    <div class="max-w-2xl mx-auto">
         <div class="text-center py-12">
             <div class="mb-6 flex justify-center">
                 <div class="h-24 w-24 bg-green-100 rounded-full flex items-center justify-center">
@@ -13,29 +13,29 @@
             <h2 class="text-2xl font-bold text-gray-900 mb-2">Pembayaran Berhasil!</h2>
             <p class="text-gray-600 mb-8">Terima kasih, pembayaran Anda telah kami terima.</p>
 
-            <div class="bg-gray-50 rounded-lg p-6 max-w-md mx-auto mb-8 text-left">
+            <div class="bg-gray-50 rounded-lg p-6 max-w-full mx-auto mb-8 text-left">
                 <div class="flex justify-between mb-2">
-                    <span class="text-gray-600">No. Order</span>
-                    <span class="font-medium text-gray-900">{{ paymentDetails.sales_order.name }}</span>
+                    <span class="text-gray-600 font-semibold">No. Order</span>
+                    <span class="font-medium text-gray-900 font-semibold">{{ paymentDetails.sales_order.name }}</span>
                 </div>
                 <div class="flex justify-between mb-2">
-                    <span class="text-gray-600">Total Pembayaran</span>
-                    <span class="font-medium text-gray-900">{{ formatIDR(paymentDetails.sales_order.grand_total)
+                    <span class="text-gray-600 font-semibold">Total Pembayaran</span>
+                    <span class="font-medium text-gray-900 font-semibold">{{ formatIDR(paymentDetails.sales_order.grand_total)
                         }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-600">Metode Pembayaran</span>
-                    <span class="font-medium text-gray-900">{{ paymentDetails.payment_method.title }}</span>
+                    <span class="text-gray-600 font-semibold">Metode Pembayaran</span>
+                    <span class="font-medium text-gray-900 font-semibold">{{ paymentDetails.payment_method.title }}</span>
                 </div>
             </div>
 
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <button @click="$emit('view-order')"
-                    class="px-6 py-2 bg-[#ac208e] text-white rounded-lg hover:bg-[#8c1a72] transition-colors">
+                    class="flex-1 px-6 py-2 bg-[#ac208e] text-white rounded-lg hover:bg-[#8c1a72] transition-colors font-semibold">
                     Lihat Pesanan
                 </button>
                 <button @click="$emit('continue-shopping')"
-                    class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                    class="flex-1 px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold">
                     Lanjut Belanja
                 </button>
             </div>
