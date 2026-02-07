@@ -1,4 +1,3 @@
-
 import frappe
 from frappe.utils import now_datetime
 
@@ -17,59 +16,59 @@ def cancel_overdue_orders():
 			"Payment Request",
 			filters={
 				"reference_doctype": "Sales Order",
-				"docstatus": ["in", [0, 1]], 
-				"status": ["not in", ["Paid", "Cancelled", "Failed"]],
+				"docstatus": ["in", [0,1]], 
+				"status": ["not in", ["Paid", "Cancelled"]],
 				"payment_due_date": ["<", now_datetime()]
 			},
-			fields=["name", "reference_name", "status"]
+			fields=["name", "reference_name", "status", "payment_due_date"]
 		)
 		
 		for pr in overdue_requests:
-			sales_order_name = pr.reference_name
-			
-			# Double check Sales Order status
-			if not frappe.db.exists("Sales Order", sales_order_name):
-				continue
-				
-			sales_order = frappe.get_doc("Sales Order", sales_order_name)
-			
-			# Skip if already completed or cancelled
-			if sales_order.status in ["Completed", "Cancelled", "Closed"]:
-				continue
-				
-			# Check if fully paid (via other means)
-			if sales_order.per_billed >= 100 or sales_order.advance_paid >= sales_order.grand_total:
-				continue
-				
-			frappe.log_error(
-				f"Auto-cancelling overdue order {sales_order_name}. PR: {pr.name}", 
-				"Auto Cancel Orders"
-			)
-			
-			# Cancel the Sales Order
-			# We need to submit it first if it's draft? No, cancel works on draft too but usually docstatus 2.
-			# But user said "sales order should be auto cancelled".
-			# If it's submitted (docstatus=1), we cancel it.
-			# If it's draft (docstatus=0), we cancel it (delete or set status?).
-			# Standard practice: Cancel means docstatus=2.
-			
-			try:
-				if sales_order.docstatus == 0:
-					# If draft, we can just cancel (set to 2)
-					sales_order.cancel()
-				elif sales_order.docstatus == 1:
-					sales_order.cancel()
-					
-				# Also cancel the Payment Request
-				pr_doc = frappe.get_doc("Payment Request", pr.name)
-				if pr_doc.docstatus < 2:
-					pr_doc.cancel()
-					
-				frappe.db.commit()
-				
-			except Exception as e:
-				frappe.db.rollback()
-				frappe.log_error(f"Failed to cancel order {sales_order_name}: {str(e)}", "Auto Cancel Failure")
+			execute_cancel_order(pr)
 
 	except Exception as e:
-		frappe.log_error(frappe.get_traceback(), "Auto Cancel Job Error")
+		frappe.log_error("Auto Cancel Job Error", frappe.get_traceback())
+
+def execute_cancel_order(pr):
+	sales_order_name = pr.reference_name
+	
+	# Double check Sales Order status
+	if not frappe.db.exists("Sales Order", sales_order_name):
+		return
+		
+	sales_order = frappe.get_doc("Sales Order", sales_order_name)
+	
+	# Skip if already completed or cancelled
+	if sales_order.status in ["Completed", "Cancelled", "Closed"]:
+		return
+		
+	# Check if fully paid (via other means)
+	if sales_order.per_billed >= 100 or sales_order.advance_paid >= sales_order.grand_total:
+		return
+		
+	frappe.log_error(
+		f"Auto-cancelling overdue order {sales_order_name}. PR: {pr.name}", 
+		"Auto Cancel Orders"
+	)
+	
+	try:
+		# Also cancel the Payment Request
+		pr_doc = frappe.get_doc("Payment Request", pr.name)
+		if pr_doc.docstatus == 1:
+			pr_doc.cancel()
+			sales_order.reload()
+
+		if sales_order.docstatus == 0:
+			# If draft, manual cancel() throws transition error
+			# So we force docstatus 2 and run on_cancel to clean up (e.g. reserved stock)
+			sales_order.db_set("docstatus", 2)
+			sales_order.on_cancel()
+		elif sales_order.docstatus == 1:
+			sales_order.cancel()
+			
+		frappe.db.commit()
+		
+	except Exception as e:
+		frappe.db.rollback()
+		frappe.log_error(f"Failed to cancel order {sales_order_name}: {str(e)}", frappe.get_traceback())
+	
