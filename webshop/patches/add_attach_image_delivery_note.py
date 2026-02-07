@@ -10,7 +10,8 @@ def execute():
 				"label": "Image",
 				"fieldtype": "Attach Image",
 				"insert_after": "driver_name",
-				"print_hide": 1
+				"print_hide": 1,
+				"reqd": 1
 			}
 		]
 	}
