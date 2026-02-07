@@ -29,7 +29,7 @@
           <span class="text-gray-900 font-medium text-right break-words">{{ formData.name }}</span>
         </div>
         <div class="flex justify-between items-start gap-4">
-          <span class="text-gray-600 shrink-0">Email Sekolah</span>
+          <span class="text-gray-600 shrink-0">Email</span>
           <span class="text-gray-900 font-medium text-right break-all">{{ formData.email }}</span>
         </div>
         <div class="flex justify-between items-start gap-4">
