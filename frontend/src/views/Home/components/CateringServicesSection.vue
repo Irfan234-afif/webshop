@@ -129,19 +129,18 @@ const services: ServiceCard[] = [
           </div>
 
           <!-- CTA Button -->
-          <div class="relative z-10 mt-8">
+          <!-- <div class="relative z-10 mt-8">
             <a :href="service.ctaLink" class="inline-flex items-center gap-3 cursor-pointer group">
               <span class="text-white text-sm font-bold capitalize">
                 {{ service.ctaText }}
               </span>
-              <!-- Arrow Icon -->
               <svg width="19" height="18" viewBox="0 0 19 18" fill="none" xmlns="http://www.w3.org/2000/svg"
                 class="transition-transform group-hover:translate-x-1">
                 <path d="M11.5 4.5L16 9M16 9L11.5 13.5M16 9H3" stroke="white" stroke-width="2" stroke-linecap="round"
                   stroke-linejoin="round" />
               </svg>
             </a>
-          </div>
+          </div> -->
         </div>
       </div>
     </Container>
