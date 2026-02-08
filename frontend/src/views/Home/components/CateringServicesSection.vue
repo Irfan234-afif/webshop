@@ -33,7 +33,7 @@ const services: ServiceCard[] = [
     imageUrl: 'catering.png'
   },
   {
-    title: 'CATERING',
+    title: 'Antar Jemput',
     description: 'Layanan Antar Jemput Sekolah Auliya disediakan untuk membantu wali murid memastikan perjalanan anak ke dan dari sekolah berlangsung dengan aman dan terjadwal. Layanan ini dibagi berdasarkan wilayah area dengan harga yang telah ditentukan untuk setiap area.',
     features: [
       { text: 'Harga transparan berdasarkan area' },
