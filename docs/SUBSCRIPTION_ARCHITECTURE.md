@@ -1,6 +1,6 @@
 # Subscription System Architecture
 
-**Last Updated:** 2025-12-30
+**Last Updated:** 2026-02-08
 **Scope:** Webshop & ERPNext Integration
 **Purpose:** Technical reference for future AI agents and developers.
 
@@ -66,10 +66,21 @@ A submittable DocType (`is_submittable = 1`) to capture subscription requests pe
 - `start_date`: Date (Required) - Subscription start date
 - `end_date`: Date (Auto-calculated or Admin-editable) - Subscription end date
 - `holiday_list`: Link to Holiday List (Optional) - For effective days calculation
-- `effective_days`: Int (Read Only, Auto-calculated) - Working days excluding holidays
+- `effective_days`: Int (Read Only, Auto-calculated) - Derived from `days` child table count
+- `days`: Table (Child Table) - List of active subscription days (auto-populated)
 - `notes`: Small Text - Customer instructions/special requests
 - `subscription_ref`: Link to Subscription (Read Only) - Populated on submit
 - `amended_from`: Link to Subscription Request (Standard amend support)
+
+**Child Table: `Subscription Day`**
+
+Used by both Subscription Request and Subscription (via custom field):
+
+- `date`: Date (Required) - Active subscription date
+- `description`: Small Text - Description (e.g., "Hari Aktif")
+- `is_excluded`: Check - Manual exclusion flag
+
+> Days are auto-populated in Subscription Request, then copied to Subscription on submit. Admin can edit days directly on Subscription.
 
 **Technical Implementation:**
 
@@ -122,12 +133,13 @@ A submittable DocType (`is_submittable = 1`) to capture subscription requests pe
 
 1. When a Subscription Request is created or updated, the system automatically:
 
-   - Calculates `end_date` based on the plan's billing interval
-   - Calculates `effective_days` = (end_date - start_date + 1) - holidays
+   - Calculates `end_date` as the last day of the start month
+   - Populates `days` child table with all dates from `start_date` to `end_date`, excluding holidays
+   - Calculates `effective_days` = count of non-excluded days in child table
 
 2. When the request is submitted, the system:
    - Checks if the plan is Post-Paid AND Day-based
-   - Uses `qty = effective_days` instead of default `qty = 1`
+   - Uses `qty = len(days)` (count of active days from child table)
    - This allows the subscription price to scale based on actual working days
 
 **Example**:

@@ -34,3 +34,4 @@ webshop.patches.add_school_unit_item
 webshop.patches.add_payment_channel_to_so
 webshop.patches.add_ecommerce_delivery_status
 webshop.patches.add_student_to_subscription
+webshop.patches.add_subscription_days_custom_field

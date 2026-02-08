@@ -4,12 +4,13 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, nowdate
+from frappe.utils import getdate, nowdate, add_days
 
 class SubscriptionRequest(Document):
 	def validate(self):
 		self.calculate_end_date()
 		self.update_holiday_list()
+		self.populate_days()
 		self.update_effective_days()
 	
 	def update_holiday_list(self):
@@ -17,9 +18,51 @@ class SubscriptionRequest(Document):
 			self.holiday_list = frappe.db.get_value("Holiday List", {"from_date": ("<", self.start_date), "to_date": (">", self.end_date)}, "name")
 	
 	def update_effective_days(self):
-		"""Update effective_days field based on start_date, end_date, and holiday_list"""
-		if self.start_date and self.end_date:
+		"""Update effective_days field based on active days in child table"""
+		if self.days:
+			# Count non-excluded days from child table
+			self.effective_days = len([d for d in self.days if not d.is_excluded])
+		elif self.start_date and self.end_date:
+			# Fallback to calculation if child table not populated yet
 			self.effective_days = self.calculate_effective_days()
+		else:
+			self.effective_days = 0
+	
+	def populate_days(self):
+		"""
+		Populate days child table with active days between start_date and end_date,
+		excluding holidays from the selected holiday list.
+		"""
+		if not self.start_date or not self.end_date:
+			return
+		
+		# Get holidays from holiday list
+		holiday_dates = set()
+		if self.holiday_list:
+			holidays = frappe.db.get_all(
+				"Holiday",
+				filters={
+					"parent": self.holiday_list,
+					"holiday_date": ["between", [self.start_date, self.end_date]]
+				},
+				pluck="holiday_date"
+			)
+			holiday_dates = set(getdate(d) for d in holidays)
+		
+		# Clear existing days
+		self.days = []
+		
+		# Add all dates except holidays
+		current = getdate(self.start_date)
+		end = getdate(self.end_date)
+		while current <= end:
+			if current not in holiday_dates:
+				self.append("days", {
+					"date": current,
+					"description": "Hari Aktif",
+					"is_excluded": 0
+				})
+			current = add_days(current, 1)
 	
 	def calculate_effective_days(self):
 		"""
@@ -64,39 +107,16 @@ class SubscriptionRequest(Document):
 			frappe.throw(_("Start Date is required"))
 	
 	def calculate_end_date(self):
-		"""Auto-calculate end_date based on subscription plan's billing interval"""
+		"""Auto-calculate end_date as the last day of the start month"""
 		if not self.subscription_plan or not self.start_date:
 			return
 		
 		if self.end_date:
 			return
 		
-		# Fetch plan details
-		plan = frappe.get_doc("Subscription Plan", self.subscription_plan)
-		
-		# Get billing interval from plan
-		billing_interval = plan.billing_interval
-		billing_interval_count = plan.billing_interval_count or 1
-		
-		# Convert start_date to date object
-		start = getdate(self.start_date)
-		
-		# Calculate end_date based on interval
-		from dateutil.relativedelta import relativedelta
-		
-		if billing_interval == "Day":
-			end = start + relativedelta(days=billing_interval_count)
-		elif billing_interval == "Week":
-			end = start + relativedelta(weeks=billing_interval_count)
-		elif billing_interval == "Month":
-			end = start + relativedelta(months=billing_interval_count)
-		elif billing_interval == "Year":
-			end = start + relativedelta(years=billing_interval_count)
-		else:
-			# Default to 1 month if interval not recognized
-			end = start + relativedelta(months=1)
-		
-		self.end_date = end
+		# Get the last day of the start month
+		from frappe.utils import get_last_day
+		self.end_date = get_last_day(self.start_date)
 
 	def on_submit(self):
 		self.create_subscription_from_request()
@@ -113,8 +133,9 @@ class SubscriptionRequest(Document):
 		# Determine quantity based on billing timing and interval
 		qty = 1  # Default quantity
 		if plan_details.billing_timing == "Post-Paid" and plan_details.billing_interval == "Day":
-			# For consumption-based (post-paid, day-based), use effective days as quantity
-			qty = self.calculate_effective_days() or 1
+			# For consumption-based (post-paid, day-based), use count of active days from child table
+			active_days = len([d for d in self.days if not d.is_excluded]) if self.days else 0
+			qty = active_days or self.calculate_effective_days() or 1
 
 		# Create Subscription
 		subscription = frappe.new_doc("Subscription")
@@ -149,6 +170,16 @@ class SubscriptionRequest(Document):
 		# Submit to activate
 		subscription.insert()
 		
+		# Copy days child table from Subscription Request to Subscription
+		if self.days:
+			for day in self.days:
+				subscription.append("days", {
+					"date": day.date,
+					"description": day.description,
+					"is_excluded": day.is_excluded
+				})
+			subscription.save()
+		
 		# Link back
 		self.db_set("subscription_ref", subscription.name)
 		
@@ -166,3 +197,42 @@ class SubscriptionRequest(Document):
 				frappe.msgprint(_("Subscription {0} created, but invoice generation encountered an issue. Please check the subscription.").format(subscription.name))
 		else:
 			frappe.msgprint(_("Subscription {0} created and activated.").format(subscription.name))
+
+
+@frappe.whitelist()
+def get_estimate_cost(item_code, start_date):
+	# Get the last day of the start month
+	from frappe.utils import get_last_day
+	end_date = get_last_day(start_date)
+
+	plan = frappe.db.get_value("Item", item_code, "subscription_plan")
+	if not plan:
+		plan_name = frappe.db.get_value("Subscription Plan", {"item": item_code})
+		if not plan_name:
+			frappe.throw(_("This item is not configured as a Subscription Plan."))
+	else:
+		plan_name = plan
+	
+	plan_details = frappe.get_doc("Subscription Plan", plan_name)
+
+	# Get holiday list
+	holiday_list = frappe.db.get_value("Holiday List", {"from_date": ("<", start_date), "to_date": (">", end_date)}, "name")
+	holidays = frappe.db.count("Holiday", {"parent": holiday_list, "holiday_date": ("between", (start_date, end_date))})
+
+	# Calculate effective days
+	from frappe.utils import date_diff
+	effective_days = date_diff(end_date, start_date) - holidays
+
+	# Calculate cost
+	if plan_details.billing_timing == "Post-Paid" and plan_details.billing_interval == "Day":
+		cost = plan_details.cost * effective_days
+	else:
+		effective_days = 0
+		cost = plan_details.cost
+	
+	return {
+		"cost": cost,
+		"effective_days": effective_days,
+		"end_date": end_date,
+		"subscription_plan": plan_details,
+	}

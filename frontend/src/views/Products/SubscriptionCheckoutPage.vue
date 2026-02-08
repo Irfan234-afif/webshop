@@ -8,6 +8,7 @@ import Container from '@/components/layout/Container.vue'
 import Breadcrumb from '@/components/common/Breadcrumb.vue'
 import ServiceField from '@/components/features/product-detail/ServiceField.vue'
 import StudentSelector from '@/components/features/StudentSelector.vue'
+import PrimaryButton from '@/components/common/PrimaryButton.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -25,6 +26,8 @@ const currentStep = ref(1)
 const checkoutData = reactive({
     item: null as any,
     start_date: startDateQuery || '',
+    end_date: '',
+    effective_days: 0,
     notes: '',
     termsAccepted: false,
     student: cartStore.activeStudent || null
@@ -35,6 +38,33 @@ watch(() => cartStore.activeStudent, (newVal) => {
     if (newVal && !checkoutData.student) {
         checkoutData.student = newVal
     }
+})
+
+const estimatedCost = ref(0)
+const calculatingCost = ref(false)
+
+const fetchEstimatedCost = async () => {
+    if (!itemCode || !checkoutData.start_date) return
+
+    calculatingCost.value = true
+    try {
+        const response = await fetch(`/api/method/webshop.webshop.doctype.subscription_request.subscription_request.get_estimate_cost?item_code=${itemCode}&start_date=${checkoutData.start_date}`)
+        const data = await response.json()
+        
+        if (data.message) {
+            estimatedCost.value = data.message.cost
+            checkoutData.end_date = data.message.end_date
+            checkoutData.effective_days = data.message.effective_days
+        }
+    } catch (err) {
+        console.error('Failed to fetch estimated cost:', err)
+    } finally {
+        calculatingCost.value = false
+    }
+}
+
+watch(() => checkoutData.start_date, () => {
+    fetchEstimatedCost()
 })
 
 const breadcrumbItems = [
@@ -70,6 +100,8 @@ onMounted(async () => {
     } finally {
         loading.value = false
     }
+
+    await fetchEstimatedCost()
 })
 
 const nextStep = () => {
@@ -205,10 +237,9 @@ const getStudentName = (studentId: string | null) => {
                         </div>
 
                         <div class="mt-8 flex justify-end">
-                            <button @click="nextStep"
-                                class="rounded-xl bg-primary px-8 py-3 font-bold text-white transition hover:bg-opacity-90">
+                            <PrimaryButton @click="nextStep">
                                 Selanjutnya
-                            </button>
+                            </PrimaryButton>
                         </div>
                     </div>
 
@@ -256,6 +287,14 @@ const getStudentName = (studentId: string | null) => {
                                     <span class="text-sm text-gray-600">Tanggal Mulai</span>
                                     <span class="text-sm font-medium">{{ checkoutData.start_date }}</span>
                                 </div>
+                                <div v-if="checkoutData.end_date" class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Tanggal Selesai</span>
+                                    <span class="text-sm font-medium">{{ checkoutData.end_date }}</span>
+                                </div>
+                                <div v-if="checkoutData.effective_days > 0" class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Estimasi Hari Efektif</span>
+                                    <span class="text-sm font-medium">{{ checkoutData.effective_days }} Hari</span>
+                                </div>
                                 <div v-if="checkoutData.notes" class="flex justify-between items-start">
                                     <span class="text-sm text-gray-600">Catatan</span>
                                     <span class="text-sm font-medium text-right max-w-[60%]">{{ checkoutData.notes
@@ -273,9 +312,15 @@ const getStudentName = (studentId: string | null) => {
                                         Total Estimasi Harga Layanan
                                     </p>
                                     <div class="flex flex-col gap-4 w-full">
-                                        <p class="text-xl font-bold text-primary text-left">
-                                            Rp {{ checkoutData.item.cost.toLocaleString('id-ID') }}
-                                        </p>
+                                        <div v-if="calculatingCost" class="animate-pulse h-8 w-32 bg-gray-200 rounded"></div>
+                                        <div v-else>
+                                            <p v-if="checkoutData.effective_days > 0" class="text-xs text-gray-500 mb-1">
+                                                (Rp {{ checkoutData.item.cost.toLocaleString('id-ID') }} x {{ checkoutData.effective_days }} hari)
+                                            </p>
+                                            <p class="text-xl font-bold text-primary text-left">
+                                                Rp {{ (estimatedCost || checkoutData.item.cost).toLocaleString('id-ID') }}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -298,19 +343,15 @@ const getStudentName = (studentId: string | null) => {
                         <!-- Button Card -->
                         <div class="bg-white rounded-b-xl border-t border-gray-200 p-8">
                             <div class="flex gap-3">
-                                <button @click="prevStep"
-                                    class="flex-1 rounded-lg bg-gray-400 px-8 py-3 font-bold text-sm text-white transition hover:bg-gray-500">
+                                <PrimaryButton @click="prevStep" variant="outline" class="flex-1">
                                     Kembali
-                                </button>
-                                <button @click="submitRequest" :disabled="submitting || !checkoutData.termsAccepted"
-                                    :class="[
-                                        'flex-1 rounded-lg px-8 py-3 font-bold text-sm text-white transition flex items-center justify-center gap-2',
-                                        checkoutData.termsAccepted ? 'bg-primary hover:bg-opacity-90' : 'bg-gray-400 cursor-not-allowed'
-                                    ]">
+                                </PrimaryButton>
+                                <PrimaryButton @click="submitRequest" :disabled="submitting || !checkoutData.termsAccepted"
+                                    class="flex-1">
                                     <span v-if="submitting"
                                         class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
                                     {{ submitting ? 'Submitting...' : 'Konfirmasi Pendaftaran' }}
-                                </button>
+                                </PrimaryButton>
                             </div>
                         </div>
                     </div>

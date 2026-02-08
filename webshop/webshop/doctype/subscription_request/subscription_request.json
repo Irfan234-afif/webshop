@@ -19,6 +19,8 @@
         "holiday_list",
         "effective_days",
         "notes",
+        "days_section",
+        "days",
         "subscription_ref",
         "amended_from"
     ],
@@ -108,6 +110,19 @@
             "label": "Notes"
         },
         {
+            "collapsible": 1,
+            "fieldname": "days_section",
+            "fieldtype": "Section Break",
+            "label": "Active Days"
+        },
+        {
+            "description": "List of active subscription days (auto-populated from Holiday List calculation)",
+            "fieldname": "days",
+            "fieldtype": "Table",
+            "label": "Days",
+            "options": "Subscription Day"
+        },
+        {
             "fieldname": "subscription_ref",
             "fieldtype": "Link",
             "label": "Created Subscription",
@@ -133,7 +148,7 @@
     ],
     "is_submittable": 1,
     "links": [],
-    "modified": "2026-01-25 12:38:53.765012",
+    "modified": "2026-02-08 15:55:00.000000",
     "modified_by": "Administrator",
     "module": "Webshop",
     "name": "Subscription Request",

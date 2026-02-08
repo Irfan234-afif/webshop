@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { DatePicker } from 'frappe-ui';
 import { ref, computed, watch } from 'vue'
+import { useAlertStore } from '@/stores/alert'
 
 const props = defineProps<{
   initialDate?: string
@@ -8,13 +10,14 @@ const props = defineProps<{
 
 const emit = defineEmits(['select-date'])
 
+const alertStore = useAlertStore()
 const selectedDate = ref<string>(props.initialDate || '')
 
 watch(() => props.initialDate, (newVal) => {
   if (newVal) selectedDate.value = newVal
 })
 
-// Get today's date in YYYY-MM-DD format for min attribute
+// Get today's date in YYYY-MM-DD format
 const today = computed(() => {
   const date = new Date()
   return date.toISOString().split('T')[0]
@@ -37,10 +40,17 @@ const formattedDate = computed(() => {
   return `${day} ${month} ${year}`
 })
 
-const handleDateChange = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  selectedDate.value = target.value
-  emit('select-date', target.value)
+const handleDateChange = (date: string) => {
+  // Validate: prevent selecting dates before today
+  const todayDate = today.value || ''
+  if (date && todayDate && date < todayDate) {
+    selectedDate.value = ''
+    alertStore.error('Tidak dapat memilih tanggal yang sudah lewat')
+    return
+  }
+  
+  selectedDate.value = date
+  emit('select-date', date)
 }
 </script>
 
@@ -80,8 +90,13 @@ const handleDateChange = (event: Event) => {
       </div>
 
       <!-- Actual date input overlaid on top -->
-      <input id="service-date-input" type="date" :value="selectedDate" :min="today" @change="handleDateChange"
-        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+      <DatePicker
+        id="service-date-input"
+        v-model="selectedDate"
+        placeholder="Pilih tanggal layanan"
+        @change="handleDateChange"
+        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+      />
     </div>
 
     <!-- Helper Text -->

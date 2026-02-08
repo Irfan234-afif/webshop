@@ -15,6 +15,7 @@ def execute(doc, method=None):
             "description",
             "disabled",
             "image",
+            "has_variants",
             "is_subscription_item",
         ]
         doc_before_save = doc.get_doc_before_save()

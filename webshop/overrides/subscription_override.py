@@ -81,6 +81,9 @@ class CustomSubscription(Subscription):
 		# Call original validate
 		super(CustomSubscription, self).validate()
 		
+		# Auto-update qty from days child table
+		self._update_qty_from_days()
+		
 		# Additional validation for fixed period
 		if self._uses_fixed_period():
 			if not self.end_date:
@@ -90,3 +93,26 @@ class CustomSubscription(Subscription):
 			
 			if getdate(self.end_date) <= getdate(self.start_date):
 				frappe.throw(_("Subscription End Date must be after Start Date"))
+	
+	def _update_qty_from_days(self):
+		"""
+		Auto-update subscription plan qty based on active days in child table.
+		Only applies to Post-Paid Day-based plans.
+		"""
+		# Check if days child table exists and has data
+		if not self.get("days"):
+			return
+		
+		# Count active (non-excluded) days
+		active_days = len([d for d in self.days if not d.is_excluded])
+		
+		if active_days <= 0:
+			return
+		
+		# Update qty for Post-Paid Day-based plans
+		for plan in self.plans:
+			plan_doc = frappe.get_cached_doc("Subscription Plan", plan.plan)
+			
+			if plan_doc.billing_timing == "Post-Paid" and plan_doc.billing_interval == "Day":
+				plan.qty = active_days
+

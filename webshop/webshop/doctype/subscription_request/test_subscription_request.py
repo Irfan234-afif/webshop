@@ -55,22 +55,22 @@ class TestSubscriptionRequest(unittest.TestCase):
 		"""Test effective days calculation without holiday list"""
 		sub_req = frappe.get_doc({
 			"doctype": "Subscription Request",
-			"start_date": "2026-01-01",
-			"end_date": "2026-01-10"
+			"start_date": "2026-03-01",
+			"end_date": "2026-03-10"
 		})
 		
 		effective_days = sub_req.calculate_effective_days()
 		
 		# 9 days (date_diff between Jan 1 and Jan 10)
-		expected_days = date_diff("2026-01-10", "2026-01-01")
+		expected_days = date_diff("2026-03-10", "2026-03-01")
 		self.assertEqual(effective_days, expected_days)
 	
 	def test_calculate_effective_days_with_same_dates(self):
 		"""Test effective days when start and end are same"""
 		sub_req = frappe.get_doc({
 			"doctype": "Subscription Request",
-			"start_date": "2026-01-01",
-			"end_date": "2026-01-01"
+			"start_date": "2026-03-01",
+			"end_date": "2026-03-01"
 		})
 		
 		effective_days = sub_req.calculate_effective_days()
@@ -89,7 +89,7 @@ class TestSubscriptionRequest(unittest.TestCase):
 		"""Test that manually set end_date is not overwritten"""
 		sub_req = frappe.get_doc({
 			"doctype": "Subscription Request",
-			"start_date": "2026-01-01",
+			"start_date": "2026-03-01",
 			"end_date": "2026-03-01"
 		})
 		
@@ -103,8 +103,8 @@ class TestSubscriptionRequest(unittest.TestCase):
 		"""Test effective days for typical monthly subscription"""
 		sub_req = frappe.get_doc({
 			"doctype": "Subscription Request",
-			"start_date": "2026-01-01",
-			"end_date": "2026-01-31"
+			"start_date": "2026-03-01",
+			"end_date": "2026-03-31"
 		})
 		
 		effective_days = sub_req.calculate_effective_days()
@@ -114,7 +114,7 @@ class TestSubscriptionRequest(unittest.TestCase):
 		"""Test effective days for yearly subscription"""
 		sub_req = frappe.get_doc({
 			"doctype": "Subscription Request",
-			"start_date": "2026-01-01",
+			"start_date": "2026-03-01",
 			"end_date": "2027-01-01"
 		})
 		
@@ -184,3 +184,60 @@ class TestSubscriptionRequest(unittest.TestCase):
 		# Cleanup
 		frappe.delete_doc("Subscription", subscription.name, force=1)
 
+	def test_days_populated_without_holidays(self):
+		"""Test that days child table is populated with all dates when no holiday list"""
+		sub_req = frappe.get_doc({
+			"doctype": "Subscription Request",
+			"customer": "_Test Customer",
+			"subscription_plan": "_Test Post-Paid Daily",
+			"start_date": "2026-03-01",
+			"end_date": "2026-03-05",
+			"company": "_Test Company"
+		})
+		sub_req.insert(ignore_permissions=True)
+		
+		# Should have 5 days (Jan 1, 2, 3, 4, 5)
+		self.assertEqual(len(sub_req.days), 5)
+		
+		# Verify dates
+		dates = [getdate(d.date) for d in sub_req.days]
+		self.assertEqual(dates[0], getdate("2026-03-01"))
+		self.assertEqual(dates[-1], getdate("2026-03-05"))
+	
+	def test_effective_days_matches_days_count(self):
+		"""Test that effective_days equals count of non-excluded days in child table"""
+		sub_req = frappe.get_doc({
+			"doctype": "Subscription Request",
+			"customer": "_Test Customer",
+			"subscription_plan": "_Test Post-Paid Daily",
+			"start_date": "2026-03-01",
+			"end_date": "2026-03-10",
+			"company": "_Test Company"
+		})
+		sub_req.insert(ignore_permissions=True)
+		
+		# effective_days should equal number of days in child table
+		self.assertEqual(sub_req.effective_days, len(sub_req.days))
+	
+	def test_postpaid_qty_uses_days_count(self):
+		"""Test Post-Paid subscription quantity uses days child table count"""
+		sub_req = frappe.get_doc({
+			"doctype": "Subscription Request",
+			"customer": "_Test Customer",
+			"subscription_plan": "_Test Post-Paid Daily",
+			"start_date": "2026-03-01",
+			"end_date": "2026-03-10",
+			"company": "_Test Company"
+		})
+		sub_req.insert(ignore_permissions=True)
+		sub_req.submit()
+		
+		# Get created subscription
+		subscription = frappe.get_doc("Subscription", sub_req.subscription_ref)
+		
+		# Quantity should match days count
+		expected_qty = len([d for d in sub_req.days if not d.is_excluded])
+		self.assertEqual(subscription.plans[0].qty, expected_qty)
+		
+		# Cleanup
+		frappe.delete_doc("Subscription", subscription.name, force=1)

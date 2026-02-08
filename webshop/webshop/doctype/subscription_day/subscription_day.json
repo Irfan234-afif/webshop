@@ -1,0 +1,58 @@
+{
+    "actions": [],
+    "creation": "2026-02-08 00:00:00",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "date",
+        "column_break_1",
+        "is_excluded",
+        "section_break_3",
+        "description"
+    ],
+    "fields": [
+        {
+            "columns": 3,
+            "fieldname": "date",
+            "fieldtype": "Date",
+            "in_list_view": 1,
+            "label": "Date",
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_1",
+            "fieldtype": "Column Break"
+        },
+        {
+            "columns": 1,
+            "default": "0",
+            "fieldname": "is_excluded",
+            "fieldtype": "Check",
+            "in_list_view": 1,
+            "label": "Excluded"
+        },
+        {
+            "fieldname": "section_break_3",
+            "fieldtype": "Section Break"
+        },
+        {
+            "columns": 4,
+            "fieldname": "description",
+            "fieldtype": "Small Text",
+            "in_list_view": 1,
+            "label": "Description"
+        }
+    ],
+    "istable": 1,
+    "links": [],
+    "modified": "2026-02-08 16:10:00.000000",
+    "modified_by": "Administrator",
+    "module": "Webshop",
+    "name": "Subscription Day",
+    "owner": "Administrator",
+    "permissions": [],
+    "sort_field": "date",
+    "sort_order": "ASC",
+    "states": []
+}

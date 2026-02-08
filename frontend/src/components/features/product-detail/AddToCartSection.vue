@@ -61,7 +61,7 @@ const buttonText = computed(() => {
 <template>
   <div class="flex flex-col gap-4 md:flex-row md:items-center">
     <!-- Quantity Selector -->
-    <QuantitySelector :model-value="quantity" :max="maxQuantity"
+    <QuantitySelector v-if="!isSubscriptionItem" :model-value="quantity" :max="maxQuantity"
       :disabled="isAddingToCart || isGuest || selectedVariant === null || isOutOfStock"
       @update:model-value="emit('update:quantity', $event)" />
 
