@@ -94,9 +94,8 @@ const legalLinks: FooterLink[] = [
                 <h3 class="text-primary text-base font-bold uppercase">Office</h3>
                 <div class="text-[#1e1e1e] text-sm">
                   <p class="mb-0">
-                    Jl. Jend. Sudirman Kav. 52-53, Kawasan District 8, SCBD Lot. 13
+                    Jl. Jombang Raya No.49, Jombang, Kec. Ciputat, Kota Tangerang Selatan, Banten 15414
                   </p>
-                  <p class="mb-0">SCBD, Jakarta Selatan</p>
                 </div>
               </div>
 
