@@ -17,10 +17,13 @@ watch(() => props.initialDate, (newVal) => {
   if (newVal) selectedDate.value = newVal
 })
 
-// Get today's date in YYYY-MM-DD format
+// Get today's date in YYYY-MM-DD format (using LOCAL timezone, not UTC)
 const today = computed(() => {
   const date = new Date()
-  return date.toISOString().split('T')[0]
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 })
 
 // Format date for display (e.g., "25 Desember 2025")
@@ -40,17 +43,33 @@ const formattedDate = computed(() => {
   return `${day} ${month} ${year}`
 })
 
-const handleDateChange = (date: string) => {
-  // Validate: prevent selecting dates before today
+// Watch selectedDate for changes (handles v-model updates)
+watch(selectedDate, (date, oldDate) => {
+  if (!date) return
+  handleDateValidation(date)
+})
+
+function handleDateValidation(date: string) {
   const todayDate = today.value || ''
-  if (date && todayDate && date < todayDate) {
+  if (todayDate && date < todayDate) {
     selectedDate.value = ''
     alertStore.error('Tidak dapat memilih tanggal yang sudah lewat')
     return
   }
-  
-  selectedDate.value = date
+
   emit('select-date', date)
+}
+
+// Fallback: @change handler for when DatePicker emits change
+// but v-model doesn't update (due to internal initialValue guard)
+const handleDateChange = (date: string) => {
+  if (!date) return
+  if (date !== selectedDate.value) {
+    selectedDate.value = date
+  } else {
+    // v-model didn't change but we got a change event, re-validate
+    handleDateValidation(date)
+  }
 }
 </script>
 
