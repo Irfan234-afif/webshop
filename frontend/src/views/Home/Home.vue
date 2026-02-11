@@ -10,6 +10,7 @@ import WebshopOffers from './components/WebshopOffers.vue'
 import { transformApiProducts } from '@/utils/productTransformers'
 import type { ApiProduct } from '@/types/itemGroup'
 import { useCartStore } from '@/stores/cart'
+import ComingSoonSection from './components/ComingSoonSection.vue'
 
 // Set component name for KeepAlive caching
 defineOptions({
@@ -84,9 +85,6 @@ const itemGroups = computed(() => {
     <!-- Hero Section -->
     <HeroSection :content="heroBannerContent" />
 
-    <!-- Webshop Offers -->
-    <WebshopOffers />
-
     <!-- School Year Preparation Section -->
     <!-- <SchoolYearPreparationSection /> -->
 
@@ -112,6 +110,12 @@ const itemGroups = computed(() => {
 
     <!-- Catering & Shuttle Services Section -->
     <CateringServicesSection />
+
+    <!-- Webshop Offers -->
+    <WebshopOffers />
+
+    <!-- Coming Soon Section -->
+    <ComingSoonSection />
 
     <!-- Placeholder for additional sections -->
     <!-- You can add more sections here as per the Figma design -->

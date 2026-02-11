@@ -227,6 +227,24 @@ const router = createRouter({
         }
       ]
     },
+    {
+      path: '/member',
+      name: 'member-coming-soon',
+      component: () => import('../views/ComingSoon.vue'),
+      meta: {
+        title: 'Anggota Koperasi',
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/saving',
+      name: 'saving-coming-soon',
+      component: () => import('../views/ComingSoon.vue'),
+      meta: {
+        title: 'Simpan Pinjam',
+        requiresAuth: true
+      }
+    },
   ],
   scrollBehavior(to, from, savedPosition) {
     // Selalu scroll ke atas saat pindah halaman

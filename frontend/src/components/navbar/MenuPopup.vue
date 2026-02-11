@@ -16,6 +16,8 @@ import UniformIcon from '@/components/icons/UniformIcon.vue'
 import WishlistIcon from '@/components/icons/WishlistIcon.vue'
 import CartIcon from '../icons/CartIcon.vue'
 import { createResource } from 'frappe-ui'
+import MemberIcon from '@/components/icons/MemberIcon.vue'
+import SavingIcon from '@/components/icons/SavingIcon.vue'
 
 interface MenuItem {
   id: string
@@ -38,6 +40,8 @@ const menuItems = computed<MenuItem[]>(() => {
     { id: 'contact', label: 'Kontak', icon: 'info', link: '#' },
     { id: 'cart', label: 'Keranjang', icon: 'cart', badge: cartStore.itemCount, link: '/cart', requiresAuth: true },
     { id: 'bills', label: 'Tagihan', icon: 'bill-list', badge: billsCount.data, link: '/bills', requiresAuth: true },
+    { id: 'member', label: 'Anggota Koperasi (Coming soon)', icon: 'member', link: '/member', requiresAuth: true },
+    { id: 'saving', label: 'Simpan Pinjam (Coming Soon)', icon: 'saving', link: '/saving', requiresAuth: true },
     { id: 'help', label: 'Bantuan', icon: 'info', link: '/' },
     { id: 'account', label: 'Pengaturan Akun & Data Siswa', icon: 'user-circle', link: '/profile', requiresAuth: true },
     { id: 'logout', label: 'Log Out', icon: 'logout', onClick: () => handleLogout(), requiresAuth: true },
@@ -145,6 +149,8 @@ const handleNavigation = (item: MenuItem) => {
               <LogoutIcon v-else-if="item.icon === 'logout'" class="w-6 h-6" />
               <UniformIcon v-else-if="item.icon === 'uniform'" class="w-6 h-6" />
               <WishlistIcon v-else-if="item.icon === 'wishlist'" class="w-6 h-6 text-primary" />
+              <MemberIcon v-else-if="item.icon === 'member'" class="w-6 h-6 text-[#757575]" />
+              <SavingIcon v-else-if="item.icon === 'saving'" class="w-6 h-6 text-[#757575]" />
               <p class="font-bold text-sm text-[#1e1e1e] capitalize">{{ item.label }}</p>
             </div>
             <div class="flex gap-6 items-center">
@@ -168,6 +174,8 @@ const handleNavigation = (item: MenuItem) => {
               <LogoutIcon v-else-if="item.icon === 'logout'" class="w-6 h-6 text-primary" />
               <UniformIcon v-else-if="item.icon === 'uniform'" class="w-6 h-6" />
               <WishlistIcon v-else-if="item.icon === 'wishlist'" class="w-6 h-6 text-primary" />
+              <MemberIcon v-else-if="item.icon === 'member'" class="w-6 h-6 text-[#757575]" />
+              <SavingIcon v-else-if="item.icon === 'saving'" class="w-6 h-6 text-[#757575]" />
               <p class="font-bold text-sm text-[#1e1e1e] capitalize">{{ item.label }}</p>
             </div>
             <div class="flex gap-6 items-center">
