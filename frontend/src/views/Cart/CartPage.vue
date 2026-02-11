@@ -171,7 +171,7 @@ const goHome = () => {
                       </span>
                       <span> - </span>
                       <span class="font-bold text-primary">
-                        {{ formatCurrency(student.original_total || student.total) }}
+                        {{ formatCurrency(student.total) }}
                       </span>
                     </p>
                     <svg class="w-5 h-5 text-gray-400 transition-transform"
@@ -197,7 +197,7 @@ const goHome = () => {
                 :quotation-name="cartStore.selectedStudentCart?.quotation_name"
                 :coupon-code="cartStore.selectedStudentCart?.coupon_code"
                 :discount-amount="cartStore.selectedStudentCart?.discount_amount"
-                :original-total="cartStore.selectedStudentCart?.original_total"
+                :original-total="cartStore.selectedStudentCart?.total"
                 :is-checkout-loading="isCheckoutProcessing" @checkout="handleCheckout" />
             </div>
           </div>

@@ -808,8 +808,10 @@ def get_all_student_cart_details():
                         "title": item.get("web_item_name") or item.item_name,
                         "image": image,
                         "price": flt(item.price_list_rate),  # Use price_list_rate (original price) instead of rate (after discount)
+                        "net_price": flt(item.rate), # Use rate (after discount) instead of price_list_rate (original price)
                         "quantity": flt(item.qty),
                         "amount": flt(item.price_list_rate) * flt(item.qty),  # Calculate from original price
+                        "net_amount": flt(item.rate) * flt(item.qty),  # Calculate discount price
                         "description": item.get("description") or "",
                         "route": item.get("route") or "",
                         "warehouse": item.get("warehouse") or "",

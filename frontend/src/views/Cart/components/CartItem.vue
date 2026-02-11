@@ -44,6 +44,14 @@ const formatDate = (dateString?: string) => {
     year: 'numeric'
   })
 }
+
+const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  }).format(amount)
+}
 </script>
 
 <template>
@@ -93,9 +101,14 @@ const formatDate = (dateString?: string) => {
              Periode: {{ formatDate(item.service_start_date) }} - {{ formatDate(item.service_end_date) }}
           </p>
         </div>
-        <p class="text-base font-bold text-primary">
-          {{ formattedPrice }}
-        </p>
+        <div class="flex flex-col items-start mt-1">
+          <p v-if="item.net_price && item.net_price < item.price" class="text-xs text-gray-500 line-through color-red-500">
+            {{ formattedPrice }}
+          </p>
+          <p class="text-base font-bold text-primary">
+            {{ formatCurrency(item.net_price || item.price) }}
+          </p>
+        </div>
       </div>
 
       <!-- Price and Quantity Controls -->
@@ -157,6 +170,7 @@ const formatDate = (dateString?: string) => {
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

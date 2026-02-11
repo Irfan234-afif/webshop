@@ -52,7 +52,7 @@ const couponDiscount = computed(() => {
 })
 
 const total = computed(() => {
-  return subtotal.value - couponDiscount.value
+  return subtotal.value
 })
 
 // Check if coupon is applied
@@ -208,7 +208,7 @@ const toggleDetails = () => {
             class="flex items-start justify-between gap-4 font-semibold text-sm text-text-secondary">
             <p class="flex-1 min-w-0 overflow-hidden line-clamp-2">{{ item.title }}</p>
             <p class="flex-shrink-0 text-right whitespace-nowrap">
-              {{ formatCurrency(item.price * item.quantity) }}
+              {{ formatCurrency(item.net_price * item.quantity) }}
             </p>
           </div>
 

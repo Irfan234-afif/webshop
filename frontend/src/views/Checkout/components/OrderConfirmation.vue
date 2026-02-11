@@ -7,7 +7,7 @@
         <div class="section-content">
           <div v-for="item in items" :key="item.item_code" class="flex justify-between py-2">
             <span class="font-semibold text-sm text-text-secondary">{{ item.item_name }} ({{ item.qty }}x)</span>
-            <span class="font-semibold text-sm text-text-secondary">{{ formatIDR(item.price_list_rate * item.qty)
+            <span class="font-semibold text-sm text-text-secondary">{{ formatIDR(item.amount)
               }}</span>
           </div>
 

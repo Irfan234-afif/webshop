@@ -55,9 +55,11 @@ export interface CartItem {
   productType?: 'product' | 'service'
   title: string // Product title
   image: string // Product image URL
-  price: number // Item price
+  price: number // Item price (Original Price)
+  net_price: number // Item net price (Discounted Price)
   quantity: number // Item quantity
   amount: number // Total amount (price * quantity)
+  net_amount?: number // Total net amount (net_price * quantity)
   description?: string // Product description
   route?: string // Website item route
   warehouse?: string // Warehouse location
