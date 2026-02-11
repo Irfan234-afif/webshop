@@ -69,7 +69,7 @@ RUN cd /home/frappe/frappe-bench && bench get-app https://github.com/Irfan234-af
 
 # Build frontend
 RUN if [ -d "/home/frappe/frappe-bench/apps/webshop/frontend" ]; then \
-  cd /home/frappe/frappe-bench/apps/webshop/frontend && yarn install && yarn build && rm -rf node_modules; fi
+  cd /home/frappe/frappe-bench/apps/webshop/frontend && npm install && npm run build && rm -rf node_modules; fi
 
 FROM base AS backend
 
