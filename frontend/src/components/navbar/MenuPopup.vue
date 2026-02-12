@@ -41,7 +41,7 @@ const menuItems = computed<MenuItem[]>(() => {
     { id: 'cart', label: 'Keranjang', icon: 'cart', badge: cartStore.itemCount, link: '/cart', requiresAuth: true },
     { id: 'bills', label: 'Tagihan', icon: 'bill-list', badge: billsCount.data, link: '/bills', requiresAuth: true },
     { id: 'member', label: 'Anggota Koperasi (Coming soon)', icon: 'member', link: '/member', requiresAuth: true },
-    { id: 'saving', label: 'Simpan Pinjam (Coming Soon)', icon: 'saving', link: '/saving', requiresAuth: true },
+    { id: 'saving', label: 'Simpanan Anggota (Coming Soon)', icon: 'saving', link: '/saving', requiresAuth: true },
     { id: 'help', label: 'Bantuan', icon: 'info', link: '/' },
     { id: 'account', label: 'Pengaturan Akun & Data Siswa', icon: 'user-circle', link: '/profile', requiresAuth: true },
     { id: 'logout', label: 'Log Out', icon: 'logout', onClick: () => handleLogout(), requiresAuth: true },

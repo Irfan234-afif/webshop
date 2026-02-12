@@ -49,9 +49,9 @@ const cards: ComingSoonCard[] = [
         iconComponent: MemberIcon
     },
     {
-        title: 'Simpan Pinjam',
+        title: 'Simpanan Anggota',
         description: 'Layanan simpan pinjam khusus anggota koperasi untuk mendukung kebutuhan finansial dengan proses yang transparan, aman, dan dikelola langsung oleh Koperasi Auliya.',
-        features: ['Simpan Pinjam', 'Koperasi Auliya'],
+        features: ['Pengajuan Mudah', 'Skema Cicilan Jelas', 'Dikelola seusai aturan koperasi'],
         iconComponent: SavingIcon
     }
 ]
