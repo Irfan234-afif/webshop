@@ -889,6 +889,15 @@ def apply_coupon_code(applied_code, quotation_name=None, applied_referral_sales_
 	quotation.ignore_pricing_rule = 0
 	quotation.coupon_code = coupon_name
 	quotation.flags.ignore_permissions = True
+
+	# apply_cart_settings resets price_list_rate to None and refetches
+	# with pricing rules applied. This is needed because save() alone
+	# won't apply the pricing rule rate due to a check in
+	# apply_pricing_rule_on_items that compares item_code against
+	# apply_rule_on_other_items (which contains item groups for
+	# mixed_conditions rules, not item codes).
+	apply_cart_settings(quotation=quotation)
+
 	quotation.save()
 
 	if applied_referral_sales_partner:
@@ -911,11 +920,31 @@ def remove_coupon_code(quotation_name=None):
 	quotation.referral_sales_partner = ""
 	quotation.flags.ignore_permissions = True
 
-	# reset discount amount if coupon code is removed (on desk it is done in client side)
-	# as we are enabling ignore_pricing_rule, so we also need to manually reset discount percentage
+	# Reset document-level discounts
 	quotation.discount_amount = 0
 	quotation.additional_discount_percentage = 0
+
+	# Must use ignore_pricing_rule=1 to prevent re-application of pricing rule
 	quotation.ignore_pricing_rule = 1
+
+	# Clear item-level pricing rule references
+	for item in quotation.get("items"):
+		item.pricing_rules = ""
+		item.discount_percentage = 0
+		item.discount_amount = 0
+		item.margin_type = ""
+		item.margin_rate_or_amount = 0
+
+	# Re-fetch original prices from Item Price.
+	# apply_cart_settings -> set_price_list_and_rate resets price_list_rate/rate
+	# to None, then calls set_price_list_and_item_details() which refetches
+	# the real price from Item Price. With ignore_pricing_rule=1, the pricing
+	# rule won't override the fresh prices.
+	apply_cart_settings(quotation=quotation)
+
+	# Reset ignore_pricing_rule back to 0 after prices are refetched.
+	# This ensures future coupon applications can evaluate pricing rules.
+	quotation.ignore_pricing_rule = 0
 
 	quotation.save()
 
