@@ -648,11 +648,24 @@ def get_checkout_payment_details(sales_order_name):
 			
 
 		# Check for Payment Request VA details (Primary Source)
+		# Attempt to fetch existing PR details first
 		pr_va = frappe.db.get_value("Payment Request", {
 			"reference_doctype": "Sales Order",
-			"reference_name": sales_order_name
+			"reference_name": sales_order_name,
+			"docstatus": ["!=", 2] # Not cancelled
 		}, ["virtual_account_number", "virtual_account_bank", "payment_due_date", "status"], as_dict=1)
 
+		# If not found, create it and then fetch details
+		if not pr_va:
+			get_payment_gateway_url(sales_order_name, sales_order.payment_method_type, sales_order.payment_channel)
+			
+			pr_va = frappe.db.get_value("Payment Request", {
+				"reference_doctype": "Sales Order",
+				"reference_name": sales_order_name,
+				"docstatus": ["!=", 1] # Not cancelled
+			}, ["virtual_account_number", "virtual_account_bank", "payment_due_date", "status"], as_dict=1)
+
+		# If we have PR details (either existing or newly created), populate the response
 		if pr_va:
 			res["virtual_account"] = {
 				"number": pr_va.virtual_account_number,

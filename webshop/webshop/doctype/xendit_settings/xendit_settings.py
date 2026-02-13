@@ -261,5 +261,8 @@ def simulate_va_payment(payment_request_name):
 		)
 		return response
 	except Exception as e:
-		frappe.log_error(title="Xendit VA Simulation Failed", message=str(e))
+		frappe.log_error("Xendit VA Simulation Failed", {
+			"error": e,
+			"response": frappe.flags.get("integration_request").json()
+		})
 		frappe.throw(_("Simulation Failed: {0}").format(str(e)))
