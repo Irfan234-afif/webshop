@@ -130,7 +130,7 @@ const getApprovalStatusStyle = (status: string) => {
         </div>
         <div class="flex-1 min-w-0">
           <p class="text-sm text-gray-500 mb-1">
-            Rekening {{ bankDetails.bank_name }}
+            Rekening {{ bankDetails.bank_name }} an <strong>{{ bankDetails.account_holder }}</strong>
           </p>
           <p class="text-lg font-bold text-[#ac208e]">
             {{ bankDetails.account_number }}
