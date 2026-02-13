@@ -33,7 +33,7 @@
               <!-- Channels Grid -->
               <div
                 v-if="method.payment_channels && method.payment_channels.length > 0 && selectedMethod === method.name"
-                class="mt-4 grid grid-cols-2 gap-3">
+                class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div v-for="channel in method.payment_channels" :key="channel.channel_code"
                   class="channel-option p-3 border rounded-lg flex items-center gap-3 cursor-pointer transition-all"
                   :class="{
