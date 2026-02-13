@@ -1,5 +1,6 @@
 import frappe
 from frappe.utils import cint, flt
+from webshop.webshop.doctype.webshop_settings.webshop_settings import get_shopping_cart_settings
 from webshop.webshop.shopping_cart.product_info import get_product_info_for_website
 from webshop.webshop.doctype.item_review.item_review import get_item_reviews
 from erpnext.utilities.product import get_price
@@ -272,6 +273,15 @@ def get_product_detail(route):
     product_detail["inStock"] = product_info.product_info.get("in_stock", False) if product_info else False
     product_detail["stockQuantity"] = flt(product_info.product_info.get("stock_qty", 0)) if product_info else None
 
+    # Expose allow_items_not_in_stock setting to frontend
+    cart_settings = get_shopping_cart_settings()
+    allow_oos = cint(cart_settings.allow_items_not_in_stock) if cart_settings else 0
+    product_detail["allowItemsNotInStock"] = bool(allow_oos)
+
+    # Override stock status when setting is enabled
+    if allow_oos:
+        product_detail["inStock"] = True
+
     return product_detail
 
 
@@ -466,6 +476,10 @@ def get_item_variants(item_code):
             # For non-stock items (services, digital goods, etc.), always in stock
             in_stock = True
             stock_qty = 0
+
+        # Override stock status when allow_items_not_in_stock is enabled
+        if cart_settings and cint(cart_settings.allow_items_not_in_stock):
+            in_stock = True
 
         # Build variant data WITHOUT price (will be fetched on-demand)
         variant_data = {
@@ -865,11 +879,16 @@ def get_all_student_cart_details():
 
             detailed_carts.append(student_detail)
 
+        # Expose allow_items_not_in_stock setting to frontend
+        cart_settings = get_shopping_cart_settings()
+        allow_oos = cint(cart_settings.allow_items_not_in_stock) if cart_settings else 0
+
         return {
             "students": detailed_carts,
             "active_student": active_student_name,  # Changed from active_student_id to active_student
             "grand_total": grand_total,
-            "total_items": total_items
+            "total_items": total_items,
+            "allowItemsNotInStock": bool(allow_oos)
         }
 
     except Exception as e:

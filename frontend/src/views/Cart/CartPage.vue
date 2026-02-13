@@ -87,7 +87,10 @@ const handleCheckout = async () => {
 
   isCheckoutProcessing.value = true
   try {
-    await validateCartStock(cartStore.selectedStudentCart.quotation_name)
+    // Skip stock validation when allow_items_not_in_stock is enabled
+    if (!cartStore.allowItemsNotInStock) {
+      await validateCartStock(cartStore.selectedStudentCart.quotation_name)
+    }
 
     // Navigate to checkout page with selected student
     router.push({

@@ -152,6 +152,13 @@ def add_custom_fields():
 				"insert_after": "is_return",
 				"read_only": 1,
 				"print_hide": 1
+			},
+			{
+				"fieldname": "payment_channel",
+				"fieldtype": "Data",
+				"label": "Payment Channel",
+				"insert_after": "payment_method_type",
+				"no_copy": 1
 			}
 		],
 		"Sales Order": [
@@ -253,6 +260,14 @@ def add_custom_fields():
 				"insert_after": "shipped_date",
 				"read_only": 1,
 				"description": "Timestamp when customer confirmed delivery"
+			},
+			{
+				"fieldname": "payment_channel",
+				"fieldtype": "Data",
+				"label": "Payment Channel",
+				"insert_after": "payment_method_type",
+				"read_only": 1,
+				"no_copy": 1
 			}
 		],
 		"Item": [

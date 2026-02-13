@@ -140,6 +140,9 @@ const displayHasDiscount = computed(() => {
 
 // Check if product is globally out of stock
 const isOutOfStock = computed(() => {
+  // When allow_items_not_in_stock is enabled, never consider items as out of stock
+  if (props.product.allowItemsNotInStock) return false
+
   if (props.product.variants && props.product.variants.length > 0) {
     return props.product.variants.every(variant => !variant.inStock)
   }
@@ -235,7 +238,7 @@ const infoNotes = computed(() => {
 
     <!-- Add to Cart Section -->
     <AddToCartSection :quantity="quantity" :is-in-wishlist="isInWishlist" :is-adding-to-cart="isAddingToCart"
-      :is-toggling-wishlist="isTogglingWishlist" :can-add-to-cart="canAddToCart" :max-quantity="product.stockQuantity"
+      :is-toggling-wishlist="isTogglingWishlist" :can-add-to-cart="canAddToCart" :max-quantity="product.allowItemsNotInStock ? undefined : product.stockQuantity"
       :selected-variant="selectedVariant" :is-out-of-stock="isOutOfStock"
       :is-subscription-item="!!product.is_subscription_item" @update:quantity="emit('update:quantity', $event)"
       @add-to-cart="emit('addToCart')" @toggle-wishlist="emit('toggleWishlist')"

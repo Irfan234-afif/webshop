@@ -52,6 +52,7 @@ export interface ProductDetail {
   // Stock and availability
   inStock: boolean
   stockQuantity?: number
+  allowItemsNotInStock?: boolean
 
   // Metadata
   classGrade?: number[]

@@ -14,6 +14,7 @@ export const useCartStore = defineStore('cart', () => {
   const total = ref<number>(0)
   const isLoading = ref(false)
   const error = ref<Error | null>(null)
+  const allowItemsNotInStock = ref(false)
 
   // Getters
   const itemCount = computed(() => {
@@ -57,6 +58,7 @@ export const useCartStore = defineStore('cart', () => {
     try {
       const response = await cartApi.getAllStudentCarts()
       studentCarts.value = response.students as StudentCart[]
+      allowItemsNotInStock.value = !!response.allowItemsNotInStock
 
       selectedStudentCart.value = studentCarts.value.find(sc => sc.name === activeStudent.value) || null
     } catch (e) {
@@ -293,6 +295,7 @@ export const useCartStore = defineStore('cart', () => {
     error,
     total,
     selectedStudentCart,
+    allowItemsNotInStock,
     // Getters
     itemCount,
     totalPrice,
