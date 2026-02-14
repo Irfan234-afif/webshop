@@ -851,7 +851,7 @@ def get_all_student_cart_details():
                     items.append(cart_item)
 
                 student_detail["items"] = items
-                student_detail["total"] = flt(cart_summary.get("grand_total", 0))
+                student_detail["total"] = flt(cart_summary.get("rounded_total", cart_summary.get("grand_total", 0)))
                 student_detail["itemCount"] = int(cart_summary.get("total_qty", 0))
                 student_detail["quotation_name"] = cart_summary["name"]
                 

@@ -602,7 +602,7 @@ def get_checkout_payment_details(sales_order_name):
 			"sales_order": {
 				"name": sales_order.name,
 				"customer": sales_order.customer_name,
-				"grand_total": sales_order.grand_total,
+				"grand_total": sales_order.get("rounded_total", sales_order.grand_total),
 				"delivery_date": sales_order.delivery_date if hasattr(sales_order, 'delivery_date') else None,
 				"student_name": sales_order.student if hasattr(sales_order, 'student') else None,
 				"pickup_type": sales_order.pickup_type if hasattr(sales_order, 'pickup_type') else None,
@@ -843,7 +843,7 @@ def get_payment_gateway_url(sales_order_name, payment_method_type, payment_chann
 				payment_request.party_type = "Customer"
 				payment_request.party = sales_order.customer
 				payment_request.currency = sales_order.currency
-				payment_request.grand_total = sales_order.grand_total
+				payment_request.grand_total = sales_order.get("rounded_total", sales_order.get("grand_total", 0))
 				payment_request.reference_doctype = "Sales Order"
 				payment_request.reference_name = sales_order_name
 				payment_request.make_sales_invoice = 1
@@ -920,7 +920,7 @@ def create_payment_request_for_manual_approval(sales_order, payment_method):
 	payment_request.party_type = "Customer"
 	payment_request.party = sales_order.customer
 	payment_request.party_name = sales_order.customer_name
-	payment_request.grand_total = sales_order.grand_total
+	payment_request.grand_total = sales_order.get("rounded_total", sales_order.get("grand_total", 0))
 	payment_request.currency = sales_order.currency
 	payment_request.company = sales_order.company
 	payment_request.payment_method_type = payment_method.name

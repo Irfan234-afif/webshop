@@ -160,7 +160,7 @@ def get_all_student_carts():
 			cart = None
 			quotation = frappe.get_all(
 				"Quotation",
-				fields=["name", "grand_total", "total_qty", "currency"],
+				fields=["name", "grand_total", "total_qty", "currency", "rounded_total"],
 				filters={
 					"party_name": party.name,
 					"student": student.get("name"),
