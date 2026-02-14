@@ -516,7 +516,30 @@ def add_custom_fields():
 				"label": "Source Sales Order",
 				"read_only": 1,
 				"insert_after": "party"
-			}
+			},
+			{
+				"fieldname": "student",
+				"label": "Student",
+				"fieldtype": "Link",
+				"options": "Student",
+				"insert_after": "party",
+				"translatable": 0,
+			},
+			{
+				"fieldname": "days_section",
+				"fieldtype": "Section Break",
+				"label": "Active Days",
+				"insert_after": "plans",
+				"collapsible": 1,
+			},
+			{
+				"fieldname": "days",
+				"fieldtype": "Table",
+				"label": "Days",
+				"options": "Subscription Day",
+				"insert_after": "days_section",
+				"description": "List of active subscription days. Edit to adjust billing days.",
+			},
 		],
 		"Subscription Plan": [
 			{
