@@ -4,9 +4,39 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import cint, cstr
 
 
 class Student(Document):
+	def autoname(self):
+		self.name = self.get_student_name()
+
+	def get_student_name(self):
+		if frappe.db.get_value("Student", self.student_name) and not frappe.flags.in_import:
+			count = frappe.db.sql(
+				"""select ifnull(MAX(CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED)), 0) from tabStudent
+				 where name like %s""",
+				f"%{self.student_name} - %",
+				as_list=1,
+			)[0][0]
+			count = cint(count) + 1
+
+			new_student_name = f"{self.student_name} - {cstr(count)}"
+
+			frappe.msgprint(
+				_("Changed student name to '{}' as '{}' already exists.").format(
+					new_student_name, self.student_name
+				),
+				title=_("Note"),
+				indicator="yellow",
+				alert=True,
+			)
+
+			return new_student_name
+
+		return self.student_name
+
+
 	def validate(self):
 		"""Validate student data"""
 		self.validate_school_unit()

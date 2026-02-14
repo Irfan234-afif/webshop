@@ -45,6 +45,12 @@ export const useCartStore = defineStore('cart', () => {
     return items.value.find(i => i.item_code === itemCode)
   }
 
+  const activeStudentName = computed(() => {
+    if (!activeStudent.value) return ''
+    const student = students.value.find(s => s.name === activeStudent.value)
+    return student ? student.student_name : ""
+  })
+
   // Actions
 
   /**
@@ -305,6 +311,7 @@ export const useCartStore = defineStore('cart', () => {
     getItemsByStudent,
     getStudentCartTotal,
     getStudentItemCount,
+    activeStudentName,
     // Actions
     fetchAllStudentCarts,
     fetchCart,

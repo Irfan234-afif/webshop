@@ -217,7 +217,7 @@ const handleLoginClick = () => {
               @click.stop="handleToggleMenu">
               <span class="truncate max-w-[100px] lg:max-w-none font-semibold">
                 {{
-                  cartStore.activeStudent
+                  cartStore.activeStudentName
                 }}
               </span>
               <HumbergerIcon />
