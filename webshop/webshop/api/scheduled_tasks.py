@@ -75,7 +75,7 @@ def execute_cancel_order(pr):
 		if pr_doc.docstatus == 1:
 			pr_doc.cancel()
 			sales_order.reload()
-		else:
+		elif pr_doc.docstatus == 0:
 			# pr_doc.db_set("docstatus", 2)
 			# pr_doc.on_cancel()
 			pr_doc.delete(ignore_permissions=True)
