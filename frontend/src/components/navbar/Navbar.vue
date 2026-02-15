@@ -215,7 +215,7 @@ const handleLoginClick = () => {
             <PrimaryButton ref="menuButtonRef"
               class="bg-primary text-white font-bold text-xs sm:text-sm uppercase !px-6 !py-2.5 sm:py-3 rounded-xl flex items-center gap-2 sm:gap-4 lg:gap-6 hover:opacity-90 transition-opacity"
               @click.stop="handleToggleMenu">
-              <span class="truncate max-w-[100px] lg:max-w-none font-semibold">
+              <span class="hidden md:block truncate max-w-[100px] lg:max-w-none font-semibold">
                 {{
                   cartStore.activeStudentName
                 }}
