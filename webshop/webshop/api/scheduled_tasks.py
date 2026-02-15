@@ -75,12 +75,15 @@ def execute_cancel_order(pr):
 		if pr_doc.docstatus == 1:
 			pr_doc.cancel()
 			sales_order.reload()
+		else:
+			pr_doc.db_set("docstatus", 2)
+			# pr_doc.on_cancel()
 
 		if sales_order.docstatus == 0:
 			# If draft, manual cancel() throws transition error
 			# So we force docstatus 2 and run on_cancel to clean up (e.g. reserved stock)
 			sales_order.db_set("docstatus", 2)
-			sales_order.on_cancel()
+			# sales_order.on_cancel()
 		elif sales_order.docstatus == 1:
 			sales_order.cancel()
 			
