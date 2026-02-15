@@ -76,8 +76,9 @@ def execute_cancel_order(pr):
 			pr_doc.cancel()
 			sales_order.reload()
 		else:
-			pr_doc.db_set("docstatus", 2)
+			# pr_doc.db_set("docstatus", 2)
 			# pr_doc.on_cancel()
+			pr_doc.delete(ignore_permissions=True)
 
 		if sales_order.docstatus == 0:
 			# If draft, manual cancel() throws transition error
