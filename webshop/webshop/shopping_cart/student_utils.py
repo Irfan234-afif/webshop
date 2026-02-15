@@ -8,8 +8,48 @@ Student session management utilities for per-student shopping carts
 import frappe
 from frappe import _
 
-from webshop.webshop.shopping_cart.cart import get_party
 from webshop.webshop.doctype.student.student import get_students_for_customer
+
+
+def get_all_customers_for_user(user=None):
+	"""
+	Get all customers linked to the user via Contact or Portal User.
+	Handles cases where user has multiple contacts or multiple customer links.
+	"""
+	if not user:
+		user = frappe.session.user
+
+	customers = set()
+
+	# 1. Get all Contacts with this email
+	contacts = frappe.get_all("Contact Email", filters={"email_id": user}, fields=["parent"])
+	contact_names = [c.parent for c in contacts]
+
+	if contact_names:
+		# 2. Get linked customers from these contacts
+		links = frappe.get_all(
+			"Dynamic Link", 
+			filters={
+				"parent": ["in", contact_names], 
+				"parenttype": "Contact", 
+				"link_doctype": "Customer"
+			}, 
+			fields=["link_name"]
+		)
+		for l in links:
+			customers.add(l.link_name)
+
+	# 3. Check Portal User links
+	portal_links = frappe.get_all(
+		"Portal User", 
+		filters={"user": user, "parenttype": "Customer"}, 
+		fields=["parent"]
+	)
+	for p in portal_links:
+		customers.add(p.parent)
+
+	return list(customers)
+
 
 
 def get_active_student():
@@ -32,21 +72,24 @@ def get_active_student():
 	if not student_name:
 		return None
 
-	# Validate student belongs to current user's customer
-	party = get_party()
-	if not party:
+	# Validate student belongs to current user's customer(s)
+	customers = get_all_customers_for_user()
+	if not customers:
 		return None
 
 	try:
-		students = get_students_for_customer(party.name)
+		# Check all linked customers
+		for customer in customers:
+			students = get_students_for_customer(customer)
+			for student in students:
+				if student.get("name") == student_name and student.get("is_active"):
+					return frappe.get_doc("Student", student_name)
 
-		# Find student in customer's students list
-		for student in students:
-			if student.get("name") == student_name and student.get("is_active"):
-				return frappe.get_doc("Student", student_name)
 
-		# Student not found or not active - clear from session
+		# Student not found or not active - clear from session and cookie
 		frappe.session.active_student = None
+		if hasattr(frappe.local, "cookie_manager"):
+			frappe.local.cookie_manager.delete_cookie("active_student")
 		return None
 
 	except Exception as e:
@@ -66,26 +109,30 @@ def set_active_student(student_name):
 		dict: Success status and student info
 	"""
 	# Validate student belongs to current user
-	party = get_party()
-	if not party:
+	customers = get_all_customers_for_user()
+	if not customers:
 		frappe.throw(_("No customer account found"), title=_("Authentication Required"))
 
 	try:
-		students = get_students_for_customer(party.name)
-
 		student_found = False
 		student_obj = None
 
-		# Check if student exists and is active
-		for student in students:
-			if student.get("name") == student_name:
-				if not student.get("is_active"):
-					frappe.throw(
-						_("Student '{0}' is not active").format(student.get("student_name")),
-						title=_("Inactive Student")
-					)
-				student_found = True
-				student_obj = student
+		# Check all linked customers
+		for customer in customers:
+			students = get_students_for_customer(customer)
+			
+			for student in students:
+				if student.get("name") == student_name:
+					if not student.get("is_active"):
+						frappe.throw(
+							_("Student '{0}' is not active").format(student.get("student_name")),
+							title=_("Inactive Student")
+						)
+					student_found = True
+					student_obj = student
+					break
+			
+			if student_found:
 				break
 
 		if not student_found:
@@ -129,25 +176,44 @@ def get_customer_students():
 	Returns:
 		list: Array of student objects
 	"""
-	party = get_party()
-	if not party:
+	customers = get_all_customers_for_user()
+	if not customers:
 		return []
 
 	try:
-		customer_doc = frappe.get_doc("Customer", party.name)
-		students = []
+		all_students = []
+		
+		# Aggregate students from all customers
+		for customer in customers:
+			customer_doc = frappe.get_doc("Customer", customer)
+			
+			# Check child table students
+			if hasattr(customer_doc, 'students'):
+				for student in customer_doc.students:
+					all_students.append({
+						"student_id": student.student_id,
+						"student_name": student.student_name,
+						"school_unit": student.school_unit,
+						"grade_level": student.grade_level,
+						"is_active": student.is_active,
+						"date_of_birth": student.date_of_birth
+					})
+			
+			# Also get students linked via 'customer' field (backwards compatibility/completeness)
+			linked_students = get_students_for_customer(customer)
+			for s in linked_students:
+				# Avoid duplicates if they appear in both places
+				if not any(exist['student_id'] == s.name for exist in all_students):
+					all_students.append({
+						"student_id": s.name,
+						"student_name": s.student_name,
+						"school_unit": s.school_unit,
+						"grade_level": s.grade_level,
+						"is_active": s.is_active,
+						"date_of_birth": s.date_of_birth
+					})
 
-		for student in customer_doc.students:
-			students.append({
-				"student_id": student.student_id,
-				"student_name": student.student_name,
-				"school_unit": student.school_unit,
-				"grade_level": student.grade_level,
-				"is_active": student.is_active,
-				"date_of_birth": student.date_of_birth
-			})
-
-		return students
+		return all_students
 
 	except Exception as e:
 		frappe.log_error(f"Error getting customer students: {str(e)}")

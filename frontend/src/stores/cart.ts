@@ -269,6 +269,18 @@ export const useCartStore = defineStore('cart', () => {
     // Try to get active student from cookie first
     const storedActiveStudent = getCookie('active_student')
     activeStudent.value = storedActiveStudent ? decodeURIComponent(storedActiveStudent) : null
+
+    // Validate that the stored active student actually belongs to the user
+    // This handles the case where the user has a "stale" cookie from a previous session which is no longer valid
+    if (activeStudent.value && students.value.length > 0) {
+      const isValidStudent = students.value.some(s => s.name === activeStudent.value)
+      if (!isValidStudent) {
+        console.warn(`Active student '${activeStudent.value}' not found in user's student list. Resetting.`)
+        activeStudent.value = null
+        // Force expire the cookie
+        document.cookie = 'active_student=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+      }
+    }
     
     // If no active student, select the primary student
     if (!activeStudent.value && students.value.length > 0) {

@@ -12,6 +12,7 @@ from frappe import _
 
 from webshop.webshop.shopping_cart.cart import get_party
 from webshop.webshop.doctype.student.student import get_students_for_customer
+from webshop.webshop.shopping_cart.student_utils import get_all_customers_for_user
 
 
 @frappe.whitelist()
@@ -22,13 +23,17 @@ def get_students():
 	Returns:
 		list: Array of student objects
 	"""
-	party = get_party()
-	if not party:
+	customers = get_all_customers_for_user()
+	if not customers:
 		frappe.throw(_("No customer account found"), title=_("Authentication Required"))
 
 	try:
-		students = get_students_for_customer(party.name)
-		return students
+		all_students = []
+		for customer in customers:
+			students = get_students_for_customer(customer)
+			all_students.extend(students)
+			
+		return all_students
 
 	except Exception as e:
 		frappe.log_error(f"Error fetching students: {str(e)}")
@@ -98,18 +103,23 @@ def get_cart_by_student(student_name):
 	Returns:
 		dict: Cart quotation summary or None
 	"""
-	party = get_party()
-	if not party:
-		frappe.throw(_("No customer account found"), title=_("Authentication Required"))
-
-	# Validate student belongs to current customer
+	# Validate student belongs to current customer(s)
 	try:
-		students = get_students_for_customer(party.name)
-		student_found = False
+		customers = get_all_customers_for_user()
+		if not customers:
+			frappe.throw(_("No customer account found"), title=_("Authentication Required"))
 
-		for student in students:
-			if student.get("name") == student_name:
-				student_found = True
+		student_found = False
+		party_name = None
+
+		for customer in customers:
+			students = get_students_for_customer(customer)
+			for student in students:
+				if student.get("name") == student_name:
+					student_found = True
+					party_name = customer
+					break
+			if student_found:
 				break
 
 		if not student_found:
@@ -124,7 +134,7 @@ def get_cart_by_student(student_name):
 		"Quotation",
 		fields=["name", "grand_total", "total_qty", "currency"],
 		filters={
-			"party_name": party.name,
+			"party_name": party_name,
 			"student": student_name,
 			"order_type": "Shopping Cart",
 			"docstatus": 0
@@ -147,41 +157,43 @@ def get_all_student_carts():
 	Returns:
 		list: Array of student cart summaries
 	"""
-	party = get_party()
-	if not party:
+	customers = get_all_customers_for_user()
+	if not customers:
 		frappe.throw(_("No customer account found"), title=_("Authentication Required"))
 
 	try:
-		students = get_students_for_customer(party.name)
 		carts = []
+		
+		for customer in customers:
+			students = get_students_for_customer(customer)
 
-		for student in students:
-			# Get cart for this student
-			cart = None
-			quotation = frappe.get_all(
-				"Quotation",
-				fields=["name", "grand_total", "total_qty", "currency", "rounded_total"],
-				filters={
-					"party_name": party.name,
-					"student": student.get("name"),
-					"order_type": "Shopping Cart",
-					"docstatus": 0
-				},
-				order_by="modified desc",
-				limit_page_length=1
-			)
+			for student in students:
+				# Get cart for this student
+				cart = None
+				quotation = frappe.get_all(
+					"Quotation",
+					fields=["name", "grand_total", "total_qty", "currency", "rounded_total"],
+					filters={
+						"party_name": customer,
+						"student": student.get("name"),
+						"order_type": "Shopping Cart",
+						"docstatus": 0
+					},
+					order_by="modified desc",
+					limit_page_length=1
+				)
 
-			if quotation:
-				cart = quotation[0]
+				if quotation:
+					cart = quotation[0]
 
-			carts.append({
-				"student_name": student.get("name"),
-				"student_display_name": student.get("student_name"),
-				"school_unit": student.get("school_unit"),
-				"is_active": student.get("is_active"),
-				"is_primary": student.get("is_primary"),
-				"cart": cart
-			})
+				carts.append({
+					"student_name": student.get("name"),
+					"student_display_name": student.get("student_name"),
+					"school_unit": student.get("school_unit"),
+					"is_active": student.get("is_active"),
+					"is_primary": student.get("is_primary"),
+					"cart": cart
+				})
 
 		return carts
 
@@ -206,18 +218,20 @@ def update_student(student_name, new_student_name=None, school_unit=None, grade_
 	Returns:
 		dict: Success status
 	"""
-	party = get_party()
-	if not party:
+	customers = get_all_customers_for_user()
+	if not customers:
 		frappe.throw(_("No customer account found"), title=_("Authentication Required"))
 
 	try:
 		# Validate student belongs to current customer
-		students = get_students_for_customer(party.name)
 		student_found = False
-
-		for student in students:
-			if student.get("name") == student_name:
-				student_found = True
+		for customer in customers:
+			students = get_students_for_customer(customer)
+			for student in students:
+				if student.get("name") == student_name:
+					student_found = True
+					break
+			if student_found:
 				break
 
 		if not student_found:
@@ -264,18 +278,20 @@ def delete_student(student_name):
 	Returns:
 		dict: Success status
 	"""
-	party = get_party()
-	if not party:
+	customers = get_all_customers_for_user()
+	if not customers:
 		frappe.throw(_("No customer account found"), title=_("Authentication Required"))
 
 	try:
 		# Validate student belongs to current customer
-		students = get_students_for_customer(party.name)
 		student_found = False
-
-		for student in students:
-			if student.get("name") == student_name:
-				student_found = True
+		for customer in customers:
+			students = get_students_for_customer(customer)
+			for student in students:
+				if student.get("name") == student_name:
+					student_found = True
+					break
+			if student_found:
 				break
 
 		if not student_found:
