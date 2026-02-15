@@ -913,6 +913,12 @@ def create_payment_request_for_manual_approval(sales_order, payment_method):
 	# Create Payment Request instead of Payment Approval
 	payment_request = frappe.new_doc("Payment Request")
 
+	grand_total = sales_order.get("grand_total", 0)
+	if sales_order.disable_rounded_total:
+		grand_total = sales_order.get("grand_total", 0)
+	else:
+		grand_total = sales_order.get("rounded_total", sales_order.get("grand_total", 0))
+
 	# Standard Payment Request fields
 	payment_request.payment_request_type = "Inward"
 	payment_request.reference_doctype = "Sales Order"
@@ -920,7 +926,7 @@ def create_payment_request_for_manual_approval(sales_order, payment_method):
 	payment_request.party_type = "Customer"
 	payment_request.party = sales_order.customer
 	payment_request.party_name = sales_order.customer_name
-	payment_request.grand_total = sales_order.get("rounded_total", sales_order.get("grand_total", 0))
+	payment_request.grand_total = grand_total
 	payment_request.currency = sales_order.currency
 	payment_request.company = sales_order.company
 	payment_request.payment_method_type = payment_method.name
