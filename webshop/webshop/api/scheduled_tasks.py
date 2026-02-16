@@ -25,21 +25,22 @@ def cancel_overdue_orders():
 			fields=["name", "reference_name", "status", "payment_due_date"]
 		)
 
-		# 2. Cancel if payment_method_type IS "Transfer Bank" AND payment_proof is NOT set
-		transfer_requests_no_proof = frappe.get_all(
-			"Payment Request",
-			filters={
-				"reference_doctype": "Sales Order",
-				"docstatus": ["in", [0,1]], 
-				"status": ["not in", ["Paid", "Cancelled"]],
-				"payment_due_date": ["<", now_datetime()],
-				"payment_method_type": "Transfer Bank",
-				"payment_proof": ["is", "not set"]
-			},
-			fields=["name", "reference_name", "status", "payment_due_date"]
-		)
+		# # 2. Cancel if payment_method_type IS "Transfer Bank" AND payment_proof is NOT set
+		# transfer_requests_no_proof = frappe.get_all(
+		# 	"Payment Request",
+		# 	filters={
+		# 		"reference_doctype": "Sales Order",
+		# 		"docstatus": ["in", [0,1]], 
+		# 		"status": ["not in", ["Paid", "Cancelled"]],
+		# 		"payment_due_date": ["<", now_datetime()],
+		# 		"payment_method_type": "Transfer Bank",
+		# 		"payment_proof": ["is", "not set"]
+		# 	},
+		# 	fields=["name", "reference_name", "status", "payment_due_date"]
+		# )
 		
-		overdue_requests = non_transfer_requests + transfer_requests_no_proof
+		# overdue_requests = non_transfer_requests + transfer_requests_no_proof
+		overdue_requests = non_transfer_requests
 		
 		for pr in overdue_requests:
 			execute_cancel_order(pr)
