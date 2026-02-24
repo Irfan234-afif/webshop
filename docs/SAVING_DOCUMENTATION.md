@@ -1,7 +1,7 @@
 # Cooperative Savings Module — Architecture & Walkthrough
 
 > Documentation for the Cooperative (Koperasi) Savings module built on the Webshop app.  
-> Last updated: 2026-02-22
+> Last updated: 2026-02-24
 
 ---
 
@@ -9,9 +9,13 @@
 
 The Cooperative Savings module manages member registration, savings collection, and accounting journal entries for a cooperative (koperasi). It integrates with ERPNext's accounting system via **Journal Entries** — deliberately bypassing the Payment Entry module to avoid its strict validations against custom doctypes.
 
-### Key Design Decision
+### Key Design Decisions
 
-> ERPNext's `Payment Entry` module hardcodes validations for standard doctypes (Sales Invoice, Sales Order, etc.) and rejects custom references. After extensive research, we chose **direct Journal Entry creation** as the only sustainable approach.
+> **Journal Entry over Payment Entry** — ERPNext's `Payment Entry` module hardcodes validations for standard doctypes (Sales Invoice, Sales Order, etc.) and rejects custom references. We use direct Journal Entry creation instead.
+
+> **Frappe Workflow over Submittable** — Cooperative Member is a **non-Submittable** DocType. Member approval/rejection is controlled by the native Frappe Workflow engine ("Cooperative Registration Flow"), which provides role-based action buttons, audit trail, and optional email notifications — without custom code.
+
+> **`frappe.db.set_value()` over `doc.save()`** — When updating status/balances after payment, we use `db.set_value` directly to bypass the Workflow engine (which would revert `workflow_state` back to the previous state if `doc.save()` is called).
 
 ---
 
@@ -36,6 +40,7 @@ erDiagram
         Data nik
         Data full_name
         Select status
+        Data workflow_state
         Currency principal_saving_amount
         Currency mandatory_saving_amount
         Currency total_registration_amount
@@ -91,29 +96,42 @@ Central configuration. All amounts and accounts are sourced from here.
 | `default_bank_account` | Link → Account | Fallback bank/cash account for JE debit |
 | `company` | Link → Company | Default company |
 
-### 2.2 Cooperative Member (Submittable)
+### 2.2 Cooperative Member (Non-Submittable, Workflow-controlled)
 
 Member registration with personal data, KTP address, emergency contact, and auto-populated saving amounts.
 
-**Key fields:** `customer`, `nik`, `full_name`, `status`, `principal_saving_amount`, `mandatory_saving_amount`, `total_registration_amount`, `mandatory_saving_balance`, `voluntary_saving_balance`, `company`, `company_currency`
+> [!IMPORTANT]
+> This is **not** a Submittable DocType (`is_submittable = 0`). Status transitions are controlled entirely by the Frappe **Workflow** — not the Submit/Cancel buttons. This avoids the Submittable constraint on field edits.
 
-**Balance fields:**
+**Key fields:** `customer`, `nik`, `full_name`, `status`, `workflow_state`, `principal_saving_amount`, `mandatory_saving_amount`, `total_registration_amount`, `mandatory_saving_balance`, `voluntary_saving_balance`, `company`, `company_currency`
 
-| Field | Type | Purpose |
-|---|---|---|
-| `mandatory_saving_balance` | Currency | Running total of all paid mandatory savings (updated automatically on payment) |
-| `voluntary_saving_balance` | Currency | Running total of voluntary savings net balance: deposits − withdrawals (updated on payment) |
+**Balance fields (read-only, auto-maintained):**
 
-> Both fields are read-only, `allow_on_submit`, and maintained by the `on_payment_request_submit()` hook in `cooperative_payment.py`.
+| Field | Updated by |
+|---|---|
+| `mandatory_saving_balance` | `on_payment_request_submit()` hook when a Mandatory Saving or registration PR is paid |
+| `voluntary_saving_balance` | `on_payment_request_submit()` for deposits; `on_submit()` on Voluntary Saving for withdrawals |
 
-**Dashboard links:** Payment Request (Payment group), Mandatory Saving, Voluntary Saving (Saving group)
+**Workflow — "Cooperative Registration Flow":**
 
-**Status flow:** `Draft` → `Pending Payment` → `Active` (or `Rejected`)
+| From State | Action | To State | Role |
+|---|---|---|---|
+| Draft | Submit for Review | Pending Approval | Customer, System Manager |
+| Pending Approval | Approve | Pending Payment | System Manager |
+| Pending Approval | Reject | Rejected | System Manager |
+| Rejected | Resubmit | Pending Approval | Customer, System Manager |
+| Pending Payment | *(automatic on PR payment)* | Active | — |
+
+> The `Pending Payment → Active` transition is **not** a Workflow action — it's triggered programmatically via `frappe.db.set_value()` inside `on_payment_request_submit()`. This bypasses the Workflow engine, which would otherwise revert `workflow_state` if `doc.save()` is used.
 
 **Naming:** `COOP-.YYYY.-.#####`
 
-**Client-side buttons (Active members):**
-- **Create Next Year Saving** — manually creates Mandatory Saving for the next year
+**Dashboard links:** Payment Request (Payment group), Mandatory Saving, Voluntary Saving (Saving group)
+
+**Client-side buttons:**
+- **Create Payment Request** — shown when `status = Pending Payment` and no PR exists
+- **View Payment Request** — shown when `status = Pending Payment` and PR already exists
+- **Create Next Year Saving** — shown when `status = Active`
 
 ### 2.3 Mandatory Saving (Submittable)
 
@@ -133,7 +151,7 @@ Ad-hoc deposits or withdrawals.
 
 **Naming:** `VOL-SAV-.YYYY.-.#####`
 
-**Key fields:** `cooperative_member`, `transaction_type` (Deposit/Withdrawal), `amount`, `status`, `payment_request`, `journal_entry`
+**Key fields:** `cooperative_member`, `transaction_type` (Deposit/Withdrawal), `amount`, `status`, `payment_request`, `journal_entry`, `payment_date`
 
 ---
 
@@ -141,31 +159,34 @@ Ad-hoc deposits or withdrawals.
 
 ```mermaid
 sequenceDiagram
-    participant Admin
+    participant Member/Admin
     participant CM as Cooperative Member
+    participant WF as Workflow Engine
     participant PR as Payment Request
     participant JE as Journal Entry
     participant MS as Mandatory Saving
 
-    Admin->>CM: Create & Submit member
-    Admin->>CM: Click "Request Payment" → status = Pending Payment
-    Admin->>PR: Click "Create Payment Request" (mapped doc)
+    Member/Admin->>CM: Create & Save (Draft)
+    Member/Admin->>WF: Click "Submit for Review"
+    WF->>CM: status = Pending Approval
+
+    Member/Admin->>WF: Click "Approve" (System Manager)
+    WF->>CM: status = Pending Payment
+
+    Member/Admin->>PR: Click "Create Payment Request"
     Note over PR: Pre-filled: party, amount, reference
-    Admin->>PR: Set Mode of Payment, Save
-    Admin->>PR: Submit Payment Request
+    Member/Admin->>PR: Set Mode of Payment, Save & Submit
 
     PR->>PR: before_submit() → validate payment proof
-    PR->>PR: on_submit() → set_as_paid()
-    PR->>PR: create_payment_entry() [OVERRIDDEN]
-
+    PR->>PR: on_submit() → create_payment_entry() [OVERRIDDEN]
     PR->>JE: Create Journal Entry (Bank Entry)
     Note over JE: Debit: Bank Account<br/>Credit: Principal Saving (equity)<br/>Credit: Mandatory Saving (equity)
     JE->>JE: insert + submit → GL Entries created
     PR->>PR: db_set status = "Paid"
 
     PR->>CM: on_payment_request_submit hook
-    CM->>CM: status → "Active"
-    CM->>CM: mandatory_saving_balance += mandatory_saving_amount
+    CM->>CM: db_set status = "Active", workflow_state = "Active"
+    CM->>CM: db_set mandatory_saving_balance += mandatory_saving_amount
     CM->>MS: create_mandatory_saving_for_year(start_month=current_month)
     Note over MS: Months from registration onward only, registration month = "Paid"
 ```
@@ -216,9 +237,6 @@ sequenceDiagram
     MS->>CM: db_set mandatory_saving_balance += paid_amount
 ```
 
-> [!IMPORTANT]
-> All updates to submitted documents (Mandatory Saving, Cooperative Member) use `frappe.db.set_value()` instead of `doc.save()`. This bypasses Frappe's `_validate_update_after_submit` mechanism which silently drops field changes on submitted documents, even with `allow_on_submit = 1`.
-
 ### 3.4 Journal Entry Structure (Mandatory Saving Payment)
 
 | Row | Account | Debit | Credit |
@@ -247,17 +265,27 @@ sequenceDiagram
         PR->>JE: create_payment_entry() → JE
         Note over JE: Debit: Bank Account<br/>Credit: Voluntary Saving Account
         PR->>VS: on_payment_request_submit hook
-        VS->>VS: Status = "Approved", link JE
-        VS->>CM: voluntary_saving_balance += amount
+        VS->>VS: db_set Status = "Approved", link JE, payment_date
+        VS->>CM: db_set voluntary_saving_balance += amount
     else Withdrawal
         Admin->>VS: Create Withdrawal & Submit
         VS->>VS: validate() balance check
         VS->>JE: on_submit() creates JE directly
         Note over JE: Debit: Voluntary Saving Account<br/>Credit: Bank Account
-        VS->>VS: Status = "Approved", link JE
-        VS->>CM: voluntary_saving_balance -= amount
+        VS->>VS: db_set Status = "Approved", link JE
+        VS->>CM: db_set voluntary_saving_balance -= amount
     end
 ```
+
+### 3.6 Payment Request Cancellation
+
+When a Payment Request is **cancelled**, a `before_cancel` hook clears back-linked fields to prevent Frappe's link check from blocking cancellation:
+
+| Reference DocType | What is cleared |
+|---|---|
+| Mandatory Saving | `payment_request` field on linked Detail rows; status reverted from `Pending Payment` → `Unpaid` |
+| Voluntary Saving | `payment_request` field on the VS document |
+| Cooperative Member | `status` reverted from `Pending Payment` → `Draft` (so a new PR can be created) |
 
 ---
 
@@ -268,22 +296,41 @@ sequenceDiagram
 | File | Purpose |
 |---|---|
 | `webshop/doctype/cooperative_settings/cooperative_settings.json` | Settings schema |
-| `webshop/doctype/cooperative_member/cooperative_member.json` | Member schema (includes balance fields + dashboard links) |
-| `webshop/doctype/cooperative_member/cooperative_member.py` | Member python logic + `make_payment_request()` mapper |
+| `webshop/doctype/cooperative_member/cooperative_member.json` | Member schema (non-submittable, workflow-controlled) |
+| `webshop/doctype/cooperative_member/cooperative_member.py` | Member logic + `make_payment_request()` mapper |
 | `webshop/doctype/cooperative_member/cooperative_member.js` | Client-side buttons (Create/View Payment Request, Create Next Year Saving) |
 | `webshop/doctype/mandatory_saving/mandatory_saving.json` | Mandatory Saving schema |
 | `webshop/doctype/mandatory_saving/mandatory_saving.py` | Mandatory Saving logic + `make_payment_request()` API |
 | `webshop/doctype/mandatory_saving/mandatory_saving.js` | Client-side "Make Payment" button with unpaid month selector |
 | `webshop/doctype/mandatory_saving_detail/mandatory_saving_detail.json` | Monthly detail child table |
 | `webshop/doctype/voluntary_saving/voluntary_saving.json` | Voluntary Saving schema |
+| `webshop/doctype/voluntary_saving/voluntary_saving.py` | Voluntary Saving logic (withdrawal JE, balance updates) |
+| `webshop/doctype/voluntary_saving/voluntary_saving.js` | Client-side "Make Payment" button |
 
 ### Override & API
 
 | File | Purpose |
 |---|---|
 | `webshop/doctype/override_doctype/payment_request.py` | **Core override** — `create_payment_entry()` creates JE instead of PE |
-| `webshop/api/cooperative_payment.py` | API: registration PR, `on_payment_request_submit()` hook (balance updates via `db_set`), `create_mandatory_saving_for_year()`, `create_annual_mandatory_savings()`, `create_next_year_saving()` |
-| `webshop/api/backfill_saving_balance.py` | One-time script to backfill `mandatory_saving_balance` for existing members |
+| `webshop/api/cooperative_payment.py` | `on_payment_request_submit()` hook, `before_payment_request_cancel()` hook, `create_mandatory_saving_for_year()`, `create_annual_mandatory_savings()`, `create_next_year_saving()` |
+| `webshop/api/cooperative.py` | `register_member()`, `get_membership_status()`, `approve_member()`, `reject_member()` |
+| `webshop/api/setup_cooperative_workflow.py` | One-time manual helper — `execute()` and `sync_workflow_states()` for debugging |
+
+### Fixtures
+
+| File | Purpose |
+|---|---|
+| `webshop/fixtures/workflow.json` | "Cooperative Registration Flow" Workflow definition |
+| `webshop/fixtures/workflow_state.json` | Workflow States (Draft, Pending Approval, Pending Payment, Active, Rejected) |
+| `webshop/fixtures/workflow_action_master.json` | Workflow Actions (Submit for Review, Approve, Reject, Resubmit) |
+
+> Fixtures are synced automatically during `bench migrate` and on fresh installs via `bench install-app webshop`. To update after changing the Workflow in Frappe Desk, run `bench export-fixtures --app webshop`.
+
+### Patches
+
+| File | Purpose |
+|---|---|
+| `webshop/patches/setup_cooperative_member_workflow.py` | Data migration: resets old `docstatus=1` records to 0, backfills `workflow_state = status` for existing records |
 
 ### Hooks (`hooks.py`)
 
@@ -293,11 +340,14 @@ override_doctype_class = {
     "Payment Request": "webshop.webshop.doctype.override_doctype.payment_request.PaymentRequest",
 }
 
-# Doc event — fires after PR submit to activate member / update savings
+# Doc events
 doc_events = {
     "Payment Request": {
         "on_submit": [
             "webshop.webshop.api.cooperative_payment.on_payment_request_submit"
+        ],
+        "before_cancel": [
+            "webshop.webshop.api.cooperative_payment.before_payment_request_cancel"
         ]
     },
 }
@@ -310,38 +360,60 @@ scheduler_events = {
         ]
     }
 }
+
+# Fixtures — synced on migrate and fresh install
+fixtures = [
+    ...,
+    {"doctype": "Workflow", "filters": [["document_type", "=", "Cooperative Member"]]},
+    {"doctype": "Workflow State", "filters": [["name", "in", ["Draft", "Pending Approval", "Pending Payment", "Active", "Rejected"]]]},
+    {"doctype": "Workflow Action Master", "filters": [["name", "in", ["Submit for Review", "Approve", "Reject", "Resubmit"]]]},
+]
 ```
 
 ---
 
-## 5. What Still Needs Implementation
+## 5. Deployment
 
-### ~~Mandatory Saving — Monthly Payment Flow~~ ✅ Done
+### Fresh Install
 
-- [x] "Make Payment" button on Mandatory Saving form for unpaid months
-- [x] `create_payment_entry()` handles `reference_doctype == "Mandatory Saving"` → JE: Debit Bank ↔ Credit Mandatory Saving Account
-- [x] After payment, update the corresponding `monthly_details` row to "Paid" and set `payment_date`
-- [x] Recalculate `total_paid` / `total_unpaid` on the parent (via `db_set`)
-- [x] Update `mandatory_saving_balance` on Cooperative Member (via `db_set`)
+```bash
+bench install-app webshop
+# Fixtures (Workflow) are loaded automatically
+```
 
-### ~~Annual Rollover~~ ✅ Done
+### Existing Install / Update
 
-- [x] Scheduled job (`0 0 1 1 *`) auto-creates current year’s Mandatory Saving for all active members
-- [x] Manual "Create Next Year Saving" button on Cooperative Member form
+```bash
+bench migrate
+# Runs: fixtures sync + patch (setup_cooperative_member_workflow)
+```
 
-### ~~Dashboard~~ ✅ Done
+### Updating the Workflow
 
-- [x] Payment Request linked on Cooperative Member dashboard (Payment group)
+If you modify the Workflow in Frappe Desk (Settings → Workflow), re-export it to keep the fixture JSON in sync:
 
-### ~~Voluntary Saving — Deposit & Withdrawal~~ ✅ Done
+```bash
+bench export-fixtures --app webshop
+# Commit the updated webshop/fixtures/workflow.json
+```
 
-The `Voluntary Saving` DocType supports member-led deposits and withdrawals:
+---
 
-- **Deposit flow**: Admin creates VS (Deposit) → Submits (becomes "Pending Payment") → Clicks "Make Payment" to create Payment Request → PR is Paid → JE is automatically created (Debit Bank ↔ Credit Voluntary Saving Account) → VS status = "Approved" → `voluntary_saving_balance` increases.
-- **Withdrawal flow**: Admin creates VS (Withdrawal) → Submits → Backend validates balance → Creates JE instantly (Debit Voluntary Saving ↔ Credit Bank) → VS status = "Approved" → `voluntary_saving_balance` decreases.
-- Link `journal_entry` field is updated with the created Journal Entry in both cases.
+## 6. Completed Features
 
-### Other Enhancements
+| Feature | Status |
+|---|---|
+| Member Registration (Workflow-based) | ✅ Done |
+| Registration Payment → JE creation | ✅ Done |
+| Automatic Mandatory Saving on registration | ✅ Done |
+| Mandatory Saving monthly payment | ✅ Done |
+| Voluntary Saving deposit & withdrawal | ✅ Done |
+| Annual Saving rollover (scheduled) | ✅ Done |
+| Manual "Create Next Year Saving" button | ✅ Done |
+| Payment Request cancellation handling | ✅ Done |
+| Workflow Fixture (fresh install + migrate) | ✅ Done |
+
+## 7. Pending Enhancements
 
 - [ ] Dashboard / report for cooperative financials
 - [ ] Member-facing portal (webshop frontend) for self-service

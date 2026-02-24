@@ -9,7 +9,30 @@ from frappe.utils import flt
 class MandatorySaving(Document):
 	def validate(self):
 		self.calculate_totals()
-		
+
+	def before_cancel(self):
+		# Cancel all linked Payment Requests BEFORE Frappe's link check blocks cancellation
+		payment_requests = frappe.get_all(
+			"Payment Request",
+			filters={"reference_doctype": "Mandatory Saving", "reference_name": self.name},
+			fields=["name", "docstatus"],
+		)
+		for pr in payment_requests:
+			pr_doc = frappe.get_doc("Payment Request", pr.name)
+			if pr_doc.docstatus == 1:
+				pr_doc.flags.ignore_permissions = True
+				pr_doc.cancel()
+			elif pr_doc.docstatus == 0:
+				frappe.delete_doc("Payment Request", pr.name, ignore_permissions=True)
+
+		# Reset Pending Payment rows back to Unpaid
+		for row in self.get("monthly_details"):
+			if row.status == "Pending Payment":
+				frappe.db.set_value("Mandatory Saving Detail", row.name, {
+					"status": "Unpaid",
+					"payment_request": None,
+				})
+
 	def calculate_totals(self):
 		total_paid = 0
 		total_unpaid = 0

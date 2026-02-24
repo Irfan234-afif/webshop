@@ -70,12 +70,16 @@ def on_payment_request_submit(doc, method=None):
 		# Payment is completed/approved, activate member
 		member = frappe.get_doc("Cooperative Member", doc.reference_name)
 		if member.status != "Active":
-			member.status = "Active"
-			
-			# Update mandatory saving balance with the registration's mandatory saving amount (1 month)
-			member.mandatory_saving_balance = flt(member.mandatory_saving_balance) + flt(member.mandatory_saving_amount)
-			member.save(ignore_permissions=True)
-			
+			new_balance = flt(member.mandatory_saving_balance) + flt(member.mandatory_saving_amount)
+
+			# Use db.set_value to bypass the Workflow engine, which would revert
+			# workflow_state back to "Pending Payment" if we used doc.save()
+			frappe.db.set_value("Cooperative Member", member.name, {
+				"status": "Active",
+				"workflow_state": "Active",
+				"mandatory_saving_balance": new_balance,
+			}, update_modified=False)
+
 			# Create Mandatory Saving for this year and mark registration month as Paid
 			current_month = getdate(doc.get("transaction_date") or nowdate()).month
 			create_mandatory_saving_for_year(member.name, getdate(doc.get("transaction_date") or nowdate()).year, is_registration=True, start_month=current_month)
@@ -135,6 +139,53 @@ def on_payment_request_submit(doc, method=None):
 
 
 
+def before_payment_request_cancel(doc, method=None):
+	"""
+	Hook for Payment Request before_cancel.
+	Clears back-link fields that would cause Frappe's link check to
+	block the cancellation of the Payment Request.
+	"""
+	if doc.reference_doctype == "Mandatory Saving":
+		# Clear payment_request link from any Mandatory Saving Detail rows
+		detail_rows = frappe.get_all(
+			"Mandatory Saving Detail",
+			filters={"payment_request": doc.name},
+			fields=["name", "status"],
+		)
+		for row in detail_rows:
+			new_status = "Unpaid" if row.status == "Pending Payment" else row.status
+			frappe.db.set_value(
+				"Mandatory Saving Detail",
+				row.name,
+				{"payment_request": None, "status": new_status},
+				update_modified=False,
+			)
+
+	elif doc.reference_doctype == "Voluntary Saving":
+		# Clear payment_request link from the Voluntary Saving doc
+		if frappe.db.exists("Voluntary Saving", doc.reference_name):
+			frappe.db.set_value(
+				"Voluntary Saving",
+				doc.reference_name,
+				"payment_request",
+				None,
+				update_modified=False,
+			)
+
+	elif doc.reference_doctype == "Cooperative Member":
+		# Reset member status back to Draft if payment is being cancelled
+		if frappe.db.exists("Cooperative Member", doc.reference_name):
+			member_status = frappe.db.get_value("Cooperative Member", doc.reference_name, "status")
+			if member_status == "Pending Payment":
+				frappe.db.set_value(
+					"Cooperative Member",
+					doc.reference_name,
+					"status",
+					"Draft",
+					update_modified=False,
+				)
+
+
 def create_mandatory_saving_for_year(member_name, year, is_registration=False, start_month=1):
 	"""
 	Create Mandatory Saving record for a member for a specific year
@@ -188,7 +239,7 @@ def create_annual_mandatory_savings():
 	
 	active_members = frappe.get_all(
 		"Cooperative Member",
-		filters={"docstatus": 1, "status": "Active"},
+		filters={"status": "Active"},
 		fields=["name"]
 	)
 	

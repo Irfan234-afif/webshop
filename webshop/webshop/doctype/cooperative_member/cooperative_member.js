@@ -4,7 +4,7 @@
 frappe.ui.form.on('Cooperative Member', {
 	refresh: function(frm) {
 		// Only show button if status is Pending Payment and no existing payment request
-		if (frm.doc.status === 'Pending Payment' && frm.doc.docstatus === 1) {
+		if (frm.doc.status === 'Pending Payment') {
 			// Check if there is already a payment request
 			frappe.db.get_list('Payment Request', {
 				filters: {
@@ -25,15 +25,8 @@ frappe.ui.form.on('Cooperative Member', {
 			});
 		}
 		
-		if (frm.doc.status === 'Draft') {
-		    frm.add_custom_button(__('Request Payment'), function() {
-		        frm.set_value('status', 'Pending Payment');
-		        frm.save();
-		    });
-		}
-
 		// Show "Create Next Year Saving" button for active members
-		if (frm.doc.status === 'Active' && frm.doc.docstatus === 1) {
+		if (frm.doc.status === 'Active') {
 			frm.add_custom_button(__('Create Next Year Saving'), function() {
 				frappe.call({
 					method: 'webshop.webshop.api.cooperative_payment.create_next_year_saving',

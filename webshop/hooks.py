@@ -151,6 +151,9 @@ doc_events = {
     "Payment Request": {
         "on_submit": [
             "webshop.webshop.api.cooperative_payment.on_payment_request_submit"
+        ],
+        "before_cancel": [
+            "webshop.webshop.api.cooperative_payment.before_payment_request_cancel"
         ]
     },
     "Tax Rule": {
@@ -169,5 +172,17 @@ has_website_permission = {
 fixtures = [
     "Grade",
     "School Unit",
-    "Item Attribute"
+    "Item Attribute",
+    {
+        "doctype": "Workflow",
+        "filters": [["document_type", "=", "Cooperative Member"]]
+    },
+    {
+        "doctype": "Workflow State",
+        "filters": [["name", "in", ["Draft", "Pending Approval", "Pending Payment", "Active", "Rejected"]]]
+    },
+    {
+        "doctype": "Workflow Action Master",
+        "filters": [["name", "in", ["Submit for Review", "Approve", "Reject", "Resubmit"]]]
+    }
 ]

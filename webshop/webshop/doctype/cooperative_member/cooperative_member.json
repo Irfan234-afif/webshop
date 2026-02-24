@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "COOP-.YYYY.-.#####",
- "creation": "2026-02-21 20:00:23",
+ "creation": "2026-02-24 02:44:03.686181",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -46,8 +46,7 @@
   "sb_saving_balance",
   "mandatory_saving_balance",
   "cb_saving_balance",
-  "voluntary_saving_balance",
-  "amended_from"
+  "voluntary_saving_balance"
  ],
  "fields": [
   {
@@ -244,11 +243,12 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Status",
+   "no_copy": 1,
    "options": "Draft\nPending Payment\nPending Approval\nActive\nRejected",
    "reqd": 1
   },
@@ -256,6 +256,7 @@
    "fieldname": "principal_saving_amount",
    "fieldtype": "Currency",
    "label": "Principal Saving Amount",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -266,12 +267,14 @@
    "fieldname": "mandatory_saving_amount",
    "fieldtype": "Currency",
    "label": "Mandatory Saving Amount",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "total_registration_amount",
    "fieldtype": "Currency",
    "label": "Total Registration Amount",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -280,11 +283,11 @@
    "label": "Savings Balance"
   },
   {
-   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "mandatory_saving_balance",
    "fieldtype": "Currency",
    "label": "Mandatory Saving Balance",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -292,25 +295,14 @@
    "fieldtype": "Column Break"
   },
   {
-   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "voluntary_saving_balance",
    "fieldtype": "Currency",
    "label": "Voluntary Saving Balance",
-   "read_only": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
    "no_copy": 1,
-   "options": "Cooperative Member",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
+   "read_only": 1
   }
  ],
- "is_submittable": 1,
  "links": [
   {
    "group": "Saving",
@@ -328,7 +320,7 @@
    "link_fieldname": "reference_name"
   }
  ],
- "modified": "2026-02-22 14:49:04.006850",
+ "modified": "2026-02-24 21:18:52.561933",
  "modified_by": "Administrator",
  "module": "Webshop",
  "name": "Cooperative Member",
@@ -336,18 +328,17 @@
  "owner": "Administrator",
  "permissions": [
   {
-   "cancel": 1,
    "create": 1,
+   "delete": 1,
    "read": 1,
    "role": "System Manager",
-   "submit": 1,
+   "select": 1,
    "write": 1
   },
   {
    "create": 1,
    "read": 1,
    "role": "Customer",
-   "submit": 1,
    "write": 1
   }
  ],
@@ -356,6 +347,27 @@
  "show_title_field_in_link": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Gray",
+   "title": "Draft"
+  },
+  {
+   "color": "Orange",
+   "title": "Pending Approval"
+  },
+  {
+   "color": "Yellow",
+   "title": "Pending Payment"
+  },
+  {
+   "color": "Green",
+   "title": "Active"
+  },
+  {
+   "color": "Red",
+   "title": "Rejected"
+  }
+ ],
  "title_field": "full_name"
 }

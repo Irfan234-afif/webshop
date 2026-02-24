@@ -1,122 +1,146 @@
 {
-    "actions": [],
-    "allow_rename": 1,
-    "creation": "2026-02-21 20:00:23",
-    "doctype": "DocType",
-    "engine": "InnoDB",
-    "module": "Webshop",
-    "name": "Voluntary Saving",
-    "owner": "Administrator",
-    "modified": "2026-02-21 20:00:23",
-    "modified_by": "Administrator",
-    "autoname": "VOL-SAV-.YYYY.-.#####",
-    "fields": [
-        {
-            "fieldname": "cooperative_member",
-            "fieldtype": "Link",
-            "label": "Cooperative Member",
-            "options": "Cooperative Member",
-            "reqd": 1,
-            "set_only_once": 1
-        },
-        {
-            "fieldname": "customer",
-            "fieldtype": "Link",
-            "label": "Customer",
-            "options": "Customer",
-            "reqd": 1,
-            "read_only": 1,
-            "fetch_from": "cooperative_member.customer"
-        },
-        {
-            "fieldname": "transaction_type",
-            "fieldtype": "Select",
-            "label": "Transaction Type",
-            "options": "Deposit\nWithdrawal",
-            "reqd": 1,
-            "set_only_once": 1
-        },
-        {
-            "fieldname": "amount",
-            "fieldtype": "Currency",
-            "label": "Amount",
-            "reqd": 1,
-            "set_only_once": 1
-        },
-        {
-            "fieldname": "cb_main",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "status",
-            "fieldtype": "Select",
-            "label": "Status",
-            "options": "Draft\nPending Payment\nPending Approval\nApproved\nRejected",
-            "default": "Draft",
-            "reqd": 1
-        },
-        {
-            "fieldname": "payment_request",
-            "fieldtype": "Link",
-            "label": "Payment Request",
-            "options": "Payment Request",
-            "read_only": 1
-        },
-        {
-            "fieldname": "journal_entry",
-            "fieldtype": "Link",
-            "label": "Journal Entry",
-            "options": "Journal Entry",
-            "read_only": 1
-        },
-        {
-            "fieldname": "payment_date",
-            "fieldtype": "Date",
-            "label": "Payment Date",
-            "read_only": 1
-        },
-        {
-            "fieldname": "sb_notes",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "notes",
-            "fieldtype": "Small Text",
-            "label": "Notes"
-        }
-    ],
-    "permissions": [
-        {
-            "role": "System Manager",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "submit": 1,
-            "cancel": 1,
-            "amend": 0
-        },
-        {
-            "role": "Customer",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "submit": 1,
-            "cancel": 0,
-            "amend": 0
-        }
-    ],
-    "is_submittable": 1,
-    "field_order": [
-        "cooperative_member",
-        "customer",
-        "transaction_type",
-        "amount",
-        "cb_main",
-        "status",
-        "payment_request",
-        "journal_entry",
-        "payment_date",
-        "sb_notes",
-        "notes"
-    ]
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "VOL-SAV-.YYYY.-.#####",
+ "creation": "2026-02-21 20:00:23",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "cooperative_member",
+  "customer",
+  "transaction_type",
+  "amount",
+  "cb_main",
+  "status",
+  "payment_request",
+  "journal_entry",
+  "payment_date",
+  "sb_notes",
+  "notes",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "cooperative_member",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Cooperative Member",
+   "options": "Cooperative Member",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fetch_from": "cooperative_member.customer",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "transaction_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Transaction Type",
+   "options": "Deposit\nWithdrawal",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "cb_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nPending Payment\nPending Approval\nApproved\nRejected",
+   "reqd": 1
+  },
+  {
+   "fieldname": "payment_request",
+   "fieldtype": "Link",
+   "label": "Payment Request",
+   "options": "Payment Request",
+   "read_only": 1
+  },
+  {
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "label": "Journal Entry",
+   "options": "Journal Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_date",
+   "fieldtype": "Date",
+   "label": "Payment Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_notes",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Voluntary Saving",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-02-24 20:52:55.529975",
+ "modified_by": "Administrator",
+ "module": "Webshop",
+ "name": "Voluntary Saving",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Customer",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "select": 1,
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
 }

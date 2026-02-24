@@ -12,7 +12,32 @@ class VoluntarySaving(Document):
 			member = frappe.get_doc("Cooperative Member", self.cooperative_member)
 			if self.amount > member.voluntary_saving_balance:
 				frappe.throw(_("Withdrawal amount cannot exceed available balance ({0})").format(member.voluntary_saving_balance))
-				
+
+	def before_cancel(self):
+		# Cancel linked Payment Request BEFORE Frappe's link check blocks cancellation
+		linked_prs = frappe.get_all(
+			"Payment Request",
+			filters={"reference_doctype": "Voluntary Saving", "reference_name": self.name},
+			fields=["name", "docstatus"],
+		)
+		for pr in linked_prs:
+			pr_doc = frappe.get_doc("Payment Request", pr.name)
+			if pr_doc.docstatus == 1:
+				pr_doc.flags.ignore_permissions = True
+				pr_doc.cancel()
+			elif pr_doc.docstatus == 0:
+				frappe.delete_doc("Payment Request", pr.name, ignore_permissions=True)
+
+		# Cancel linked Journal Entry and reverse member balance (for Withdrawals)
+		if self.transaction_type == "Withdrawal" and self.get("journal_entry"):
+			je_doc = frappe.get_doc("Journal Entry", self.journal_entry)
+			if je_doc.docstatus == 1:
+				je_doc.cancel()
+			# Reverse the member balance
+			member = frappe.get_doc("Cooperative Member", self.cooperative_member)
+			member.voluntary_saving_balance += self.amount
+			member.save(ignore_permissions=True)
+
 	def on_submit(self):
 		if self.transaction_type == "Withdrawal":
 			# Create JE directly for withdrawal

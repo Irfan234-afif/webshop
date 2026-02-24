@@ -118,6 +118,7 @@ def approve_member(member_name):
 		frappe.throw(_("Cannot approve a rejected member"))
 		
 	member.status = "Active"
+	member.workflow_state = "Active"
 	# Update approval information if fields existed
 	
 	member.save(ignore_permissions=True)
@@ -139,6 +140,7 @@ def reject_member(member_name, reason=None):
 		frappe.throw(_("Cannot reject an active member"))
 		
 	member.status = "Rejected"
+	member.workflow_state = "Rejected"
 	member.save(ignore_permissions=True)
 	
 	return {"status": "success", "message": _("Member rejected")}
