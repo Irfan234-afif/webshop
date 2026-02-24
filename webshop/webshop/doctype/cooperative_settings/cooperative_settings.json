@@ -1,0 +1,96 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-02-21 20:00:23",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "principal_saving_amount",
+  "mandatory_saving_amount",
+  "principal_saving_account",
+  "mandatory_saving_account",
+  "voluntary_saving_account",
+  "default_bank_account",
+  "company"
+ ],
+ "fields": [
+  {
+   "default": "250000",
+   "fieldname": "principal_saving_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Principal Saving Amount",
+   "reqd": 1
+  },
+  {
+   "default": "50000",
+   "fieldname": "mandatory_saving_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Mandatory Saving Amount",
+   "reqd": 1
+  },
+  {
+   "description": "Equity account for Principal Savings",
+   "fieldname": "principal_saving_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Principal Saving Account",
+   "link_filters": "[[\"Account\",\"root_type\",\"=\",\"Equity\"]]",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "description": "Equity account for Mandatory Savings",
+   "fieldname": "mandatory_saving_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Mandatory Saving Account",
+   "link_filters": "[[\"Account\",\"root_type\",\"=\",\"Equity\"]]",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "description": "Equity account for Voluntary Savings",
+   "fieldname": "voluntary_saving_account",
+   "fieldtype": "Link",
+   "label": "Voluntary Saving Account",
+   "link_filters": "[[\"Account\",\"root_type\",\"=\",\"Equity\"]]",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "default_bank_account",
+   "fieldtype": "Link",
+   "label": "Default Bank Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-02-21 20:34:52.998569",
+ "modified_by": "Administrator",
+ "module": "Webshop",
+ "name": "Cooperative Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

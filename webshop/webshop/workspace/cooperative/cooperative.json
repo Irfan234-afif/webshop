@@ -1,0 +1,96 @@
+{
+ "app": "webshop",
+ "charts": [],
+ "content": "[{\"id\": \"h1\", \"type\": \"header\", \"data\": {\"text\": \"Cooperative Management\", \"level\": 2}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Coop Settings\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Coop Members\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mandatory Savings\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Voluntary Savings\", \"col\": 3}}]",
+ "creation": "2026-02-21 20:44:14.622887",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "icon": "users",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Cooperative",
+ "link_type": "DocType",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Coop Settings",
+   "link_count": 0,
+   "link_to": "Cooperative Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Coop Members",
+   "link_count": 0,
+   "link_to": "Cooperative Member",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mandatory Savings",
+   "link_count": 0,
+   "link_to": "Mandatory Saving",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Voluntary Savings",
+   "link_count": 0,
+   "link_to": "Voluntary Saving",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-02-21 20:48:26.009769",
+ "modified_by": "Administrator",
+ "module": "Webshop",
+ "name": "Cooperative",
+ "number_cards": [],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 0.0,
+ "shortcuts": [
+  {
+   "doc_view": "",
+   "label": "Coop Settings",
+   "link_to": "Cooperative Settings",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Coop Members",
+   "link_to": "Cooperative Member",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Mandatory Savings",
+   "link_to": "Mandatory Saving",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Voluntary Savings",
+   "link_to": "Voluntary Saving",
+   "type": "DocType"
+  }
+ ],
+ "title": "Cooperative",
+ "type": "Workspace"
+}

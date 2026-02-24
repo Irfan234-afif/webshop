@@ -19,11 +19,125 @@ class PaymentRequest(OriginalPaymentRequest):
 
     def validate(self):
         """Extended validation for webshop payment approval workflow"""
-        super().validate()
+        
+        is_coop_doc = self.reference_doctype in ["Cooperative Member", "Mandatory Saving", "Voluntary Saving"]
+        
+        if is_coop_doc:
+            # Bypass ERPNext's strict standard validate routines which checks for standard doctypes and totals
+            if self.get("__islocal"):
+                self.status = "Draft"
+            if not self.reference_doctype or not self.reference_name:
+                frappe.throw(_("To create a Payment Request reference document is required"))
+            if self.grand_total == 0:
+                frappe.throw(_("Grand Total cannot be zero"))
+        else:
+            # Handle normal Sales Orders and Invoices
+            super().validate()
 
         # Additional validation for webshop manual payments
         if self.is_webshop_manual_payment():
             self.validate_payment_proof_on_submit()
+
+    def create_payment_entry(self, submit=True):
+        """
+        Override to create a Journal Entry instead of Payment Entry for Cooperative doctypes.
+        
+        This avoids all ERPNext Payment Entry validations that are hardcoded for
+        Sales Order/Invoice doctypes, while still recording proper accounting entries.
+        """
+        is_coop_doc = self.reference_doctype in ["Cooperative Member", "Mandatory Saving", "Voluntary Saving"]
+        
+        if not is_coop_doc:
+            return super().create_payment_entry(submit=submit)
+
+        frappe.flags.ignore_account_permission = True
+        
+        settings = frappe.get_cached_doc("Cooperative Settings")
+        ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+        company = ref_doc.get("company") or settings.company
+        
+        je = frappe.new_doc("Journal Entry")
+        je.voucher_type = "Bank Entry"
+        je.company = company
+        je.posting_date = nowdate()
+        je.cheque_no = self.name
+        je.cheque_date = nowdate()
+        je.user_remark = f"Payment for {self.reference_doctype} {self.reference_name} via Payment Request {self.name}"
+        
+        # Determine Bank Account
+        bank_account = None
+        if self.mode_of_payment:
+            bank_account = frappe.db.get_value(
+                "Mode of Payment Account",
+                {"parent": self.mode_of_payment, "company": company},
+                "default_account"
+            )
+            
+        if not bank_account:
+            bank_account = settings.default_bank_account
+            
+        if not bank_account:
+            frappe.throw(_("Please set a Default Bank Account in Cooperative Settings or Mode of Payment Account"))
+        
+        if self.reference_doctype == "Cooperative Member":
+            member = ref_doc
+            
+            # Row 1: Debit Bank Account (money coming in)
+            je.append("accounts", {
+                "account": bank_account,
+                "debit_in_account_currency": member.total_registration_amount,
+                "credit_in_account_currency": 0,
+            })
+            
+            # Row 2: Credit Principal Saving Account (equity)
+            je.append("accounts", {
+                "account": settings.principal_saving_account,
+                "debit_in_account_currency": 0,
+                "credit_in_account_currency": member.principal_saving_amount,
+            })
+            
+            # Row 3: Credit Mandatory Saving Account (equity)
+            je.append("accounts", {
+                "account": settings.mandatory_saving_account,
+                "debit_in_account_currency": 0,
+                "credit_in_account_currency": member.mandatory_saving_amount,
+            })
+        
+        elif self.reference_doctype == "Mandatory Saving":
+            # Debit Bank, Credit Mandatory Saving
+            je.append("accounts", {
+                "account": bank_account,
+                "debit_in_account_currency": self.grand_total,
+                "credit_in_account_currency": 0,
+            })
+            je.append("accounts", {
+                "account": settings.mandatory_saving_account,
+                "debit_in_account_currency": 0,
+                "credit_in_account_currency": self.grand_total,
+            })
+        
+        elif self.reference_doctype == "Voluntary Saving":
+            # Debit Bank, Credit Voluntary Saving
+            je.append("accounts", {
+                "account": bank_account,
+                "debit_in_account_currency": self.grand_total,
+                "credit_in_account_currency": 0,
+            })
+            je.append("accounts", {
+                "account": settings.voluntary_saving_account,
+                "debit_in_account_currency": 0,
+                "credit_in_account_currency": self.grand_total,
+            })
+        
+        if submit:
+            je.insert(ignore_permissions=True)
+            je.submit()
+        
+        # Mark Payment Request as Paid
+        self.db_set("status", "Paid", update_modified=False)
+        self.db_set("outstanding_amount", 0, update_modified=False)
+        
+        return je
 
     def before_submit(self):
         """Capture admin approval metadata and set mode_of_payment before submission"""

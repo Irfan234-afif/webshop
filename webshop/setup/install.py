@@ -79,7 +79,6 @@ def add_custom_fields():
 				"label": "Student",
 				"options": "Student",
 				"insert_after": "school_section",
-				"read_only": 1,
 				"depends_on": "eval:doc.order_type=='Shopping Cart'"
 			},
 			{
@@ -175,7 +174,6 @@ def add_custom_fields():
 				"label": "Student",
 				"options": "Student",
 				"insert_after": "school_section",
-				"read_only": 1
 			},
 			{
 				"fieldname": "delivery_time",
@@ -183,7 +181,6 @@ def add_custom_fields():
 				"label": "Delivery Time",
 				"insert_after": "delivery_date",
 				"depends_on": "eval:doc.order_type=='Shopping Cart'",
-				"read_only": 1
 			},
 			{
 				"fieldname": "checkout_section",
@@ -198,7 +195,6 @@ def add_custom_fields():
 				"label": "Jenis Pengambilan",
 				"options": "\nAmbil di koperasi\nAmbil secara online",
 				"insert_after": "checkout_section",
-				"read_only": 1
 			},
 			{
 				"fieldname": "column_break_checkout",
@@ -220,7 +216,6 @@ def add_custom_fields():
 				"insert_after": "student",
 				"depends_on": "eval:doc.order_type=='Shopping Cart'",
     			"fetch_from": "student.school_unit",
-    			"read_only": 1
 			},
 			{
 				"fieldname": "ecommerce_delivery_section",

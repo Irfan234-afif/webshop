@@ -1,0 +1,107 @@
+{
+    "actions": [],
+    "allow_rename": 1,
+    "creation": "2026-02-21 20:00:23",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "module": "Webshop",
+    "name": "Mandatory Saving",
+    "owner": "Administrator",
+    "modified": "2026-02-21 20:00:23",
+    "modified_by": "Administrator",
+    "autoname": "format:{cooperative_member}-{year}",
+    "fields": [
+        {
+            "fieldname": "cooperative_member",
+            "fieldtype": "Link",
+            "label": "Cooperative Member",
+            "options": "Cooperative Member",
+            "reqd": 1,
+            "set_only_once": 1
+        },
+        {
+            "fieldname": "customer",
+            "fieldtype": "Link",
+            "label": "Customer",
+            "options": "Customer",
+            "reqd": 1,
+            "read_only": 1,
+            "fetch_from": "cooperative_member.customer"
+        },
+        {
+            "fieldname": "year",
+            "fieldtype": "Int",
+            "label": "Year",
+            "reqd": 1,
+            "set_only_once": 1
+        },
+        {
+            "fieldname": "cb_main",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "amount_per_month",
+            "fieldtype": "Currency",
+            "label": "Amount per Month",
+            "reqd": 1,
+            "read_only": 1
+        },
+        {
+            "allow_on_submit": 1,
+            "fieldname": "total_paid",
+            "fieldtype": "Currency",
+            "label": "Total Paid",
+            "read_only": 1
+        },
+        {
+            "allow_on_submit": 1,
+            "fieldname": "total_unpaid",
+            "fieldtype": "Currency",
+            "label": "Total Unpaid",
+            "read_only": 1
+        },
+        {
+            "fieldname": "sb_details",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "monthly_details",
+            "fieldtype": "Table",
+            "label": "Monthly Details",
+            "options": "Mandatory Saving Detail",
+            "reqd": 1
+        }
+    ],
+    "permissions": [
+        {
+            "role": "System Manager",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "submit": 1,
+            "cancel": 1,
+            "amend": 0
+        },
+        {
+            "role": "Customer",
+            "read": 1,
+            "write": 0,
+            "create": 0,
+            "submit": 0,
+            "cancel": 0,
+            "amend": 0
+        }
+    ],
+    "is_submittable": 1,
+    "field_order": [
+        "cooperative_member",
+        "customer",
+        "year",
+        "cb_main",
+        "amount_per_month",
+        "total_paid",
+        "total_unpaid",
+        "sb_details",
+        "monthly_details"
+    ]
+}

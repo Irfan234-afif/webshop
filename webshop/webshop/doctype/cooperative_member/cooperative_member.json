@@ -1,0 +1,361 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "COOP-.YYYY.-.#####",
+ "creation": "2026-02-21 20:00:23",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sb_personal",
+  "customer",
+  "nik",
+  "ktp_photo",
+  "cb_personal_1",
+  "full_name",
+  "place_of_birth",
+  "date_of_birth",
+  "gender",
+  "cb_personal_2",
+  "occupation",
+  "marital_status",
+  "email",
+  "phone_number",
+  "relationship_with_cooperative",
+  "sb_address",
+  "province",
+  "city",
+  "district",
+  "cb_address",
+  "sub_district",
+  "postal_code",
+  "full_address",
+  "sb_emergency",
+  "emergency_contact_name",
+  "emergency_contact_phone",
+  "cb_emergency",
+  "emergency_contact_relationship",
+  "emergency_contact_address",
+  "sb_registration",
+  "company",
+  "company_currency",
+  "status",
+  "principal_saving_amount",
+  "cb_registration",
+  "mandatory_saving_amount",
+  "total_registration_amount",
+  "sb_saving_balance",
+  "mandatory_saving_balance",
+  "cb_saving_balance",
+  "voluntary_saving_balance",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "sb_personal",
+   "fieldtype": "Section Break",
+   "label": "Personal Information"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "nik",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "NIK",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "ktp_photo",
+   "fieldtype": "Attach Image",
+   "label": "KTP Photo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_personal_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Full Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "place_of_birth",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Place of Birth",
+   "reqd": 1
+  },
+  {
+   "fieldname": "date_of_birth",
+   "fieldtype": "Date",
+   "label": "Date of Birth",
+   "reqd": 1
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_personal_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "occupation",
+   "fieldtype": "Data",
+   "label": "Occupation",
+   "reqd": 1
+  },
+  {
+   "fieldname": "marital_status",
+   "fieldtype": "Select",
+   "label": "Marital Status",
+   "options": "Single\nMarried\nWidowed\nDivorced",
+   "reqd": 1
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email",
+   "reqd": 1
+  },
+  {
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "relationship_with_cooperative",
+   "fieldtype": "Data",
+   "label": "Relationship with Cooperative",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sb_address",
+   "fieldtype": "Section Break",
+   "label": "KTP Address"
+  },
+  {
+   "fieldname": "province",
+   "fieldtype": "Data",
+   "label": "Province",
+   "reqd": 1
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City",
+   "reqd": 1
+  },
+  {
+   "fieldname": "district",
+   "fieldtype": "Data",
+   "label": "District",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_address",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sub_district",
+   "fieldtype": "Data",
+   "label": "Sub District",
+   "reqd": 1
+  },
+  {
+   "fieldname": "postal_code",
+   "fieldtype": "Data",
+   "label": "Postal Code",
+   "reqd": 1
+  },
+  {
+   "fieldname": "full_address",
+   "fieldtype": "Small Text",
+   "label": "Full Address",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sb_emergency",
+   "fieldtype": "Section Break",
+   "label": "Emergency Contact"
+  },
+  {
+   "fieldname": "emergency_contact_name",
+   "fieldtype": "Data",
+   "label": "Contact Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "emergency_contact_phone",
+   "fieldtype": "Data",
+   "label": "Contact Phone",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_emergency",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "emergency_contact_relationship",
+   "fieldtype": "Data",
+   "label": "Relationship",
+   "reqd": 1
+  },
+  {
+   "fieldname": "emergency_contact_address",
+   "fieldtype": "Small Text",
+   "label": "Contact Address",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sb_registration",
+   "fieldtype": "Section Break",
+   "label": "Registration"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "company_currency",
+   "fieldtype": "Link",
+   "label": "Company Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nPending Payment\nPending Approval\nActive\nRejected",
+   "reqd": 1
+  },
+  {
+   "fieldname": "principal_saving_amount",
+   "fieldtype": "Currency",
+   "label": "Principal Saving Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_registration",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mandatory_saving_amount",
+   "fieldtype": "Currency",
+   "label": "Mandatory Saving Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_registration_amount",
+   "fieldtype": "Currency",
+   "label": "Total Registration Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_saving_balance",
+   "fieldtype": "Section Break",
+   "label": "Savings Balance"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "mandatory_saving_balance",
+   "fieldtype": "Currency",
+   "label": "Mandatory Saving Balance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_saving_balance",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "voluntary_saving_balance",
+   "fieldtype": "Currency",
+   "label": "Voluntary Saving Balance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Cooperative Member",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [
+  {
+   "group": "Saving",
+   "link_doctype": "Mandatory Saving",
+   "link_fieldname": "cooperative_member"
+  },
+  {
+   "group": "Saving",
+   "link_doctype": "Voluntary Saving",
+   "link_fieldname": "cooperative_member"
+  },
+  {
+   "group": "Payment",
+   "link_doctype": "Payment Request",
+   "link_fieldname": "reference_name"
+  }
+ ],
+ "modified": "2026-02-22 14:49:04.006850",
+ "modified_by": "Administrator",
+ "module": "Webshop",
+ "name": "Cooperative Member",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "read": 1,
+   "role": "System Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Customer",
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "full_name",
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "full_name"
+}

@@ -39,7 +39,12 @@ update_website_context = [
 scheduler_events = {
 	"hourly": [
 		"webshop.webshop.api.scheduled_tasks.cancel_overdue_orders"
-	]
+	],
+	"cron": {
+		"0 0 1 1 *": [
+			"webshop.webshop.api.cooperative_payment.create_annual_mandatory_savings"
+		]
+	}
 }
 
 website_generators = ["Website Item", "Item Group"]
@@ -141,6 +146,11 @@ doc_events = {
         "on_submit": [
             "webshop.webshop.doctype.return_request.return_request.update_return_request_on_si_submit",
             "webshop.webshop.api.sales_order_return.close_so_on_full_return"
+        ]
+    },
+    "Payment Request": {
+        "on_submit": [
+            "webshop.webshop.api.cooperative_payment.on_payment_request_submit"
         ]
     },
     "Tax Rule": {
