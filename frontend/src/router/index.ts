@@ -229,10 +229,28 @@ const router = createRouter({
     },
     {
       path: '/member',
-      name: 'member-coming-soon',
-      component: () => import('../views/ComingSoon.vue'),
+      name: 'member',
+      component: () => import('../views/Cooperative/CooperativeMembershipPage.vue'),
       meta: {
         title: 'Anggota Koperasi',
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/member/register',
+      name: 'member-register',
+      component: () => import('../views/Cooperative/CooperativeRegisterPage.vue'),
+      meta: {
+        title: 'Daftar Anggota Koperasi',
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/member/payment',
+      name: 'member-payment',
+      component: () => import('../views/Cooperative/CooperativePaymentPage.vue'),
+      meta: {
+        title: 'Pembayaran Pendaftaran Koperasi',
         requiresAuth: true
       }
     },

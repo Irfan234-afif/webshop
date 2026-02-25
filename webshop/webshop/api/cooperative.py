@@ -37,13 +37,15 @@ def register_member(data):
 		frappe.throw(_("Cooperative savings amounts are not configured completely."))
 		
 	# Get Customer
-	customer = frappe.db.get_value("Customer", {"contact_email": frappe.session.user}, "name")
-	if not customer:
+	from webshop.webshop.shopping_cart.cart import get_party
+	customer_doc = get_party()
+	if not customer_doc:
 		frappe.throw(_("Customer profile not found for your account. Please complete your profile first."))
+	customer_name = customer_doc.name
 		
 	# Create Member Doc
 	member = frappe.new_doc("Cooperative Member")
-	member.customer = customer
+	member.customer = customer_name
 	
 	# Mapping fields
 	fields_to_map = [
@@ -70,7 +72,7 @@ def register_member(data):
 	# Insert documentation
 	member.insert(ignore_permissions=True)
 	
-	return member.name
+	return {"name": member.name, "status": "success"}
 
 @frappe.whitelist()
 def get_membership_status():
@@ -144,3 +146,129 @@ def reject_member(member_name, reason=None):
 	member.save(ignore_permissions=True)
 	
 	return {"status": "success", "message": _("Member rejected")}
+
+@frappe.whitelist()
+def get_registration_settings():
+	"""
+	Returns Cooperative Settings for registration fees.
+	"""
+	settings = frappe.get_doc("Cooperative Settings")
+	return {
+		"principal_saving_amount": settings.principal_saving_amount,
+		"mandatory_saving_amount": settings.mandatory_saving_amount,
+		"total_registration_amount": settings.principal_saving_amount + settings.mandatory_saving_amount
+	}
+
+@frappe.whitelist()
+def get_cooperative_payment_details(member_name):
+	"""
+	Mock the `CheckoutPaymentDetails` shape so `BankTransferView` can be reused flawlessly.
+	It fetches the Payment Request tied to this member registration.
+	"""
+	member = frappe.get_doc("Cooperative Member", member_name)
+	
+	pr_records = frappe.get_all(
+		"Payment Request",
+		filters={
+			"reference_doctype": "Cooperative Member",
+			"reference_name": member_name,
+			"docstatus": ["!=", 2]
+		},
+		fields=["name", "docstatus", "payment_proof", "remarks", "payment_method_type", "payment_channel_code", "virtual_account_number", "virtual_account_bank", "payment_due_date"],
+		limit=1
+	)
+	
+	if not pr_records:
+		frappe.throw(_("Payment Request is not found for this member."))
+		
+	pr = pr_records[0]
+	
+	# Fetch the payment method details
+	payment_method = frappe.get_doc("Webshop Payment Method", pr.payment_method_type)
+	
+	bank_details = None
+	if payment_method.payment_type == "Transfer Manual" and payment_method.bank_account:
+		bank_account = frappe.get_doc("Bank Account", payment_method.bank_account)
+		bank_details = {
+			"account_number": bank_account.bank_account_no or "",
+			"bank_name": bank_account.bank or "",
+			"account_holder": payment_method.account_holder_name or "",
+			"branch_code": bank_account.branch_code or ""
+		}
+		
+	# Approval mapping
+	status_map = {
+		0: "Pending",
+		1: "Approved",
+		2: "Rejected"
+	}
+	
+	approval = {
+		"name": pr.name,
+		"status": status_map.get(pr.docstatus, "Pending"),
+		"payment_proof": pr.payment_proof,
+		"remarks": pr.remarks
+	}
+
+	# Create a mock 'sales_order'
+	sales_order_mock = {
+		"name": member.name,
+		"customer": member.full_name,
+		"grand_total": member.total_registration_amount,
+		"delivery_date": None,
+		"student_name": None,
+		"pickup_type": None,
+		"unit": None
+	}
+	
+	return {
+		"sales_order": sales_order_mock,
+		"payment_method": {
+			"name": payment_method.name,
+			"title": payment_method.title,
+			"payment_type": payment_method.payment_type,
+			"need_admin_approval": payment_method.need_admin_approval,
+			"payment_duration": payment_method.payment_duration
+		},
+		"bank_account_details": bank_details,
+		"payment_approval": approval,
+		"virtual_account": {
+			"number": pr.virtual_account_number,
+			"bank": pr.virtual_account_bank,
+			"expiry": pr.payment_due_date
+		}
+	}
+
+@frappe.whitelist()
+def upload_cooperative_payment_proof(member_name, file_url, notes=None):
+	"""
+	Uploads payment proof onto the Payment Request for the cooperative member.
+	"""
+	pr_records = frappe.get_all(
+		"Payment Request",
+		filters={
+			"reference_doctype": "Cooperative Member",
+			"reference_name": member_name,
+			"docstatus": ["in", [0, 1]]
+		},
+		fields=["name", "docstatus", "remarks"],
+		limit=1
+	)
+	
+	if not pr_records:
+		frappe.throw(_("Active Payment Request not found."))
+		
+	pr_name = pr_records[0].name
+	pr_doc = frappe.get_doc("Payment Request", pr_name)
+	
+	if pr_doc.docstatus == 0:
+		pr_doc.payment_proof = file_url
+		if notes:
+			current_remarks = pr_doc.remarks or ""
+			pr_doc.remarks = (current_remarks + "\\n\\n" + notes) if current_remarks else notes
+			
+		pr_doc.save(ignore_permissions=True)
+		frappe.db.commit()
+		return {"status": "success", "message": "Bukti pembayaran berhasil diupload"}
+	else:
+		frappe.throw(_("Payment Request has already been submitted or processed."))
