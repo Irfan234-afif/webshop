@@ -117,6 +117,13 @@ body {
   scrollbar-color: #d1d5db transparent;
 }
 
+.font-instrument {
+  font-family: 'Instrument Sans', sans-serif;
+}
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
+
 .merriweather-font {
   font-family: "Merriweather", serif;
   font-optical-sizing: auto;

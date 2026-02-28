@@ -67,7 +67,8 @@ def register_member(data):
 	member.principal_saving_amount = settings.principal_saving_amount
 	member.mandatory_saving_amount = settings.mandatory_saving_amount
 	member.total_registration_amount = settings.principal_saving_amount + settings.mandatory_saving_amount
-	member.status = "Draft"
+	member.status = "Pending Approval"
+	member.workflow_state = "Pending Approval"
 	
 	# Insert documentation
 	member.insert(ignore_permissions=True)

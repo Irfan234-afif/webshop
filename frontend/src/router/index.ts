@@ -256,10 +256,37 @@ const router = createRouter({
     },
     {
       path: '/saving',
-      name: 'saving-coming-soon',
-      component: () => import('../views/ComingSoon.vue'),
+      name: 'saving',
+      component: () => import('../views/Saving/SavingPage.vue'),
       meta: {
-        title: 'Simpan Pinjam',
+        title: 'Simpanan Anggota Koperasi',
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/savings/payment/:id',
+      name: 'saving-payment',
+      component: () => import('../views/Saving/SavingPaymentPage.vue'),
+      meta: {
+        title: 'Pembayaran Simpanan Wajib',
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/savings/withdrawal',
+      name: 'saving-withdrawal',
+      component: () => import('../views/Saving/WithdrawalRequestWizard.vue'),
+      meta: {
+        title: 'Pengajuan Pengambilan Saldo',
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/savings/deposit',
+      name: 'saving-deposit',
+      component: () => import('../views/Saving/DepositRequestWizard.vue'),
+      meta: {
+        title: 'Setoran Simpanan Sukarela',
         requiresAuth: true
       }
     },

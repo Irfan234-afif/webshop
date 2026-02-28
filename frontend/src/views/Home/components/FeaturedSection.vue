@@ -3,7 +3,7 @@
         <Container>
             <!-- Section Title -->
             <h2 class="text-text text-2xl sm:text-3xl !font-bold capitalize mb-12 sm:mb-16">
-                Coming Soon
+                Layanan Unggulan
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div v-for="card in cards" :key="card.title" class="rounded-xl flex flex-col items-start gap-6 p-6 bg-[#f2f2f2] p-8 sm:p-12">
@@ -22,7 +22,7 @@
                             <span>{{ feature }}</span>
                         </li>
                     </ul>
-                    <p class="text-primary font-bold text-primary text-xl mt-4">Coming Soon</p>
+                    <!-- <p class="text-primary font-bold text-xl mt-4">Tersedia Sekarang</p> -->
                 </div>
             </div>
         </Container>

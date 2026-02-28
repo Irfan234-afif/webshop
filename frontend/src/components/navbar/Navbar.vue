@@ -14,6 +14,7 @@ import type { NavLink } from '@/types/navigation'
 import { useAuthStore } from '@/stores/auth'
 import { useWishlistStore } from '@/stores/wishlist'
 import PrimaryButton from '../common/PrimaryButton.vue'
+import MemberCardDialog from '@/components/dialogs/MemberCardDialog.vue'
 
 withDefaults(
   defineProps<{
@@ -45,6 +46,7 @@ const emit = defineEmits<{
 const searchQuery = ref('')
 const cartItemCount = computed(() => cartStore.itemCount)
 const isMenuOpen = ref(false)
+const isMemberCardOpen = ref(false)
 const menuButtonRef = ref<HTMLElement | null>(null)
 const isGuest = computed(() => authStore.isGuest)
 
@@ -133,6 +135,11 @@ const handleToggleMenu = () => {
 
 const handleCloseMenu = () => {
   isMenuOpen.value = false
+}
+
+const handleOpenMemberCard = () => {
+  isMenuOpen.value = false
+  isMemberCardOpen.value = true
 }
 
 const handleSelectStudent = (studentId: string) => {
@@ -226,8 +233,10 @@ const handleLoginClick = () => {
             <!-- Menu Popup -->
             <Popup :is-open="isMenuOpen" position="top-right" width="min(468px, 94vw)" max-height="90vh"
               @close="handleCloseMenu">
-              <MenuPopup @select-student="handleSelectStudent" @logout="handleLogout" @close="handleCloseMenu" />
+              <MenuPopup @select-student="handleSelectStudent" @logout="handleLogout" @close="handleCloseMenu" @open-member-card="handleOpenMemberCard" />
             </Popup>
+            
+            <MemberCardDialog :is-open="isMemberCardOpen" @close="isMemberCardOpen = false" />
           </div>
           <PrimaryButton v-else
             class=""

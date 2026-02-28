@@ -139,8 +139,9 @@
   },
   {
    "fieldname": "relationship_with_cooperative",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "label": "Relationship with Cooperative",
+   "options": "Karyawan\nWali Murid\nSimpatisan\nAlumni\nLainnya",
    "reqd": 1
   },
   {

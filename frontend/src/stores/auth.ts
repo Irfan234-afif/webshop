@@ -38,6 +38,12 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const customer = ref<Customer | null>(null)
   const students = ref<Student[]>([])
+  const isMember = ref(false)
+  const memberName = ref<string | null>(null)
+  const memberStatus = ref<string | null>(null)
+  const memberFullName = ref<string | null>(null)
+  const memberCategory = ref<string | null>(null)
+  const memberJoinDate = ref<string | null>(null)
   const isAuthenticated = ref(!!getCookie('user_id') && getCookie('user_id') !== 'Guest')
   const isLoading = ref(true)
 
@@ -58,11 +64,23 @@ export const useAuthStore = defineStore('auth', () => {
         customer.value = response.customer
         console.log("customer : ", response.customer);
         students.value = response.students || []
+        isMember.value = !!response.is_member
+        memberName.value = response.member_name || null
+        memberStatus.value = response.member_status || null
+        memberFullName.value = response.member_full_name || null
+        memberCategory.value = response.member_category || null
+        memberJoinDate.value = response.member_join_date || null
         isAuthenticated.value = true
       } else {
         user.value = null
         customer.value = null
         students.value = []
+        isMember.value = false
+        memberName.value = null
+        memberStatus.value = null
+        memberFullName.value = null
+        memberCategory.value = null
+        memberJoinDate.value = null
         isAuthenticated.value = false
       }
     } catch (error) {
@@ -70,6 +88,12 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = null
       customer.value = null
       students.value = []
+      isMember.value = false
+      memberName.value = null
+      memberStatus.value = null
+      memberFullName.value = null
+      memberCategory.value = null
+      memberJoinDate.value = null
       isAuthenticated.value = false
     } finally {
       isLoading.value = false
@@ -99,6 +123,9 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = null
       customer.value = null
       students.value = []
+      isMember.value = false
+      memberName.value = null
+      memberStatus.value = null
       isAuthenticated.value = false
     } catch (error) {
       console.error('Logout error:', error)
@@ -189,6 +216,12 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     customer,
     students,
+    isMember,
+    memberName,
+    memberStatus,
+    memberFullName,
+    memberCategory,
+    memberJoinDate,
     isAuthenticated,
     isLoading,
 

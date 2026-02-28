@@ -413,8 +413,48 @@ bench export-fixtures --app webshop
 | Payment Request cancellation handling | ✅ Done |
 | Workflow Fixture (fresh install + migrate) | ✅ Done |
 
-## 7. Pending Enhancements
+## 7. Frontend Integration (Vue.js)
+
+The Cooperative Savings module provides a seamless user experience via the Webshop Vue.js frontend. It aims to reuse the Checkout payment components (e.g., Virtual Account, Transfer Bank) to maintain UI consistency for members.
+
+### 7.1 Key Frontend Components
+
+| Component | Location | Role |
+|---|---|---|
+| `MandatorySavingsTab.vue` | `src/components/Saving/MandatorySavingsTab.vue` | Main view for users to see their savings balance and unpaid months. Allows checking multiple unpaid months for bulk payment. |
+| `SavingPaymentModal.vue` | `src/components/Saving/SavingPaymentModal.vue` | Selection modal triggered by "Bayar Sekarang". Aggregates selected rows and allows users to choose a Payment Method. |
+| `SavingPaymentPage.vue` | `src/views/Saving/SavingPaymentPage.vue` | The dedicated payment page (`/savings/payment/:id`) which displays instructions, handles proof upload, and shows the success state after approval. |
+
+### 7.2 Backend to Frontend API Mapping
+
+A core design feature is wrapping the Cooperative Payment responses into a structure recognizable by the existing Checkout UI:
+
+1. **`create_mandatory_saving_payment_request`**: Accepts an array of row IDs from the `Mandatory Saving Detail` and creates a single `Payment Request` (status: `Pending Payment`).
+2. **`get_saving_payment_details`**: Takes the PR name and structures the output exactly like `CheckoutPaymentDetails` (with a mocked `sales_order` containing the PR grand total). This allows `BankTransferView.vue` and `VirtualAccountView.vue` to work flawlessly without modification.
+3. **`upload_saving_payment_proof`**: Attaches the uploaded file proof directly to the PR.
+
+### 7.3 Bulk Payment Flow
+
+```mermaid
+sequenceDiagram
+    participant Member
+    participant Tab as MandatorySavingsTab
+    participant Modal as SavingPaymentModal
+    participant API as savingPaymentApi
+    participant Page as SavingPaymentPage
+
+    Member->>Tab: Select multiple unpaid months and click "Bayar"
+    Tab->>Modal: Open with selectedRows and saving_name
+    Member->>Modal: Select Payment Method & Confirm
+    Modal->>API: createSavingPayment(rowIds, method)
+    API-->>Modal: Returns prName
+    Modal->>Page: redirect to /savings/payment/:prName
+    Member->>Page: Upload Proof (if manual transfer)
+    Page->>API: uploadSavingPaymentProof()
+```
+
+## 8. Pending Enhancements
 
 - [ ] Dashboard / report for cooperative financials
-- [ ] Member-facing portal (webshop frontend) for self-service
+- [x] Member-facing portal (webshop frontend) for self-service
 - [ ] WhatsApp notification on payment confirmation

@@ -24,7 +24,11 @@ class VoluntarySaving(Document):
 			pr_doc = frappe.get_doc("Payment Request", pr.name)
 			if pr_doc.docstatus == 1:
 				pr_doc.flags.ignore_permissions = True
-				pr_doc.cancel()
+				self.db_set("payment_request", None, update_modified=False)
+				try:
+					pr_doc.cancel()
+				finally:
+					self.db_set("payment_request", pr.name, update_modified=False)
 			elif pr_doc.docstatus == 0:
 				frappe.delete_doc("Payment Request", pr.name, ignore_permissions=True)
 
@@ -32,7 +36,16 @@ class VoluntarySaving(Document):
 		if self.transaction_type == "Withdrawal" and self.get("journal_entry"):
 			je_doc = frappe.get_doc("Journal Entry", self.journal_entry)
 			if je_doc.docstatus == 1:
-				je_doc.cancel()
+				je_doc.flags.ignore_permissions = True
+				
+				# Temporarily remove link from DB so Frappe's validation allows cancellation
+				original_je = self.journal_entry
+				self.db_set("journal_entry", None, update_modified=False)
+				try:
+					je_doc.cancel()
+				finally:
+					self.db_set("journal_entry", original_je, update_modified=False)
+			
 			# Reverse the member balance
 			member = frappe.get_doc("Cooperative Member", self.cooperative_member)
 			member.voluntary_saving_balance += self.amount
@@ -47,9 +60,15 @@ class VoluntarySaving(Document):
 			
 			je = frappe.new_doc("Journal Entry")
 			je.voucher_type = "Bank Entry"
+			je.cheque_no = self.name
+			je.cheque_date = nowdate()
 			je.company = company
 			je.posting_date = nowdate()
-			je.user_remark = f"Withdrawal for Voluntary Saving {self.name}"
+			
+			remark = f"Withdrawal for Voluntary Saving {self.name}"
+			if self.notes:
+				remark += f"\n\n{self.notes}"
+			je.user_remark = remark
 			
 			if not settings.default_bank_account:
 				frappe.throw(_("Please set a Default Bank Account in Cooperative Settings"))

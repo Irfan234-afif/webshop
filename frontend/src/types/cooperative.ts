@@ -49,3 +49,33 @@ export interface CooperativeRegistrationResponse {
 export interface CooperativePaymentRequestResponse {
   payment_request: string
 }
+
+export type SavingsHistoryType = 'registration' | 'mandatory' | 'voluntary_deposit' | 'voluntary_withdrawal'
+
+export type SavingsHistorySavingType = 'Simpanan Pokok' | 'Simpanan Wajib' | 'Simpanan Sukarela'
+
+export type SavingsHistoryTransactionKind = 'Pembayaran' | 'Setoran' | 'Pengambilan' | 'Simpanan Pokok'
+
+export interface SavingsHistoryItem {
+  date: string
+  type: SavingsHistoryType
+  period: string | null
+  amount: number
+  due_date: string | null
+  saving_type: SavingsHistorySavingType
+  transaction_kind: SavingsHistoryTransactionKind
+  payment_date: string | null
+  payment_method: string
+  status: string
+  reference_doctype: string
+  reference_name: string
+  payment_request: string | null
+}
+
+export interface SavingsHistoryResponse {
+  items: SavingsHistoryItem[]
+  total_count: number
+  page: number
+  page_length: number
+  has_more: boolean
+}

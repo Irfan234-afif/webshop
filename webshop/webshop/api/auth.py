@@ -435,6 +435,26 @@ def get_current_user():
 				for s in student_docs
 			]
 
+		# Get cooperative member status
+		is_member = False
+		member_name = None
+		member_status = None
+		member_full_name = None
+		member_category = None
+		member_join_date = None
+		member_docs = frappe.get_all(
+			"Cooperative Member",
+			filters={"email": frappe.session.user},
+			fields=["name", "status", "full_name", "relationship_with_cooperative", "creation"]
+		)
+		if member_docs:
+			is_member = True
+			member_name = member_docs[0].name
+			member_status = member_docs[0].status
+			member_full_name = member_docs[0].full_name
+			member_category = member_docs[0].relationship_with_cooperative
+			member_join_date = member_docs[0].creation
+
 		return {
 			"success": True,
 			"user": {
@@ -448,6 +468,12 @@ def get_current_user():
 				"customer_name": customer.customer_name if customer else None,
 			},
 			"students": students,
+			"is_member": is_member,
+			"member_name": member_name,
+			"member_status": member_status,
+			"member_full_name": member_full_name,
+			"member_category": member_category,
+			"member_join_date": member_join_date,
 		}
 
 	except Exception as e:

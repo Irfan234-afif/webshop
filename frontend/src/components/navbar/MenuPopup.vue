@@ -40,8 +40,15 @@ const menuItems = computed<MenuItem[]>(() => {
     { id: 'contact', label: 'Kontak', icon: 'info', link: '#' },
     { id: 'cart', label: 'Keranjang', icon: 'cart', badge: cartStore.itemCount, link: '/cart', requiresAuth: true },
     { id: 'bills', label: 'Tagihan', icon: 'bill-list', badge: billsCount.data, link: '/bills', requiresAuth: true },
-    { id: 'member', label: 'Anggota Koperasi (Coming soon)', icon: 'member', link: '/member', requiresAuth: true },
-    { id: 'saving', label: 'Simpanan Anggota (Coming Soon)', icon: 'saving', link: '/saving', requiresAuth: true },
+    { 
+      id: 'member', 
+      label: 'Anggota Koperasi', 
+      icon: 'member', 
+      requiresAuth: true,
+      link: authStore.isMember ? undefined : '/member',
+      onClick: authStore.isMember ? () => { emit('openMemberCard'); emit('close') } : undefined
+    },
+    { id: 'saving', label: 'Simpanan Anggota', icon: 'saving', link: '/saving', requiresAuth: true },
     { id: 'help', label: 'Bantuan', icon: 'info', link: '/' },
     { id: 'account', label: 'Pengaturan Akun & Data Siswa', icon: 'user-circle', link: '/profile', requiresAuth: true },
     { id: 'logout', label: 'Log Out', icon: 'logout', onClick: () => handleLogout(), requiresAuth: true },
@@ -49,7 +56,13 @@ const menuItems = computed<MenuItem[]>(() => {
   ]
 
   if (authStore.isAuthenticated) {
-    return allItems.filter(item => item.requiresAuth !== false)
+    return allItems.filter(item => {
+      if (item.requiresAuth === false) return false
+      if (item.id === 'saving') {
+        return authStore.isMember && authStore.memberStatus === 'Active'
+      }
+      return true
+    })
   } else {
     return allItems.filter(item => !item.requiresAuth)
   }
@@ -73,6 +86,7 @@ const emit = defineEmits<{
   selectStudent: [studentId: string]
   logout: []
   close: []
+  openMemberCard: []
 }>()
 
 const selectStudent = (studentId: string) => {
@@ -149,8 +163,8 @@ const handleNavigation = (item: MenuItem) => {
               <LogoutIcon v-else-if="item.icon === 'logout'" class="w-6 h-6" />
               <UniformIcon v-else-if="item.icon === 'uniform'" class="w-6 h-6" />
               <WishlistIcon v-else-if="item.icon === 'wishlist'" class="w-6 h-6 text-primary" />
-              <MemberIcon v-else-if="item.icon === 'member'" class="w-6 h-6 text-[#757575]" />
-              <SavingIcon v-else-if="item.icon === 'saving'" class="w-6 h-6 text-[#757575]" />
+              <MemberIcon v-else-if="item.icon === 'member'" class="w-6 h-6 text-primary" />
+              <SavingIcon v-else-if="item.icon === 'saving'" class="w-6 h-6 text-primary" />
               <p class="font-bold text-sm text-[#1e1e1e] capitalize">{{ item.label }}</p>
             </div>
             <div class="flex gap-6 items-center">
@@ -174,8 +188,8 @@ const handleNavigation = (item: MenuItem) => {
               <LogoutIcon v-else-if="item.icon === 'logout'" class="w-6 h-6 text-primary" />
               <UniformIcon v-else-if="item.icon === 'uniform'" class="w-6 h-6" />
               <WishlistIcon v-else-if="item.icon === 'wishlist'" class="w-6 h-6 text-primary" />
-              <MemberIcon v-else-if="item.icon === 'member'" class="w-6 h-6 text-[#757575]" />
-              <SavingIcon v-else-if="item.icon === 'saving'" class="w-6 h-6 text-[#757575]" />
+              <MemberIcon v-else-if="item.icon === 'member'" class="w-6 h-6 text-primary" />
+              <SavingIcon v-else-if="item.icon === 'saving'" class="w-6 h-6 text-primary" />
               <p class="font-bold text-sm text-[#1e1e1e] capitalize">{{ item.label }}</p>
             </div>
             <div class="flex gap-6 items-center">
